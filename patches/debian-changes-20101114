@@ -31,7 +31,7 @@ Last-Update: <YYYY-MM-DD>
  
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	$(install_sh) doc/* "$(DESTDIR)$(docdir)"
++	$(install_sh) $(top_builddir)/doc/* "$(DESTDIR)$(docdir)"
 +
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of
@@ -78,7 +78,7 @@ Last-Update: <YYYY-MM-DD>
 +
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	$(install_sh) doc/* "$(DESTDIR)$(docdir)"
++	$(install_sh) $(top_builddir)/doc/* "$(DESTDIR)$(docdir)"
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  
