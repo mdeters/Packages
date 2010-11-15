@@ -1,6 +1,13 @@
-cvc4-2010-11 for Debian
------------------------
+cvc4 for Debian
+---------------
 
-<possible notes regarding this package - if none, delete this file>
+Packaged for Debian by Morgan Deters, please let him know at
+mdeters@cs.nyu.edu if there are problems with these packages.
 
- -- Morgan Deters <mdeters@cs.nyu.edu>  Thu, 11 Nov 2010 22:14:33 -0500
+http://cs.nyu.edu/acsys/cvc4/
+http://goedel.cims.nyu.edu/cvc4-builds/
+
+CVC4 is presently a research prototype.  Caveat emptor.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Sun, 14 Nov 2010 20:55:53 -0500
+
