@@ -1,9 +1,9 @@
-Description: Upstream changes introduced in version 20101114
+Description: Upstream changes introduced in version 20101115
  This patch has been created by dpkg-source during the package build.
  Here's the last changelog entry, hopefully it gives details on why
  those changes were made:
  .
- cvc4 (20101114) unstable; urgency=low
+ cvc4 (20101115) unstable; urgency=low
  .
    * Initial release.
  .
@@ -23,21 +23,21 @@ Forwarded: <no|not-needed|url proving that it has been forwarded>
 Reviewed-By: <name and email of someone who approved the patch>
 Last-Update: <YYYY-MM-DD>
 
---- cvc4-20101114.orig/Makefile.am
-+++ cvc4-20101114/Makefile.am
+--- cvc4-20101115.orig/Makefile.am
++++ cvc4-20101115/Makefile.am
 @@ -82,6 +82,10 @@ lcov lcov-all lcov18:
  
  endif
  
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	$(install_sh) $(top_builddir)/doc/* "$(DESTDIR)$(docdir)"
++	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
 +
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of
  # EXTRA_DIST files)
---- cvc4-20101114.orig/Makefile.in
-+++ cvc4-20101114/Makefile.in
+--- cvc4-20101115.orig/Makefile.in
++++ cvc4-20101115/Makefile.in
 @@ -801,7 +801,7 @@ info: info-recursive
  
  info-am:
@@ -78,12 +78,12 @@ Last-Update: <YYYY-MM-DD>
 +
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	$(install_sh) $(top_builddir)/doc/* "$(DESTDIR)$(docdir)"
++	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  
---- cvc4-20101114.orig/config/doxygen.cfg
-+++ cvc4-20101114/config/doxygen.cfg
+--- cvc4-20101115.orig/config/doxygen.cfg
++++ cvc4-20101115/config/doxygen.cfg
 @@ -1354,7 +1354,7 @@ HIDE_UNDOC_RELATIONS   = YES
  # toolkit from AT&T and Lucent Bell Labs. The other options in this section
  # have no effect if this option is set to NO (the default)

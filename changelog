@@ -1,6 +1,6 @@
-cvc4 (20101114) unstable; urgency=low
+cvc4 (20101115) unstable; urgency=low
 
   * Initial release.
 
- -- Morgan Deters <mdeters@cs.nyu.edu>  Sun, 14 Nov 2010 20:39:25 -0500
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Mon, 15 Nov 2010 18:01:49 -0500
 

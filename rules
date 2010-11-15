@@ -12,5 +12,8 @@
 %:
 	dh $@ 
 
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-static --enable-shared --with-build=default
+
 override_dh_auto_test:
 	$(MAKE) regress
