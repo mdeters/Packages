@@ -18,24 +18,10 @@ are templates for supplementary fields that you might want to add:
 Origin: <vendor|upstream|other>, <url of original patch>
 Bug: <url in upstream bugtracker>
 Bug-Debian: http://bugs.debian.org/<bugnumber>
-Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
 Forwarded: <no|not-needed|url proving that it has been forwarded>
 Reviewed-By: <name and email of someone who approved the patch>
 Last-Update: <YYYY-MM-DD>
 
---- cvc4-20101115.orig/Makefile.am
-+++ cvc4-20101115/Makefile.am
-@@ -82,6 +82,10 @@ lcov lcov-all lcov18:
- 
- endif
- 
-+install-data-local: doxygen-doc
-+	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
-+
- # abs_srcdir is required here to get this Makefile instead of the
- # Makefile in the builddir (since $(srcdir) is stripped off of
- # EXTRA_DIST files)
 --- cvc4-20101115.orig/Makefile.in
 +++ cvc4-20101115/Makefile.in
 @@ -801,7 +801,7 @@ info: info-recursive
@@ -82,6 +68,19 @@ Last-Update: <YYYY-MM-DD>
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  
+--- cvc4-20101115.orig/Makefile.am
++++ cvc4-20101115/Makefile.am
+@@ -82,6 +82,10 @@ lcov lcov-all lcov18:
+ 
+ endif
+ 
++install-data-local: doxygen-doc
++	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
++	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
++
+ # abs_srcdir is required here to get this Makefile instead of the
+ # Makefile in the builddir (since $(srcdir) is stripped off of
+ # EXTRA_DIST files)
 --- cvc4-20101115.orig/config/doxygen.cfg
 +++ cvc4-20101115/config/doxygen.cfg
 @@ -1354,7 +1354,7 @@ HIDE_UNDOC_RELATIONS   = YES
