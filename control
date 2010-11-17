@@ -9,7 +9,8 @@ Homepage: http://www.cs.nyu.edu/acsys/cvc4/
 Package: cvc4
 Section: math
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libcvc4 (= ${binary:Version}), libcvc4parser (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Recommends: cvc4-doc
 Description: CVC4 binary
  This package contains the CVC4 binary.
  .
@@ -30,6 +31,7 @@ Package: cvc4-doc
 Section: doc
 Architecture: all
 Depends: www-browser
+Recommends: cvc4
 Description: CVC4 command-line, language, and API documentation
  This package contains CVC4 documentation.
  .
@@ -74,9 +76,51 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: CVC4 dynamic libraries
  This package contains the CVC4 dynamic libraries.  "libcvc4.so" contains
- the main CVC4 prover API, and "libcvc4parser.so" contains the parsing API
- for parsing files and strings in CVC presentation language, SMT-LIB v1,
- and SMT-LIB v2 formats.
+ the main CVC4 prover API.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+
+Package: libcvc4parser-dev
+Section: libdevel
+Architecture: any
+Depends: libcvc4parser (= ${binary:Version}), libcvc4-dev (= ${binary:Version})
+Description: CVC4 parser headers and static libraries
+ This is the CVC4 parser development package, containing headers and static
+ libraries for the CVC4 parser.  Install this package only if you need to
+ build packages from source that depend on the CVC4 parser library API.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+ 
+Package: libcvc4parser
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CVC4 parser dynamic libraries
+ This package contains the CVC4 parser dynamic libraries.  "libcvc4parser.so"
+ contains the parsing API for parsing files and strings in CVC presentation
+ language, SMT-LIB v1, and SMT-LIB v2 formats.
  .
  CVC4 is a tool for determining the satisfiability of a first order formula
  modulo a first order theory (or a combination of such theories). It is the

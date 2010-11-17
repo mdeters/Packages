@@ -1,3 +1,2 @@
-usr/include/*
-usr/lib/lib*.a
-usr/lib/*.la
+usr/include/cvc4/*
+usr/lib/libcvc4.a
