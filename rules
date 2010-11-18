@@ -18,4 +18,5 @@ override_dh_auto_configure:
 # Skip unit tests (by doing a "make regress" instead of "make check") to avoid a
 # build dependency on CxxTest, which isn't(?) packaged for Debian.
 override_dh_auto_test:
+	$(MAKE) -C test/system check
 	$(MAKE) regress
