@@ -48,7 +48,7 @@ Description: CVC4 command-line, language, and API documentation
  Users looking for an industrial-strength SMT solver are encouraged to use
  CVC3 instead (for now).
 
-Package: libcvc4-0-dev
+Package: libcvc4-dev
 Section: libdevel
 Architecture: any
 Depends: libcvc4-0 (= ${binary:Version}), ${misc:Depends}
@@ -91,10 +91,10 @@ Description: CVC4 dynamic libraries
  Users looking for an industrial-strength SMT solver are encouraged to use
  CVC3 instead (for now).
 
-Package: libcvc4parser0-dev
+Package: libcvc4parser-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4parser0 (= ${binary:Version}), libcvc4-0-dev (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4parser0 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 parser headers and static libraries
  This is the CVC4 parser development package, containing headers and static
  libraries for the CVC4 parser.  Install this package only if you need to
