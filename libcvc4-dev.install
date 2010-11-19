@@ -1,2 +1,4 @@
 usr/include/cvc4/*
 usr/lib/libcvc4.a
+usr/lib/libcvc4.so
+usr/lib/libcvc4.la
