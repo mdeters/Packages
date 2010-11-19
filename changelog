@@ -2,5 +2,5 @@ cvc4 (20101119-1) unstable; urgency=low
 
   * Initial packaging for Debian.
 
- -- Morgan Deters <mdeters@cs.nyu.edu>  Fri, 19 Nov 2010 16:46:10 -0500
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Fri, 19 Nov 2010 17:58:24 -0500
 
