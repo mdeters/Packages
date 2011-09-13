@@ -1,13 +1,6 @@
-Description: Upstream changes introduced in version 20101115
- This patch has been created by dpkg-source during the package build.
- Here's the last changelog entry, hopefully it gives details on why
- those changes were made:
- .
- cvc4 (20101115) unstable; urgency=low
- .
-   * Initial release.
- .
- The person named in the Author field signed this changelog entry.
+Description: Upstream changes introduced in version 20110913
+ This patch represents some (minor) changes to CVC4's build
+ process when building for debian packages.
 Author: Morgan Deters <mdeters@cs.nyu.edu>
 
 ---
@@ -24,47 +17,51 @@ Last-Update: <YYYY-MM-DD>
 
 --- cvc4-20101115.orig/Makefile.in
 +++ cvc4-20101115/Makefile.in
-@@ -801,7 +801,7 @@ info: info-recursive
+@@ -1001,7 +1001,7 @@ info: info-recursive
  
  info-am:
  
--install-data-am:
-+install-data-am: install-data-local
+-install-data-am: install-man
++install-data-am: install-data-local install-man
  
  install-dvi: install-dvi-recursive
  
-@@ -859,14 +859,15 @@ uninstall-am:
+@@ -1061,16 +1061,17 @@ uninstall-man: uninstall-man1 uninstall-
  	dist-zip distcheck distclean distclean-generic distclean-hdr \
  	distclean-libtool distclean-tags distcleancheck distdir \
  	distuninstallcheck dvi dvi-am html html-am info info-am \
 -	install install-am install-data install-data-am install-dvi \
 -	install-dvi-am install-exec install-exec-am install-html \
 -	install-html-am install-info install-info-am install-man \
--	install-pdf install-pdf-am install-ps install-ps-am \
--	install-strip installcheck installcheck-am installdirs \
--	installdirs-am maintainer-clean maintainer-clean-generic \
--	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
--	ps ps-am tags tags-recursive uninstall uninstall-am
+-	install-man1 install-man3 install-man5 install-pdf \
+-	install-pdf-am install-ps install-ps-am install-strip \
+-	installcheck installcheck-am installdirs installdirs-am \
+-	maintainer-clean maintainer-clean-generic mostlyclean \
+-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+-	tags tags-recursive uninstall uninstall-am uninstall-man \
+-	uninstall-man1 uninstall-man3 uninstall-man5
 +	install install-am install-data install-data-am \
 +	install-data-local install-dvi install-dvi-am install-exec \
 +	install-exec-am install-html install-html-am install-info \
-+	install-info-am install-man install-pdf install-pdf-am \
-+	install-ps install-ps-am install-strip installcheck \
-+	installcheck-am installdirs installdirs-am maintainer-clean \
++	install-info-am install-man install-man1 install-man3 \
++	install-man5 install-pdf install-pdf-am install-ps \
++	install-ps-am install-strip installcheck installcheck-am \
++	installdirs installdirs-am maintainer-clean \
 +	maintainer-clean-generic mostlyclean mostlyclean-generic \
 +	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-+	uninstall uninstall-am
++	uninstall uninstall-am uninstall-man uninstall-man1 \
++	uninstall-man3 uninstall-man5
  
  
  @DX_COND_doc_TRUE@@DX_COND_ps_TRUE@doxygen-ps: @DX_DOCDIR@/@PACKAGE@.ps
-@@ -976,6 +977,10 @@ units: all
- @COVERAGE_ENABLED_FALSE@	@echo "Please run configure with --enable-coverage." >&2
+@@ -1181,6 +1182,10 @@ units: all
  @COVERAGE_ENABLED_FALSE@	@echo
  @COVERAGE_ENABLED_FALSE@	@false
-+
+ 
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
 +	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
++
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  

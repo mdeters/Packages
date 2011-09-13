@@ -1,3 +1,10 @@
+cvc4 (0.1~20110913-1) unstable; urgency=low
+
+  * Update to patch to Makefile.in to represent recent changes to build
+    process.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Tue, 13 Sep 2011 12:27:34 -0400
+
 cvc4 (0.1~20101119-1) unstable; urgency=low
 
   * Initial packaging for Debian.
