@@ -134,3 +134,137 @@ Description: CVC4 parser dynamic libraries
  CVC4 is still a research prototype and is not yet ready for public release.
  Users looking for an industrial-strength SMT solver are encouraged to use
  CVC3 instead (for now).
+
+Package: libcvc4compat-dev
+Section: libdevel
+Architecture: any
+Depends: libcvc4compat0 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), ${misc:Depends}, libcvc4parser-dev (= ${binary:Version}), ${misc:Depends}
+Description: CVC4 headers and static libraries, compatibility with CVC3 C++ API
+ This is the CVC4 compatibility development package, containing headers and
+ static libraries for the CVC4 compatibility layer.  Install this package only
+ if you need to build packages from source that depend on the CVC4 compatibility
+ library API (which aims to be source-compatible to CVC3's C++ API).
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+ 
+Package: libcvc4compat0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CVC4 dynamic libraries, compatibility with CVC3 C++ API
+ This package contains the CVC4 compatibility dynamic libraries.
+ "libcvc4compat.so" contains the compatibility API that allows
+ CVC4 to support (much of) the CVC3 C++ API.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+
+Package: libcvc4bindings-java0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CVC4 Java bindings
+ This package contains the CVC4 Java bindings.  "libcvc4bindings_java.so"
+ and "cvc4.jar" contain the Java API that allows CVC4 to support Java
+ programs.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+
+Package: libcvc4bindings-c-compat-dev
+Section: libdevel
+Architecture: any
+Depends: libcvc4bindings-c-compat0 (= ${binary:Version}), libcvc4compat-dev (= ${binary:Version}), ${misc:Depends}
+Description: CVC4 headers and static libraries, compatibility with CVC3 C API
+ This is the CVC4 compatibility development package, containing headers and
+ static libraries for the CVC4 compatibility layer.  Install this package only
+ if you need to build packages from source that depend on the CVC4 compatibility
+ library API (which aims to be source-compatible to CVC3's C API).
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+ 
+Package: libcvc4bindings-c-compat0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CVC4 dynamic libraries, compatibility with CVC3 C API
+ This package contains the CVC4 compatibility dynamic libraries.
+ "libcvc4bindings_c_compat.so" contains the compatibility API that allows
+ CVC4 to support (much of) the CVC3 C API.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).
+
+Package: libcvc4bindings-java-compat0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: CVC4 dynamic libraries, compatibility with CVC3 Java API
+ This package contains the CVC4 compatibility dynamic libraries.
+ "libcvc4bindings_c_compat.so" and "cvc4compat.jar" contain the compatibility
+ API that allows CVC4 to support (much of) the CVC3 Java API.
+ .
+ CVC4 is a tool for determining the satisfiability of a first order formula
+ modulo a first order theory (or a combination of such theories). It is the
+ fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
+ CVC3) but does not directly incorporate code from any previous version.
+ .
+ CVC4 is intended to be an open and extensible SMT engine. It can be used
+ as a stand-alone tool or as a library. It has been designed to increase
+ the performance and reduce the memory overhead of its predecessors.
+ .
+ CVC4 is still a research prototype and is not yet ready for public release.
+ Users looking for an industrial-strength SMT solver are encouraged to use
+ CVC3 instead (for now).

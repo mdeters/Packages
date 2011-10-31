@@ -1,4 +1,10 @@
-usr/include/cvc4/*
+usr/include/cvc4/context
+usr/include/cvc4/cvc4.h
+usr/include/cvc4/cvc4_public.h
+usr/include/cvc4/expr
+usr/include/cvc4/lib
+usr/include/cvc4/smt
+usr/include/cvc4/util
 usr/lib/libcvc4.a
 usr/lib/libcvc4.so
 usr/lib/libcvc4.la
