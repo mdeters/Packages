@@ -1,0 +1,9 @@
+Document: cvc4
+Title: CVC4 Documentation
+Author: CVC4 Development Team (New York University, University of Iowa)
+Abstract: Documentation of the CVC4 API
+Section: Science/Mathematics
+
+Format: HTML
+Index: /usr/share/doc/cvc4/doxygen/html/index.html
+Files: /usr/share/doc/cvc4/doxygen/html/*.html

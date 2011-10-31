@@ -1,13 +1,12 @@
 Source: cvc4
 Priority: extra
 Maintainer: Morgan Deters <mdeters@cs.nyu.edu>
-Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libz-dev, doxygen, graphviz, libantlr3c-dev (>= 3.2)
-Standards-Version: 3.8.4
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libz-dev, doxygen, graphviz, libantlr3c-dev (>= 3.2), libreadline-dev
+Standards-Version: 3.9.1
 Section: math
 Homepage: http://www.cs.nyu.edu/acsys/cvc4/
 
 Package: cvc4
-Section: math
 Architecture: any
 Depends: libcvc4-0 (= ${binary:Version}), libcvc4parser0 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: cvc4-doc

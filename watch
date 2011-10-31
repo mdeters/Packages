@@ -1,0 +1,3 @@
+version=3
+
+http://cs.nyu.edu/acsys/cvc4/releases/([\d\.]+)/cvc4-([\d\.]+).tar.gz
