@@ -137,7 +137,7 @@ Description: CVC4 parser dynamic libraries
 Package: libcvc4compat-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4compat0 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), ${misc:Depends}, libcvc4parser-dev (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4compat0 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), libcvc4parser-dev (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 headers and static libraries, compatibility with CVC3 C++ API
  This is the CVC4 compatibility development package, containing headers and
  static libraries for the CVC4 compatibility layer.  Install this package only
