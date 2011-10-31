@@ -1,6 +1,7 @@
-cvc4 (0.1~20111030-1) unstable; urgency=low
+cvc4 (0.1~20111031-1) unstable; urgency=low
 
   * Install libcompat and language bindings also.
+  * Fixes and updates to Debian packaging (especially lintian warnings).
 
  -- Morgan Deters <mdeters@cs.nyu.edu>  Mon, 31 Oct 2011 15:01:56 -0400
 

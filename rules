@@ -19,3 +19,7 @@ override_dh_auto_configure:
 # build dependency on CxxTest, which isn't(?) packaged for Debian.
 override_dh_auto_test:
 	$(MAKE) regress
+
+override_dh_installchangelogs:
+	dh_installchangelogs ChangeLog
+

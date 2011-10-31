@@ -1,1 +1,6 @@
-usr/share/doc/cvc4/*
+usr/share/doc/cvc4/doxygen
+
+examples/README		usr/share/doc/cvc4/examples
+examples/*.c		usr/share/doc/cvc4/examples
+examples/*.java		usr/share/doc/cvc4/examples
+examples/*.cpp		usr/share/doc/cvc4/examples

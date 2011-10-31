@@ -1,2 +1,2 @@
-usr/lib/libcvc4bindings_java.so.*
+usr/lib/libcvc4bindings_java.so*
 usr/share/java/cvc4.jar
