@@ -4,3 +4,9 @@ examples/README		usr/share/doc/cvc4/examples
 examples/*.c		usr/share/doc/cvc4/examples
 examples/*.java		usr/share/doc/cvc4/examples
 examples/*.cpp		usr/share/doc/cvc4/examples
+examples/*.py		usr/share/doc/cvc4/examples
+examples/*.php		usr/share/doc/cvc4/examples
+examples/*.pl		usr/share/doc/cvc4/examples
+examples/*.rb		usr/share/doc/cvc4/examples
+examples/*.tcl		usr/share/doc/cvc4/examples
+examples/*.ml		usr/share/doc/cvc4/examples

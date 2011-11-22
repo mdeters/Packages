@@ -1,3 +1,10 @@
+cvc4 (0.1~20111122-1) unstable; urgency=low
+
+  * Fixed the building of language bindings; added Perl, Ruby, Tcl, PHP,
+    and Python packages
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Tue, 22 Nov 2011 11:03:46 -0500
+
 cvc4 (0.1~20111031-1) unstable; urgency=low
 
   * Install libcompat and language bindings also.
