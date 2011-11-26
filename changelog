@@ -1,3 +1,9 @@
+cvc4 (0.1~20111126-1ubuntu1) natty; urgency=low
+
+  * Fix names on python module directories.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Sat, 26 Nov 2011 17:30:42 -0500
+
 cvc4 (0.1~20111122-1) unstable; urgency=low
 
   * Fixed the building of language bindings; added Perl, Ruby, Tcl, PHP,
