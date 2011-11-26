@@ -287,7 +287,7 @@ Description: CVC4 Ruby bindings
 Package: libcvc4bindings-python0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
 Description: CVC4 Python bindings
  This package contains the CVC4 Python bindings.  "CVC4.so" and "CVC4.py"
  contain the Python API that allows CVC4 to support Python programs.

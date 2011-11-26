@@ -1,6 +1,7 @@
-cvc4 (0.1~20111126-1ubuntu1) natty; urgency=low
+cvc4 (0.1~20111126-1) unstable; urgency=low
 
-  * Fix names on python module directories.
+  * Fix names on Python and Java module directories.
+  * Fix Python dependences.
 
  -- Morgan Deters <mdeters@cs.nyu.edu>  Sat, 26 Nov 2011 17:30:42 -0500
 
