@@ -13,7 +13,7 @@
 	dh --parallel $@
 
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --disable-doxygen-pdf --enable-doxygen-dot PERL_CPPFLAGS=-I/usr/lib/perl/5.10.1/CORE/ JAVA_CPPFLAGS=-I/usr/lib/jvm/java-6-openjdk/include PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.4
+	dh_auto_configure -- --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --disable-doxygen-pdf --enable-doxygen-dot PERL_CPPFLAGS=-I/usr/lib/perl/5.12/CORE/ JAVA_CPPFLAGS=-I/usr/lib/jvm/java-6-openjdk/include PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.5
 
 # Skip unit tests (by doing a "make regress" instead of "make check") to avoid a
 # build dependency on CxxTest, which isn't(?) packaged for Debian.
