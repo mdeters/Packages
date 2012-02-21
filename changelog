@@ -1,3 +1,9 @@
+cvc4 (0.1~20120221-1) unstable; urgency=low
+
+  * New copyright year; rebuild
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Tue, 21 Feb 2012 14:32:07 -0500
+
 cvc4 (0.1~20111126-1) unstable; urgency=low
 
   * Fix names on Python and Java module directories.
