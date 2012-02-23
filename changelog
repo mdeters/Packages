@@ -1,3 +1,10 @@
+cvc4 (0.1~20120223-1) unstable; urgency=low
+
+  * Add --with-portfolio to build options
+  * Work around lintian helper-templates-in-copyright false positive
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Thu, 23 Feb 2012 17:05:07 -0500
+
 cvc4 (0.1~20120221-1) unstable; urgency=low
 
   * New copyright year; rebuild
