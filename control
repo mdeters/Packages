@@ -184,7 +184,7 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: CVC4 Java bindings
- This package contains the CVC4 Java bindings.  "CVC4.so" and "cvc4.jar"
+ This package contains the CVC4 Java bindings.  "CVC4.so" and "CVC4.jar"
  contain the Java API that allows CVC4 to support Java programs.
  .
  CVC4 is a tool for determining the satisfiability of a first order formula
@@ -356,7 +356,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: CVC4 dynamic libraries, compatibility with CVC3 Java API
  This package contains the CVC4 compatibility dynamic libraries.
- "libcvc4bindings_c_compat.so" and "cvc4compat.jar" contain the compatibility
+ "libcvc4bindings_c_compat.so" and "CVC4compat.jar" contain the compatibility
  API that allows CVC4 to support (much of) the CVC3 Java API.
  .
  CVC4 is a tool for determining the satisfiability of a first order formula
