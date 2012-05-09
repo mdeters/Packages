@@ -1,3 +1,9 @@
+cvc4 (0.1~20120509-1) unstable; urgency=low
+
+  * Disable broken language bindings
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 09 May 2012 16:06:40 -0400
+
 cvc4 (0.1~20120309-1) unstable; urgency=low
 
   * Fix name of CVC4compat.jar in libcvc4bindings-java-compat0.install
