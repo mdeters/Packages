@@ -1,4 +1,4 @@
-usr/share/doc/cvc4/doxygen
+usr/share/doc/cvc4/doxygen/html
 
 examples/README		usr/share/doc/cvc4/examples
 examples/*.c		usr/share/doc/cvc4/examples
