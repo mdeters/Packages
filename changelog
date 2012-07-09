@@ -1,3 +1,9 @@
+cvc4 (0.1~20120709-1) unstable; urgency=low
+
+  * Rebuild debian package
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Mon, 09 Jul 2012 10:40:29 -0400
+
 cvc4 (0.1~20120509-1) unstable; urgency=low
 
   * Disable broken language bindings
