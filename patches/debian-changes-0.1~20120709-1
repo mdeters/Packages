@@ -53,13 +53,14 @@ Last-Update: <YYYY-MM-DD>
  	maintainer-clean-generic mostlyclean mostlyclean-generic \
  	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
  	uninstall uninstall-am uninstall-man uninstall-man1 \
-@@ -1237,6 +1237,9 @@ units:
- doc/pcvc4.1:
+@@ -1238,6 +1238,10 @@ doc/pcvc4.1:
  	rm -f doc/pcvc4.1
  	$(LN_S) cvc4.1 doc/pcvc4.1
+ 
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
 +	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
++
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  
