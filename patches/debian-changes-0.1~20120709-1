@@ -1,11 +1,11 @@
-Description: Upstream changes introduced in version 0.1~20111030-1
+Description: Upstream changes introduced in version 0.1~20120709-1
  This patch has been created by dpkg-source during the package build.
  Here's the last changelog entry, hopefully it gives details on why
  those changes were made:
  .
- cvc4 (0.1~20111030-1) unstable; urgency=low
+ cvc4 (0.1~20120709-1) unstable; urgency=low
  .
-   * Install libcompat and language bindings also.
+   * Rebuild debian package, remove .la files
  .
  The person named in the Author field signed this changelog entry.
 Author: Morgan Deters <mdeters@cs.nyu.edu>
@@ -23,9 +23,9 @@ Forwarded: <no|not-needed|url proving that it has been forwarded>
 Reviewed-By: <name and email of someone who approved the patch>
 Last-Update: <YYYY-MM-DD>
 
---- cvc4-0.1~20111030.orig/Makefile.in
-+++ cvc4-0.1~20111030/Makefile.in
-@@ -1016,7 +1016,7 @@ info: info-recursive
+--- cvc4-0.1~20120709.orig/Makefile.in
++++ cvc4-0.1~20120709/Makefile.in
+@@ -1042,7 +1042,7 @@ info: info-recursive
  
  info-am:
  
@@ -34,7 +34,7 @@ Last-Update: <YYYY-MM-DD>
  
  install-dvi: install-dvi-recursive
  
-@@ -1077,12 +1077,12 @@ uninstall-man: uninstall-man1 uninstall-
+@@ -1103,12 +1103,12 @@ uninstall-man: uninstall-man1 uninstall-
  	distclean-libtool distclean-local distclean-tags \
  	distcleancheck distdir distuninstallcheck dvi dvi-am html \
  	html-am info info-am install install-am install-data \
@@ -53,19 +53,18 @@ Last-Update: <YYYY-MM-DD>
  	maintainer-clean-generic mostlyclean mostlyclean-generic \
  	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
  	uninstall uninstall-am uninstall-man uninstall-man1 \
-@@ -1208,6 +1208,10 @@ units:
- @COVERAGE_ENABLED_FALSE@	@echo
- @COVERAGE_ENABLED_FALSE@	@false
- 
+@@ -1237,6 +1237,9 @@ units:
+ doc/pcvc4.1:
+ 	rm -f doc/pcvc4.1
+ 	$(LN_S) cvc4.1 doc/pcvc4.1
 +install-data-local: doxygen-doc
 +	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
 +	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
-+
  dist-hook:
  	cp -p "$(srcdir)/Makefile" "$(distdir)/Makefile"
  
---- cvc4-0.1~20111030.orig/Makefile.am
-+++ cvc4-0.1~20111030/Makefile.am
+--- cvc4-0.1~20120709.orig/Makefile.am
++++ cvc4-0.1~20120709/Makefile.am
 @@ -94,6 +94,10 @@ lcov lcov-all lcov18:
  
  endif
@@ -77,9 +76,9 @@ Last-Update: <YYYY-MM-DD>
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of
  # EXTRA_DIST files)
---- cvc4-0.1~20111030.orig/config/doxygen.cfg
-+++ cvc4-0.1~20111030/config/doxygen.cfg
-@@ -1358,7 +1358,7 @@ HIDE_UNDOC_RELATIONS   = YES
+--- cvc4-0.1~20120709.orig/config/doxygen.cfg
++++ cvc4-0.1~20120709/config/doxygen.cfg
+@@ -1357,7 +1357,7 @@ HIDE_UNDOC_RELATIONS   = YES
  # toolkit from AT&T and Lucent Bell Labs. The other options in this section
  # have no effect if this option is set to NO (the default)
  
