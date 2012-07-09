@@ -1,6 +1,6 @@
 cvc4 (0.1~20120709-1) unstable; urgency=low
 
-  * Rebuild debian package
+  * Rebuild debian package, remove .la files
 
  -- Morgan Deters <mdeters@cs.nyu.edu>  Mon, 09 Jul 2012 10:40:29 -0400
 
