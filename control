@@ -29,7 +29,7 @@ Description: First order formula validity checker (version 4)
 Package: cvc4-doc
 Section: doc
 Architecture: all
-Depends: elinks | www-browser, ${misc:Depends}
+Depends: elinks | www-browser, libjs-jquery, ${misc:Depends}
 Recommends: cvc4
 Description: CVC4 command-line, language, and API documentation
  This package contains CVC4 documentation.

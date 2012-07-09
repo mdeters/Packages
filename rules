@@ -20,6 +20,10 @@ override_dh_auto_configure:
 override_dh_auto_test:
 	$(MAKE) regress
 
+override_dh_install:
+	dh_install
+	rm cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
+	ln -s /usr/share/javascript/jquery/jquery.js cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
+
 override_dh_installchangelogs:
 	dh_installchangelogs ChangeLog
-
