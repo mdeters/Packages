@@ -1,3 +1,9 @@
+cvc4 (0.1~20120905-1) unstable; urgency=low
+
+  * Add THANKS file
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 05 Sep 2012 16:49:18 -0400
+
 cvc4 (0.1~20120709-1) unstable; urgency=low
 
   * Rebuild debian package, remove .la files
