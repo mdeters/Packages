@@ -1,3 +1,10 @@
+cvc4 (0.1~20120929-1) unstable; urgency=low
+
+  * Add RELEASE-NOTES file
+  * Distribute SmtEngine and options manpages
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Sat, 29 Sep 2012 11:25:07 -0400
+
 cvc4 (0.1~20120905-1) unstable; urgency=low
 
   * Add THANKS file
