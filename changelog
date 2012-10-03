@@ -1,3 +1,9 @@
+cvc4 (0.1~20121003-1) unstable; urgency=low
+
+  * Fix name of CVC4 jni library
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 03 Oct 2012 11:31:05 -0400
+
 cvc4 (0.1~20120929-1) unstable; urgency=low
 
   * Add RELEASE-NOTES file
