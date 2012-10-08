@@ -1,2 +1,2 @@
-usr/lib/libcvc4bindings_java_compat.so*
+usr/lib/jni/libcvc4compatjni.so*
 usr/share/java/CVC4compat.jar

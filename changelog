@@ -1,3 +1,9 @@
+cvc4 (0.1~20121007-1) unstable; urgency=low
+
+  * Change java compatibility bindings library name.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Sun, 07 Oct 2012 23:25:48 -0400
+
 cvc4 (0.1~20121003-1) unstable; urgency=low
 
   * Fix name of CVC4 jni library
