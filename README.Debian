@@ -4,10 +4,6 @@ cvc4 for Debian
 Packaged for Debian by Morgan Deters, please let him know at
 mdeters@cs.nyu.edu if there are problems with these packages.
 
-http://cs.nyu.edu/acsys/cvc4/
-http://goedel.cims.nyu.edu/cvc4-builds/
+http://cvc4.cs.nyu.edu/
 
-CVC4 is presently a research prototype.  Caveat emptor.
-
- -- Morgan Deters <mdeters@cs.nyu.edu>  Sun, 14 Nov 2010 20:55:53 -0500
-
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 07 Nov 2012 15:00:13 -0500

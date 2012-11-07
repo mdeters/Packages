@@ -21,10 +21,6 @@ Description: First order formula validity checker (version 4)
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: cvc4-doc
 Section: doc
@@ -42,10 +38,6 @@ Description: CVC4 command-line, language, and API documentation
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4-dev
 Section: libdevel
@@ -64,10 +56,6 @@ Description: CVC4 headers and static libraries
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
  
 Package: libcvc4-0
 Section: libs
@@ -85,10 +73,6 @@ Description: CVC4 dynamic libraries
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4parser-dev
 Section: libdevel
@@ -107,10 +91,6 @@ Description: CVC4 parser headers and static libraries
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
  
 Package: libcvc4parser0
 Section: libs
@@ -129,10 +109,6 @@ Description: CVC4 parser dynamic libraries
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4compat-dev
 Section: libdevel
@@ -152,10 +128,6 @@ Description: CVC4 headers and static libraries, compatibility with CVC3 C++ API
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
  
 Package: libcvc4compat0
 Section: libs
@@ -174,10 +146,6 @@ Description: CVC4 dynamic libraries, compatibility with CVC3 C++ API
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-java0
 Section: libs
@@ -195,10 +163,6 @@ Description: CVC4 Java bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-perl0
 Section: libs
@@ -216,10 +180,6 @@ Description: CVC4 Perl bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-php0
 Section: libs
@@ -237,10 +197,6 @@ Description: CVC4 PHP bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-tcl0
 Section: libs
@@ -258,10 +214,6 @@ Description: CVC4 Tcl bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-ruby0
 Section: libs
@@ -279,10 +231,6 @@ Description: CVC4 Ruby bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-python0
 Section: libs
@@ -300,10 +248,6 @@ Description: CVC4 Python bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-c-compat-dev
 Section: libdevel
@@ -323,10 +267,6 @@ Description: CVC4 headers and static libraries, compatibility with CVC3 C API
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
  
 Package: libcvc4bindings-c-compat0
 Section: libs
@@ -345,10 +285,6 @@ Description: CVC4 dynamic libraries, compatibility with CVC3 C API
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).
 
 Package: libcvc4bindings-java-compat0
 Section: libs
@@ -367,7 +303,3 @@ Description: CVC4 dynamic libraries, compatibility with CVC3 Java API
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
- .
- CVC4 is still a research prototype and is not yet ready for public release.
- Users looking for an industrial-strength SMT solver are encouraged to use
- CVC3 instead (for now).

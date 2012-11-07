@@ -1,3 +1,10 @@
+cvc4 (0.1~20121107-1) unstable; urgency=low
+
+  * Rebuild patches against new sources
+  * Remove references to CVC4 being a "research prototype"
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 07 Nov 2012 15:01:41 -0500
+
 cvc4 (0.1~20121007-1) unstable; urgency=low
 
   * Change java compatibility bindings library name.
