@@ -5,6 +5,7 @@ usr/include/cvc4/expr
 usr/include/cvc4/lib
 usr/include/cvc4/smt
 usr/include/cvc4/util
+usr/include/cvc4/options
 usr/lib/libcvc4.a
 usr/lib/libcvc4.so
 usr/share/man/man3/libcvc4.3
