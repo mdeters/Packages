@@ -2,8 +2,8 @@
 
 PortSystem          1.0
 
-name                cvc4
-version             1.0
+name                cvc4-devel
+version             2012-12-22
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -15,21 +15,29 @@ long_description    CVC4 is a tool for determining the satisfiability of a first
                     \
                     CVC4 is intended to be an open and extensible SMT engine. It can be used \
                     as a stand-alone tool or as a library. It has been designed to increase \
-                    the performance and reduce the memory overhead of its predecessors.
-
+                    the performance and reduce the memory overhead of its predecessors. \
+                    \
+                    This version is a developmental snapshot release.  For a stable version, \
+                    please use the "cvc4" package instead.
+license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
-master_sites        http://cvc4.cs.nyu.edu/builds/src/
-checksums           rmd160 6c698a9df1ce82f92776543bd9b0f408d73d4663 \
-                    sha256 6512e0d3f86201bc45f7eab904612a5e71a615c4cd89a67def00e946eb0edb35
+master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
+distname            cvc4-${version}
+checksums           rmd160 f8b038f6266c60029d3e817158e96ee687117359 \
+                    sha256 36307dda19da292432e208dc4556b3a14b86fcd0d5709910d2f542d3dabdccec
 depends_lib         port:gmp \
                     port:boost \
                     port:readline
-depends_build       port:doxygen
-#configure.compiler  apple-gcc-4.2
+depends_build       port:doxygen \
+                    bin:curl:curl
+conflicts           cvc4
+patchfiles          clang.patch \
+                    clang-mac-init-order-fix.patch
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
-                    --with-antlr-dir="${worksrcpath}/antlr-3.4"
+                    --with-antlr-dir="${worksrcpath}/antlr-3.4" \
+                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3"
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
@@ -39,14 +47,14 @@ pre-configure {
 }
 
 post-build {
-    system make doc
+    system "make -C \"${worksrcpath}\" doc"
 }
 
 post-destroot {
     file mkdir "${destroot}${prefix}/share/doc/${name}/doxygen"
     file copy "${worksrcpath}/doc/doxygen/html" \
           "${destroot}${prefix}/share/doc/${name}/doxygen/html"
-    system make install-examples DESTDIR="${destroot}"
+    system "make -C \"${worksrcpath}\" install-examples DESTDIR=\"${destroot}\""
 }
 
 livecheck.type          regex

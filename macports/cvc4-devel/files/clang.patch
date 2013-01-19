@@ -1,0 +1,754 @@
+diff --git contrib/get-antlr-3.4 b/contrib/get-antlr-3.4
+index 8228c2a..df03583 100755
+--- contrib/get-antlr-3.4
++++ contrib/get-antlr-3.4
+@@ -49,10 +49,10 @@ cd libantlr3c-3.4
+ 
+ if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+   # 64-bit stuff here
+-  ./configure --enable-64bit --disable-antlrdebug --prefix=`pwd`/../..
++  ./configure --enable-64bit --disable-shared --disable-antlrdebug --prefix=`pwd`/../..
+ else
+   # 32-bit stuff here
+-  ./configure --disable-antlrdebug --prefix=`pwd`/../..
++  ./configure --disable-shared --disable-antlrdebug --prefix=`pwd`/../..
+ fi
+ 
+ cp Makefile Makefile.orig
+diff --git src/expr/expr_manager_template.h b/src/expr/expr_manager_template.h
+index b9cae94..09018cb 100644
+--- src/expr/expr_manager_template.h
++++ src/expr/expr_manager_template.h
+@@ -43,7 +43,7 @@ class SmtEngine;
+ class NodeManager;
+ class Options;
+ class IntStat;
+-class ExprManagerMapCollection;
++struct ExprManagerMapCollection;
+ class StatisticsRegistry;
+ 
+ namespace expr {
+diff --git src/expr/expr_template.h b/src/expr/expr_template.h
+index 442d29a..b353ec5 100644
+--- src/expr/expr_template.h
++++ src/expr/expr_template.h
+@@ -67,7 +67,7 @@ namespace prop {
+   class TheoryProxy;
+ }/* CVC4::prop namespace */
+ 
+-class ExprManagerMapCollection;
++struct ExprManagerMapCollection;
+ 
+ struct ExprHashFunction;
+ 
+diff --git src/expr/type.cpp b/src/expr/type.cpp
+index cc52b11..4e95c0f 100644
+--- src/expr/type.cpp
++++ src/expr/type.cpp
+@@ -204,111 +204,48 @@ bool Type::isBoolean() const {
+   return d_typeNode->isBoolean();
+ }
+ 
+-/** Cast to a Boolean type */
+-Type::operator BooleanType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isBoolean(), this);
+-  return BooleanType(*this);
+-}
+-
+ /** Is this the integer type? */
+ bool Type::isInteger() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isInteger();
+ }
+ 
+-/** Cast to a integer type */
+-Type::operator IntegerType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isInteger(), this);
+-  return IntegerType(*this);
+-}
+-
+ /** Is this the real type? */
+ bool Type::isReal() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isReal();
+ }
+ 
+-/** Cast to a real type */
+-Type::operator RealType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isReal(), this);
+-  return RealType(*this);
+-}
+-
+ /** Is this the string type? */
+ bool Type::isString() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isString();
+ }
+ 
+-/** Cast to a string type */
+-Type::operator StringType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isString(), this);
+-  return StringType(*this);
+-}
+-
+ /** Is this the bit-vector type? */
+ bool Type::isBitVector() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isBitVector();
+ }
+ 
+-/** Cast to a bit-vector type */
+-Type::operator BitVectorType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isBitVector(), this);
+-  return BitVectorType(*this);
+-}
+-
+-/** Cast to a Constructor type */
+-Type::operator DatatypeType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isDatatype(), this);
+-  return DatatypeType(*this);
+-}
+-
+ /** Is this a datatype type? */
+ bool Type::isDatatype() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isDatatype() || d_typeNode->isParametricDatatype();
+ }
+ 
+-/** Cast to a Constructor type */
+-Type::operator ConstructorType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isConstructor(), this);
+-  return ConstructorType(*this);
+-}
+-
+ /** Is this the Constructor type? */
+ bool Type::isConstructor() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isConstructor();
+ }
+ 
+-/** Cast to a Selector type */
+-Type::operator SelectorType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isSelector(), this);
+-  return SelectorType(*this);
+-}
+-
+ /** Is this the Selector type? */
+ bool Type::isSelector() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isSelector();
+ }
+ 
+-/** Cast to a Tester type */
+-Type::operator TesterType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isTester(), this);
+-  return TesterType(*this);
+-}
+-
+ /** Is this the Tester type? */
+ bool Type::isTester() const {
+   NodeManagerScope nms(d_nodeManager);
+@@ -330,64 +267,30 @@ bool Type::isPredicate() const {
+   return d_typeNode->isPredicate();
+ }
+ 
+-/** Cast to a function type */
+-Type::operator FunctionType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isFunction(), this);
+-  return FunctionType(*this);
+-}
+-
+ /** Is this a tuple type? */
+ bool Type::isTuple() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isTuple();
+ }
+ 
+-/** Cast to a tuple type */
+-Type::operator TupleType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isTuple(), this);
+-  return TupleType(*this);
+-}
+-
+ /** Is this a record type? */
+ bool Type::isRecord() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isRecord();
+ }
+ 
+-/** Cast to a record type */
+-Type::operator RecordType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isRecord(), this);
+-  return RecordType(*this);
+-}
+-
+ /** Is this a symbolic expression type? */
+ bool Type::isSExpr() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isSExpr();
+ }
+ 
+-/** Cast to a symbolic expression type */
+-Type::operator SExprType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isSExpr(), this);
+-  return SExprType(*this);
+-}
+-
+ /** Is this an array type? */
+ bool Type::isArray() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isArray();
+ }
+ 
+-/** Cast to an array type */
+-Type::operator ArrayType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  return ArrayType(*this);
+-}
+-
+ /** Is this a sort kind */
+ bool Type::isSort() const {
+   NodeManagerScope nms(d_nodeManager);
+@@ -395,25 +298,11 @@ bool Type::isSort() const {
+ }
+ 
+ /** Cast to a sort type */
+-Type::operator SortType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isSort(), this);
+-  return SortType(*this);
+-}
+-
+-/** Is this a sort constructor kind */
+ bool Type::isSortConstructor() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isSortConstructor();
+ }
+ 
+-/** Cast to a sort constructor type */
+-Type::operator SortConstructorType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isSortConstructor(), this);
+-  return SortConstructorType(*this);
+-}
+-
+ /** Is this a predicate subtype */
+ /* - not in release 1.0
+ bool Type::isPredicateSubtype() const {
+@@ -422,28 +311,12 @@ bool Type::isPredicateSubtype() const {
+ }
+ */
+ 
+-/** Cast to a predicate subtype */
+-/* - not in release 1.0
+-Type::operator PredicateSubtype() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isPredicateSubtype(), this);
+-  return PredicateSubtype(*this);
+-}
+-*/
+-
+ /** Is this an integer subrange */
+ bool Type::isSubrange() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isSubrange();
+ }
+ 
+-/** Cast to a predicate subtype */
+-Type::operator SubrangeType() const throw(IllegalArgumentException) {
+-  NodeManagerScope nms(d_nodeManager);
+-  CheckArgument(isNull() || isSubrange(), this);
+-  return SubrangeType(*this);
+-}
+-
+ vector<Type> FunctionType::getArgTypes() const {
+   NodeManagerScope nms(d_nodeManager);
+   vector<Type> args;
+diff --git src/expr/type.h b/src/expr/type.h
+index 4223d71..af13ed9 100644
+--- src/expr/type.h
++++ src/expr/type.h
+@@ -33,7 +33,7 @@ class NodeManager;
+ class ExprManager;
+ class Expr;
+ class TypeNode;
+-class ExprManagerMapCollection;
++struct ExprManagerMapCollection;
+ 
+ class SmtEngine;
+ 
+@@ -240,60 +240,30 @@ public:
+   bool isBoolean() const;
+ 
+   /**
+-   * Cast this type to a Boolean type
+-   * @return the BooleanType
+-   */
+-  operator BooleanType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this the integer type?
+    * @return true if the type is a integer type
+    */
+   bool isInteger() const;
+ 
+   /**
+-   * Cast this type to a integer type
+-   * @return the IntegerType
+-   */
+-  operator IntegerType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this the real type?
+    * @return true if the type is a real type
+    */
+   bool isReal() const;
+ 
+   /**
+-   * Cast this type to a real type
+-   * @return the RealType
+-   */
+-  operator RealType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this the string type?
+    * @return true if the type is the string type
+    */
+   bool isString() const;
+ 
+   /**
+-   * Cast this type to a string type
+-   * @return the StringType
+-   */
+-  operator StringType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this the bit-vector type?
+    * @return true if the type is a bit-vector type
+    */
+   bool isBitVector() const;
+ 
+   /**
+-   * Cast this type to a bit-vector type
+-   * @return the BitVectorType
+-   */
+-  operator BitVectorType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a function type?
+    * @return true if the type is a function type
+    */
+@@ -307,132 +277,66 @@ public:
+   bool isPredicate() const;
+ 
+   /**
+-   * Cast this type to a function type
+-   * @return the FunctionType
+-   */
+-  operator FunctionType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a tuple type?
+    * @return true if the type is a tuple type
+    */
+   bool isTuple() const;
+ 
+   /**
+-   * Cast this type to a tuple type
+-   * @return the TupleType
+-   */
+-  operator TupleType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a record type?
+    * @return true if the type is a record type
+    */
+   bool isRecord() const;
+ 
+   /**
+-   * Cast this type to a record type
+-   * @return the RecordType
+-   */
+-  operator RecordType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a symbolic expression type?
+    * @return true if the type is a symbolic expression type
+    */
+   bool isSExpr() const;
+ 
+   /**
+-   * Cast this type to a symbolic expression type
+-   * @return the SExprType
+-   */
+-  operator SExprType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this an array type?
+    * @return true if the type is a array type
+    */
+   bool isArray() const;
+ 
+   /**
+-   * Cast this type to an array type
+-   * @return the ArrayType
+-   */
+-  operator ArrayType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a datatype type?
+    * @return true if the type is a datatype type
+    */
+   bool isDatatype() const;
+ 
+   /**
+-   * Cast this type to a datatype type
+-   * @return the DatatypeType
+-   */
+-  operator DatatypeType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a constructor type?
+    * @return true if the type is a constructor type
+    */
+   bool isConstructor() const;
+ 
+   /**
+-   * Cast this type to a constructor type
+-   * @return the ConstructorType
+-   */
+-  operator ConstructorType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a selector type?
+    * @return true if the type is a selector type
+    */
+   bool isSelector() const;
+ 
+   /**
+-   * Cast this type to a selector type
+-   * @return the SelectorType
+-   */
+-  operator SelectorType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a tester type?
+    * @return true if the type is a tester type
+    */
+   bool isTester() const;
+ 
+   /**
+-   * Cast this type to a tester type
+-   * @return the TesterType
+-   */
+-  operator TesterType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a sort kind?
+    * @return true if this is a sort kind
+    */
+   bool isSort() const;
+ 
+   /**
+-   * Cast this type to a sort type
+-   * @return the sort type
+-   */
+-  operator SortType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a sort constructor kind?
+    * @return true if this is a sort constructor kind
+    */
+   bool isSortConstructor() const;
+ 
+   /**
+-   * Cast this type to a sort constructor type
+-   * @return the sort constructor type
+-   */
+-  operator SortConstructorType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this a predicate subtype?
+    * @return true if this is a predicate subtype
+    */
+@@ -440,25 +344,12 @@ public:
+   //bool isPredicateSubtype() const;
+ 
+   /**
+-   * Cast this type to a predicate subtype
+-   * @return the predicate subtype
+-   */
+-  // not in release 1.0
+-  //operator PredicateSubtype() const throw(IllegalArgumentException);
+-
+-  /**
+    * Is this an integer subrange type?
+    * @return true if this is an integer subrange type
+    */
+   bool isSubrange() const;
+ 
+   /**
+-   * Cast this type to an integer subrange type
+-   * @return the integer subrange type
+-   */
+-  operator SubrangeType() const throw(IllegalArgumentException);
+-
+-  /**
+    * Outputs a string representation of this type to the stream.
+    * @param out the stream to output to
+    */
+diff --git src/options/options.h b/src/options/options.h
+index 2d49765..5f17f5a 100644
+--- src/options/options.h
++++ src/options/options.h
+@@ -31,7 +31,7 @@
+ namespace CVC4 {
+ 
+ namespace options {
+-  class OptionsHolder;
++  struct OptionsHolder;
+ }/* CVC4::options namespace */
+ 
+ class ExprStream;
+diff --git src/proof/proof_manager.cpp b/src/proof/proof_manager.cpp
+index d05fe24..c1351c6 100644
+--- src/proof/proof_manager.cpp
++++ src/proof/proof_manager.cpp
+@@ -26,7 +26,7 @@ namespace CVC4 {
+ bool          ProofManager::isInitialized = false;
+ ProofManager* ProofManager::proofManager = NULL;
+ 
+-ProofManager::ProofManager(ProofFormat format = LFSC):
++ProofManager::ProofManager(ProofFormat format):
+   d_satProof(NULL),
+   d_cnfProof(NULL),
+   d_format(format)
+diff --git src/proof/proof_manager.h b/src/proof/proof_manager.h
+index 3bfff14..91eb2ed 100644
+--- src/proof/proof_manager.h
++++ src/proof/proof_manager.h
+@@ -52,7 +52,7 @@ class ProofManager {
+   
+   static ProofManager* proofManager; 
+   static bool isInitialized; 
+-  ProofManager(ProofFormat format);
++  ProofManager(ProofFormat format = LFSC);
+ public:
+   static ProofManager* currentPM();
+ 
+diff --git src/prop/bvminisat/core/Solver.cc b/src/prop/bvminisat/core/Solver.cc
+index 978ac8d..68969c7 100644
+--- src/prop/bvminisat/core/Solver.cc
++++ src/prop/bvminisat/core/Solver.cc
+@@ -32,7 +32,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
+ #include "theory/interrupted.h"
+ using namespace BVMinisat;
+ 
+-namespace CVC4 {
++namespace BVMinisat {
+ 
+ #define OUTPUT_TAG "bvminisat: [a=" << assumptions.size() << ",l=" << decisionLevel() << "] "
+ 
+diff --git src/prop/sat_solver.h b/src/prop/sat_solver.h
+index e5d876b..b4807b0 100644
+--- src/prop/sat_solver.h
++++ src/prop/sat_solver.h
+@@ -130,8 +130,6 @@ public:
+ 
+ };/* class DPLLSatSolverInterface */
+ 
+-}/* CVC4::prop namespace */
+-
+ inline std::ostream& operator <<(std::ostream& out, prop::SatLiteral lit) {
+   out << lit.toString();
+   return out;
+@@ -167,6 +165,7 @@ inline std::ostream& operator <<(std::ostream& out, prop::SatValue val) {
+   return out;
+ }
+ 
++}/* CVC4::prop namespace */
+ }/* CVC4 namespace */
+ 
+ #endif /* __CVC4__PROP__SAT_MODULE_H */
+diff --git src/smt/smt_engine.h b/src/smt/smt_engine.h
+index 3edcd68..a7056c2 100644
+--- src/smt/smt_engine.h
++++ src/smt/smt_engine.h
+@@ -47,7 +47,7 @@ namespace CVC4 {
+ template <bool ref_count> class NodeTemplate;
+ typedef NodeTemplate<true> Node;
+ typedef NodeTemplate<false> TNode;
+-class NodeHashFunction;
++struct NodeHashFunction;
+ 
+ class Command;
+ class GetModelCommand;
+diff --git src/theory/arith/partial_model.h b/src/theory/arith/partial_model.h
+index 9a41d8d..fdb4a8f 100644
+--- src/theory/arith/partial_model.h
++++ src/theory/arith/partial_model.h
+@@ -225,7 +225,7 @@ private:
+   bool equalSizes();
+ 
+   bool inMaps(ArithVar x) const{
+-    return 0 <= x && x < d_mapSize;
++    return x < d_mapSize;
+   }
+ 
+ };/* class ArithPartialModel */
+diff --git src/theory/bv/theory_bv_rewrite_rules_simplification.h b/src/theory/bv/theory_bv_rewrite_rules_simplification.h
+index 23cd838..8bcc644 100644
+--- src/theory/bv/theory_bv_rewrite_rules_simplification.h
++++ src/theory/bv/theory_bv_rewrite_rules_simplification.h
+@@ -430,10 +430,6 @@ Node RewriteRule<BitwiseNotOr>::apply(TNode node) {
+ template<> inline
+ bool RewriteRule<XorNot>::applies(TNode node) {
+   Unreachable();
+-  if (node.getKind() == kind::BITVECTOR_XOR &&
+-      node.getNumChildren() == 2 &&
+-          node[0].getKind() == kind::BITVECTOR_NOT &&
+-          node[1].getKind() == kind::BITVECTOR_NOT); 
+ }
+ 
+ template<> inline
+diff --git src/theory/quantifiers/first_order_model.cpp b/src/theory/quantifiers/first_order_model.cpp
+index 3d98674..8272ce1 100644
+--- src/theory/quantifiers/first_order_model.cpp
++++ src/theory/quantifiers/first_order_model.cpp
+@@ -42,10 +42,6 @@ void FirstOrderModel::reset(){
+   TheoryModel::reset();
+ }
+ 
+-void FirstOrderModel::addTerm( Node n ){
+-  TheoryModel::addTerm( n );
+-}
+-
+ void FirstOrderModel::initialize( bool considerAxioms ){
+   //rebuild models
+   d_uf_model_tree.clear();
+diff --git src/theory/quantifiers/first_order_model.h b/src/theory/quantifiers/first_order_model.h
+index 3779579..50a9419 100644
+--- src/theory/quantifiers/first_order_model.h
++++ src/theory/quantifiers/first_order_model.h
+@@ -33,8 +33,6 @@ class TermDb;
+ class FirstOrderModel : public TheoryModel
+ {
+ private:
+-  //add term function
+-  void addTerm( Node n );
+   //for initialize model
+   void initializeModelForTerm( Node n );
+   /** whether an axiom is asserted */
+diff --git src/theory/theory.h b/src/theory/theory.h
+index f317d4b..de372e4 100644
+--- src/theory/theory.h
++++ src/theory/theory.h
+@@ -49,13 +49,13 @@ namespace theory {
+ class QuantifiersEngine;
+ class TheoryModel;
+ 
+-namespace rrinst{
+-class CandidateGenerator;
+-}
++namespace rrinst {
++  class CandidateGenerator;
++}/* CVC4::theory::rrinst namespace */
+ 
+ namespace eq {
+-class EqualityEngine;
+-}
++  class EqualityEngine;
++}/* CVC4::theory::eq namespace */
+ 
+ /**
+  * Information about an assertion for the theories.
+@@ -786,14 +786,10 @@ public:
+   std::hash_set<TNode, TNodeHashFunction> currentlySharedTerms() const;
+ };/* class Theory */
+ 
+-std::ostream& operator<<(std::ostream& os, Theory::Effort level);
+-
+-namespace eq{
+-  class EqualityEngine;
+-}
+-
++inline std::ostream& operator<<(std::ostream& os, theory::Theory::Effort level);
++inline std::ostream& operator<<(std::ostream& out, const theory::Assertion& a);
+ 
+-inline Assertion Theory::get() {
++inline theory::Assertion Theory::get() {
+   Assert( !done(), "Theory::get() called with assertion queue empty!" );
+ 
+   // Get the assertion
+@@ -809,7 +805,9 @@ inline Assertion Theory::get() {
+   return fact;
+ }
+ 
+-}/* CVC4::theory namespace */
++inline std::ostream& operator<<(std::ostream& out, const theory::Assertion& a) {
++  return out << a.assertion;
++}
+ 
+ inline std::ostream& operator<<(std::ostream& out,
+                                 const CVC4::theory::Theory& theory) {
+@@ -830,6 +828,7 @@ inline std::ostream& operator << (std::ostream& out, theory::Theory::PPAssertSta
+   return out;
+ }
+ 
++}/* CVC4::theory namespace */
+ }/* CVC4 namespace */
+ 
+ #endif /* __CVC4__THEORY__THEORY_H */
+diff --git src/util/node_visitor.h b/src/util/node_visitor.h
+index e444ba6..4c8e646 100644
+--- src/util/node_visitor.h
++++ src/util/node_visitor.h
+@@ -36,10 +36,11 @@ class NodeVisitor {
+   /**
+    * Guard against NodeVisitor<> being re-entrant.
+    */
++  template <class T>
+   class GuardReentry {
+-    bool& d_guard;
++    T& d_guard;
+   public:
+-    GuardReentry(bool& guard)
++    GuardReentry(T& guard)
+     : d_guard(guard) {
+       Assert(!d_guard);
+       d_guard = true;
+@@ -71,7 +72,7 @@ public:
+    */
+   static typename Visitor::return_type run(Visitor& visitor, TNode node) {
+ 
+-    GuardReentry guard(bool(s_inRun));
++    GuardReentry<CVC4_THREADLOCAL_TYPE(bool)> guard(s_inRun);
+ 
+     // Notify of a start
+     visitor.start(node);
+diff --git src/util/statistics_registry.h b/src/util/statistics_registry.h
+index 3bf990d..4e3237f 100644
+--- src/util/statistics_registry.h
++++ src/util/statistics_registry.h
+@@ -42,6 +42,8 @@ namespace CVC4 {
+ class ExprManager;
+ class SmtEngine;
+ 
++inline std::ostream& operator<<(std::ostream& os, const timespec& t);
++
+ /**
+  * The base class for all statistics.
+  *
