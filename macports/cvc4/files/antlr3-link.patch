@@ -1,6 +1,6 @@
-diff --git a/contrib/get-antlr-3.4 b/contrib/get-antlr-3.4
+diff --git contrib/get-antlr-3.4 b/contrib/get-antlr-3.4
 index 8228c2a..7928690 100755
---- a/contrib/get-antlr-3.4
+--- contrib/get-antlr-3.4
 +++ b/contrib/get-antlr-3.4
 @@ -34,8 +34,8 @@ mkdir -p antlr-3.4/share/java
  mkdir -p antlr-3.4/bin
