@@ -40,7 +40,7 @@ configure.args      --enable-static --enable-shared --with-build=default \
 test.run            yes
 
 pre-configure {
-    system "${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
