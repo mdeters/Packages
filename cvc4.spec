@@ -8,7 +8,7 @@ Release: 1
 License: BSD
 Source: http://cvc4.cs.nyu.edu/builds/src/cvc4-1.0.tar.gz
 URL: http://cvc4.cs.nyu.edu/
-BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-1.7.0-openjdk-devel
+BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
 # for other language bindings: python-devel, perl-devel, ruby-devel, tcl-devel, php-devel
 Packager: Morgan Deters <mdeters@cs.nyu.edu>
 
@@ -74,8 +74,8 @@ the performance and reduce the memory overhead of its predecessors.
 %setup
 
 %build
-%configure --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS=-I/usr/lib/jvm/java/include
-#%configure --enable-static --enable-shared --with-build=default --with-portfolio --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot
+%configure --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
+# configure --enable-static --enable-shared --with-build=default --with-portfolio --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot
 # PERL_CPPFLAGS=-I/usr/lib/perl/5.12/CORE/ PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.5
 make %{?_smp_mflags}
 
