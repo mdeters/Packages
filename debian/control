@@ -1,7 +1,7 @@
 Source: cvc4
 Priority: extra
 Maintainer: Morgan Deters <mdeters@cs.nyu.edu>
-Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libz-dev, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, libreadline-dev, swig2.0, python-dev, perl, ruby-dev, tcl-dev, php5-dev, openjdk-6-jdk
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libz-dev, awk, bash, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, libreadline-dev, swig2.0, python-dev, perl, ruby-dev, tcl-dev, php5-dev, openjdk-6-jdk
 Standards-Version: 3.9.2
 Section: math
 Homepage: http://www.cs.nyu.edu/acsys/cvc4/

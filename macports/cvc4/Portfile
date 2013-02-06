@@ -25,7 +25,9 @@ depends_lib         port:gmp \
                     port:boost \
                     port:readline
 depends_build       port:doxygen \
-                    bin:curl:curl
+                    bin:curl:curl \
+                    bin:bash:bash \
+                    bin:awk:awk
 conflicts           cvc4-devel
 patchfiles          clang.patch \
                     clang-mac-init-order-fix.patch \

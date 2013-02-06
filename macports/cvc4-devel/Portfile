@@ -29,7 +29,9 @@ depends_lib         port:gmp \
                     port:boost \
                     port:readline
 depends_build       port:doxygen \
-                    bin:curl:curl
+                    bin:curl:curl \
+                    bin:bash:bash \
+                    bin:awk:awk
 conflicts           cvc4
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \

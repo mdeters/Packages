@@ -1,3 +1,9 @@
+cvc4 (1.0.1~20130206) unstable; urgency=low
+
+  * Add awk and bash build deps.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Wed, 06 Feb 2013 16:14:38 -0500
+
 cvc4 (1.0.1~20130129) unstable; urgency=low
 
   * Some minor updates to the Debian packaging for nightly builds post-1.0
