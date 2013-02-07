@@ -80,7 +80,9 @@ the performance and reduce the memory overhead of its predecessors.
 make %{?_smp_mflags}
 
 %check
-make %{?_smp_mflags} check
+# Skip unit tests (by doing a "make regress" instead of "make check") to avoid a
+# build dependency on CxxTest
+make %{?_smp_mflags} regress
 
 %install
 rm -rf %{buildroot}
@@ -155,3 +157,4 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Feb 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.0-1-first attempt at a spec file for CVC4
