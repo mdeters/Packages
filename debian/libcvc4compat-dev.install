@@ -1,4 +1,5 @@
 usr/include/cvc4/compat
 usr/lib/libcvc4compat.a
 usr/lib/libcvc4compat.so
+usr/lib/libcvc4compat.la
 usr/share/man/man3/libcvc4compat.3

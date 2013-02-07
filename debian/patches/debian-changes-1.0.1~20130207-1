@@ -72,8 +72,8 @@ Last-Update: <YYYY-MM-DD>
  endif
  
 +install-data-local: doxygen-doc
-+	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
++	$(mkinstalldirs) "$(DESTDIR)$(docdir)/doxygen"
++	cp -r $(top_srcdir)/doc/doxygen/html "$(DESTDIR)$(docdir)/doxygen"
 +
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of

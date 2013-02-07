@@ -1,3 +1,4 @@
 usr/include/cvc4/bindings/compat/c
 usr/lib/libcvc4bindings_c_compat.a
 usr/lib/libcvc4bindings_c_compat.so
+usr/lib/libcvc4bindings_c_compat.la

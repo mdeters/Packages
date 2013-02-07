@@ -1,3 +1,9 @@
+cvc4 (1.0.1~20130207) unstable; urgency=low
+
+  * Minor fixups for installation, and include libtool .la files.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Thu, 07 Feb 2013 13:46:37 -0500
+
 cvc4 (1.0.1~20130206) unstable; urgency=low
 
   * Add awk and bash build deps.
