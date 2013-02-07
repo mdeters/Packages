@@ -157,4 +157,5 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Wed Feb 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.0-1-first attempt at a spec file for CVC4
+* Wed Feb 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.0-1
+- first attempt at a spec file for CVC4
