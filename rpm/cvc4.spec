@@ -7,6 +7,7 @@ Version: 1.0
 Release: 1
 License: BSD
 Source: http://cvc4.cs.nyu.edu/builds/src/cvc4-1.0.tar.gz
+Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
 # for other language bindings: python-devel, perl-devel, ruby-devel, tcl-devel, php-devel
@@ -71,7 +72,8 @@ as a stand-alone tool or as a library. It has been designed to increase
 the performance and reduce the memory overhead of its predecessors.
 
 %prep
-%setup
+%setup -q
+%patch0 -p1
 
 %build
 %configure --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
@@ -87,6 +89,14 @@ make %{?_smp_mflags} regress
 %install
 rm -rf %{buildroot}
 make install DESTDIR=%{buildroot}
+# incorrectly installed by "make install" in some versions
+rm -f %{buildroot}%{_includedir}/cvc4/cvc4_private_library.h
+# don't care about static or libtool versions of these
+rm -f %{buildroot}%{_libdir}/jni/libcvc4compatjni.a
+rm -f %{buildroot}%{_libdir}/jni/libcvc4compatjni.la
+rm -f %{buildroot}%{_libdir}/jni/libcvc4jni.a
+rm -f %{buildroot}%{_libdir}/jni/libcvc4jni.la
+rm -f %{buildroot}%{_libdir}/jni/libcvc4jni.la
 
 %clean
 rm -rf %{buildroot}
@@ -116,6 +126,7 @@ rm -rf %{buildroot}
 %{_includedir}/cvc4/options
 %{_libdir}/libcvc4.a
 %{_libdir}/libcvc4.so
+%{_libdir}/libcvc4.la
 %doc %{_mandir}/man3/libcvc4.3.gz
 %doc %{_mandir}/man3/SmtEngine.3cvc.gz
 %doc %{_mandir}/man3/options.3cvc.gz
@@ -123,14 +134,17 @@ rm -rf %{buildroot}
 %{_includedir}/cvc4/parser
 %{_libdir}/libcvc4parser.a
 %{_libdir}/libcvc4parser.so
+%{_libdir}/libcvc4parser.la
 %doc %{_mandir}/man3/libcvc4parser.3.gz
 %{_includedir}/cvc4/compat
 %{_libdir}/libcvc4compat.a
 %{_libdir}/libcvc4compat.so
+%{_libdir}/libcvc4compat.la
 %doc %{_mandir}/man3/libcvc4compat.3.gz
 %{_includedir}/cvc4/bindings/compat/c
 %{_libdir}/libcvc4bindings_c_compat.a
 %{_libdir}/libcvc4bindings_c_compat.so
+%{_libdir}/libcvc4bindings_c_compat.la
 
 %files java
 %defattr(-,root,root,-)
