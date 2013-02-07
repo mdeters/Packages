@@ -59,8 +59,8 @@ Last-Update: <YYYY-MM-DD>
  	cp -p "$<" "$@"
  
 +install-data-local: doxygen-doc
-+	$(mkinstalldirs) "$(DESTDIR)$(docdir)"
-+	cp -r $(top_srcdir)/doc/* "$(DESTDIR)$(docdir)"
++	$(mkinstalldirs) "$(DESTDIR)$(docdir)/doxygen"
++	cp -r $(top_srcdir)/doc/doxygen/html "$(DESTDIR)$(docdir)/doxygen"
 +
  # Can't put the first several in EXTRA_DIST because those are processed
  # *before* recursive "make dist", and these files are generated in a
