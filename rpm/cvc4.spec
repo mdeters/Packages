@@ -119,9 +119,15 @@ rm -rf %{buildroot}
 %{_includedir}/cvc4/context
 %{_includedir}/cvc4/cvc4.h
 %{_includedir}/cvc4/cvc4_public.h
+%{_includedir}/cvc4/decision
 %{_includedir}/cvc4/expr
 %{_includedir}/cvc4/lib
+%{_includedir}/cvc4/main
+%{_includedir}/cvc4/printer
+%{_includedir}/cvc4/proof
+%{_includedir}/cvc4/prop
 %{_includedir}/cvc4/smt
+%{_includedir}/cvc4/theory
 %{_includedir}/cvc4/util
 %{_includedir}/cvc4/options
 %{_libdir}/libcvc4.a
