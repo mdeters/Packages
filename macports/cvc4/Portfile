@@ -31,7 +31,8 @@ depends_build       port:doxygen \
 conflicts           cvc4-devel
 patchfiles          clang.patch \
                     clang-mac-init-order-fix.patch \
-                    antlr3-link.patch
+                    antlr3-link.patch \
+                    ppcache.patch
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
