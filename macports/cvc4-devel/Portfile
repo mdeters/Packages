@@ -32,7 +32,8 @@ depends_build       port:doxygen \
                     bin:curl:curl \
                     bin:bash:bash \
                     bin:awk:awk
-conflicts           cvc4
+conflicts           cvc4 \
+                    cvc4-kind-devel
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \

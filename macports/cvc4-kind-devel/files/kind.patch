@@ -1,0 +1,299 @@
+diff --git a/src/compat/cvc3_compat.cpp b/src/compat/cvc3_compat.cpp
+index 0cd35ce..0c593de 100644
+--- a/src/compat/cvc3_compat.cpp
++++ src/compat/cvc3_compat.cpp
+@@ -197,7 +197,7 @@ bool Type::isBool() const {
+ }
+ 
+ bool Type::isSubtype() const {
+-  return false;
++  return isPredicateSubtype();
+ }
+ 
+ Cardinality Type::card() const {
+@@ -1075,14 +1075,11 @@ Type ValidityChecker::subrangeType(const Expr& l, const Expr& r) {
+ }
+ 
+ Type ValidityChecker::subtypeType(const Expr& pred, const Expr& witness) {
+-  Unimplemented("Predicate subtyping not supported by CVC4 yet (sorry!)");
+-  /*
+   if(witness.isNull()) {
+     return d_em->mkPredicateSubtype(pred);
+   } else {
+     return d_em->mkPredicateSubtype(pred, witness);
+   }
+-  */
+ }
+ 
+ Type ValidityChecker::tupleType(const Type& type0, const Type& type1) {
+@@ -1294,7 +1291,20 @@ Type ValidityChecker::getBaseType(const Expr& e) {
+ }
+ 
+ Type ValidityChecker::getBaseType(const Type& t) {
+-  return t.getBaseType();
++  Type type = t;
++  while(type.isPredicateSubtype()) {
++    type = CVC4::PredicateSubtype(type).getBaseType();
++  }
++  // We might still be a (primitive) subtype.  Check the types that can
++  // form the base of such a type.
++  if(type.isReal()) {
++    return d_em->realType();
++  }
++  assert(!type.isInteger());// should be handled by Real
++  if(type.isBoolean()) {
++    return d_em->booleanType();
++  }
++  return type;
+ }
+ 
+ Expr ValidityChecker::getTypePred(const Type&t, const Expr& e) {
+diff --git a/src/expr/expr_manager_template.cpp b/src/expr/expr_manager_template.cpp
+index 5159f6b..9be56a0 100644
+--- a/src/expr/expr_manager_template.cpp
++++ src/expr/expr_manager_template.cpp
+@@ -731,7 +731,6 @@ SortConstructorType ExprManager::mkSortConstructor(const std::string& name,
+               new TypeNode(d_nodeManager->mkSortConstructor(name, arity))));
+ }
+ 
+-/* - not in release 1.0
+ Type ExprManager::mkPredicateSubtype(Expr lambda)
+   throw(TypeCheckingException) {
+   NodeManagerScope nms(d_nodeManager);
+@@ -742,9 +741,7 @@ Type ExprManager::mkPredicateSubtype(Expr lambda)
+     throw TypeCheckingException(this, &e);
+   }
+ }
+-*/
+ 
+-/* - not in release 1.0
+ Type ExprManager::mkPredicateSubtype(Expr lambda, Expr witness)
+   throw(TypeCheckingException) {
+   NodeManagerScope nms(d_nodeManager);
+@@ -755,7 +752,6 @@ Type ExprManager::mkPredicateSubtype(Expr lambda, Expr witness)
+     throw TypeCheckingException(this, &e);
+   }
+ }
+-*/
+ 
+ Type ExprManager::mkSubrangeType(const SubrangeBounds& bounds)
+   throw(TypeCheckingException) {
+diff --git a/src/expr/expr_manager_template.h b/src/expr/expr_manager_template.h
+index 09018cb..1796748 100644
+--- a/src/expr/expr_manager_template.h
++++ src/expr/expr_manager_template.h
+@@ -443,9 +443,8 @@ public:
+    * not a LAMBDA, or is ill-typed, or if CVC4 fails at proving that
+    * the resulting predicate subtype is inhabited.
+    */
+-  // not in release 1.0
+-  //Type mkPredicateSubtype(Expr lambda)
+-  //  throw(TypeCheckingException);
++  Type mkPredicateSubtype(Expr lambda)
++    throw(TypeCheckingException);
+ 
+   /**
+    * Make a predicate subtype type defined by the given LAMBDA
+@@ -454,9 +453,8 @@ public:
+    * a LAMBDA, or is ill-typed, or if the witness is not a witness or
+    * ill-typed.
+    */
+-  // not in release 1.0
+-  //Type mkPredicateSubtype(Expr lambda, Expr witness)
+-  //  throw(TypeCheckingException);
++  Type mkPredicateSubtype(Expr lambda, Expr witness)
++    throw(TypeCheckingException);
+ 
+   /**
+    * Make an integer subrange type as defined by the argument.
+diff --git a/src/expr/type.cpp b/src/expr/type.cpp
+index 4e95c0f..736ea8a 100644
+--- a/src/expr/type.cpp
++++ src/expr/type.cpp
+@@ -304,12 +304,10 @@ bool Type::isSortConstructor() const {
+ }
+ 
+ /** Is this a predicate subtype */
+-/* - not in release 1.0
+ bool Type::isPredicateSubtype() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->isPredicateSubtype();
+ }
+-*/
+ 
+ /** Is this an integer subrange */
+ bool Type::isSubrange() const {
+@@ -486,13 +484,11 @@ SortConstructorType::SortConstructorType(const Type& t)
+   CheckArgument(isNull() || isSortConstructor(), this);
+ }
+ 
+-/* - not in release 1.0
+ PredicateSubtype::PredicateSubtype(const Type& t)
+   throw(IllegalArgumentException) :
+   Type(t) {
+   CheckArgument(isNull() || isPredicateSubtype(), this);
+ }
+-*/
+ 
+ SubrangeType::SubrangeType(const Type& t)
+   throw(IllegalArgumentException) :
+@@ -606,7 +602,6 @@ BooleanType TesterType::getRangeType() const {
+   return BooleanType(makeType(d_nodeManager->booleanType()));
+ }
+ 
+-/* - not in release 1.0
+ Expr PredicateSubtype::getPredicate() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->getSubtypePredicate().toExpr();
+@@ -616,7 +611,6 @@ Type PredicateSubtype::getParentType() const {
+   NodeManagerScope nms(d_nodeManager);
+   return d_typeNode->getSubtypeParentType().toType();
+ }
+-*/
+ 
+ SubrangeBounds SubrangeType::getSubrangeBounds() const {
+   NodeManagerScope nms(d_nodeManager);
+diff --git a/src/expr/type.h b/src/expr/type.h
+index ce6291c..18ba74a 100644
+--- a/src/expr/type.h
++++ src/expr/type.h
+@@ -59,8 +59,7 @@ class RecordType;
+ class SExprType;
+ class SortType;
+ class SortConstructorType;
+-// not in release 1.0
+-//class PredicateSubtype;
++class PredicateSubtype;
+ class SubrangeType;
+ class Type;
+ 
+@@ -340,8 +339,7 @@ public:
+    * Is this a predicate subtype?
+    * @return true if this is a predicate subtype
+    */
+-  // not in release 1.0
+-  //bool isPredicateSubtype() const;
++  bool isPredicateSubtype() const;
+ 
+   /**
+    * Is this an integer subrange type?
+@@ -527,8 +525,6 @@ public:
+ 
+ };/* class SortConstructorType */
+ 
+-// not in release 1.0
+-#if 0
+ /**
+  * Class encapsulating a predicate subtype.
+  */
+@@ -549,7 +545,6 @@ public:
+   Type getParentType() const;
+ 
+ };/* class PredicateSubtype */
+-#endif /* 0 */
+ 
+ /**
+  * Class encapsulating an integer subrange type.
+diff --git a/src/parser/cvc/Cvc.g b/src/parser/cvc/Cvc.g
+index b8ec160..655a8f2 100644
+--- a/src/parser/cvc/Cvc.g
++++ src/parser/cvc/Cvc.g
+@@ -1143,11 +1143,9 @@ restrictedTypePossiblyFunctionLHS[CVC4::Type& t,
+     { /*SymbolTable* old = PARSER_STATE->getSymbolTable();
+       PARSER_STATE->useDeclarationsFrom(symtab);
+       delete old;*/
+-      PARSER_STATE->unimplementedFeature("predicate subtyping not supported in this release");
+-      /*t = f2.isNull() ?
++      t = f2.isNull() ?
+         EXPR_MANAGER->mkPredicateSubtype(f) :
+         EXPR_MANAGER->mkPredicateSubtype(f, f2);
+-      */
+     }
+ 
+     /* subrange types */
+diff --git a/src/smt/smt_engine.cpp b/src/smt/smt_engine.cpp
+index e7c0999..7b37e71 100644
+--- a/src/smt/smt_engine.cpp
++++ src/smt/smt_engine.cpp
+@@ -1269,7 +1269,7 @@ Node SmtEnginePrivate::expandDefinitions(TNode n, hash_map<Node, Node, NodeHashF
+     if(i != d_smt.d_definedFunctions->end()) {
+       // replacement must be closed
+       if((*i).second.getFormals().size() > 0) {
+-        throw TypeCheckingException(n.toExpr(), string("Defined function requires arguments: `") + n.toString() + "'");
++        //throw TypeCheckingException(n.toExpr(), string("Defined function requires arguments: `") + n.toString() + "'");
+       }
+       // don't bother putting in the cache
+       return (*i).second.getFormula();
+@@ -2599,9 +2599,16 @@ void SmtEnginePrivate::processAssertions() {
+     // We also can't use an iterator, because the vector may be moved in
+     // memory during this loop.
+     Chat() << "constraining subtypes..." << endl;
+-    for(unsigned i = 0, i_end = d_assertionsToPreprocess.size(); i != i_end; ++i) {
++    unsigned i, i_end;
++    for(i = 0, i_end = d_assertionsToPreprocess.size(); i != i_end; ++i) {
+       constrainSubtypes(d_assertionsToPreprocess[i], d_assertionsToPreprocess);
+     }
++    Chat() << "...re-expanding..." << endl;
++    hash_map<Node, Node, NodeHashFunction> cache;
++    for(; i < d_assertionsToPreprocess.size(); ++i) {
++      d_assertionsToPreprocess[i] =
++        expandDefinitions(d_assertionsToPreprocess[i], cache);
++    }
+   }
+   dumpAssertions("post-constrain-subtypes", d_assertionsToPreprocess);
+ 
+@@ -3086,7 +3093,15 @@ Expr SmtEngine::getValue(const Expr& ex) throw(ModalException, TypeCheckingExcep
+   Trace("smt") << "--- model-post returned " << resultNode << endl;
+ 
+   // type-check the result we got
+-  Assert(resultNode.isNull() || resultNode.getType().isSubtypeOf(n.getType()));
++  Assert(resultNode.isNull() ||
++         resultNode.getType().isSubtypeOf(n.getType()) ||
++         // assertion here is really ugly because we made integer literals INT rather than
++         // subrange_bound(k,k).  :-(
++ /*        ( resultNode.isConst() && resultNode.getType().isInteger() &&
++           n.getType().isSubrange() && SubrangeBounds(resultNode.getConst<Rational>().getNumerator(), resultNode.getConst<Rational>().getNumerator()) <= n.getType().getSubrangeBounds() ),*/
++         "incorrect type `%s' for model-returned value `%s': expected type `%s'",
++         resultNode.getType().toString().c_str(), resultNode.toString().c_str(),
++         n.getType().toString().c_str());
+ 
+   // ensure it's a constant
+   Assert(resultNode.getKind() == kind::LAMBDA || resultNode.isConst());
+diff --git a/src/theory/arith/theory_arith_type_rules.h b/src/theory/arith/theory_arith_type_rules.h
+index 30b5e27..78ab22c 100644
+--- a/src/theory/arith/theory_arith_type_rules.h
++++ src/theory/arith/theory_arith_type_rules.h
+@@ -32,7 +32,8 @@ public:
+       throw (TypeCheckingExceptionPrivate, AssertionException) {
+     Assert(n.getKind() == kind::CONST_RATIONAL);
+     if(n.getConst<Rational>().isIntegral()){
+-      return nodeManager->integerType();
++      Integer k = n.getConst<Rational>().getNumerator();
++      return nodeManager->mkSubrangeType(SubrangeBounds(k, k));
+     }else{
+       return nodeManager->realType();
+     }
+diff --git a/src/theory/term_registration_visitor.cpp b/src/theory/term_registration_visitor.cpp
+index b41089b..3168d38 100644
+--- a/src/theory/term_registration_visitor.cpp
++++ src/theory/term_registration_visitor.cpp
+@@ -185,6 +185,9 @@ bool SharedTermsVisitor::alreadyVisited(TNode current, TNode parent) const {
+       typeTheoryId = Theory::theoryOf(type);
+     } else {
+       TypeNode type = current.getType();
++      while(type.isPredicateSubtype()) {
++        type = type.getSubtypeParentType();
++      }
+       typeTheoryId = Theory::theoryOf(type);
+       if (typeTheoryId != currentTheoryId) {
+         if (options::finiteModelFind() && type.isSort()) {
+@@ -243,6 +246,9 @@ void SharedTermsVisitor::visit(TNode current, TNode parent) {
+       typeTheoryId = Theory::theoryOf(type);
+     } else {
+       TypeNode type = current.getType();
++      while(type.isPredicateSubtype()) {
++        type = type.getSubtypeParentType();
++      }
+       typeTheoryId = Theory::theoryOf(type);
+       if (typeTheoryId != currentTheoryId) {
+         if (options::finiteModelFind() && type.isSort()) {
