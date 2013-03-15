@@ -1,20 +1,3 @@
-diff --git a/src/bindings/Makefile.am b/src/bindings/Makefile.am
-index 301150b..fbecad2 100644
---- a/src/bindings/Makefile.am
-+++ src/bindings/Makefile.am
-@@ -217,10 +217,10 @@ if CVC4_HAS_SWIG
- 
- $(patsubst %,%.cpp,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS))): %.cpp: @srcdir@/../cvc4.i
- 	$(AM_V_at)mkdir -p $(patsubst %.cpp,%,$@)
--	$(AM_V_GEN)$(SWIG) -Wall -I@builddir@/.. -I@srcdir@/../include -I@srcdir@/.. -c++ -$(patsubst %.cpp,%,$@) -outdir $(patsubst %.cpp,%,$@) $($(subst .,_,$@)_SWIGFLAGS) -o $@ $<
-+	$(AM_V_GEN)$(SWIG) -Wall -I@builddir@/.. -c++ -$(patsubst %.cpp,%,$@) -outdir $(patsubst %.cpp,%,$@) $($(subst .,_,$@)_SWIGFLAGS) -o $@ $< -I@srcdir@/../include -I@srcdir@/..
- 
- $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS))): %.d: @srcdir@/../cvc4.i
--	$(AM_V_GEN)$(SWIG) -I@builddir@/.. -I@srcdir@/../include -I@srcdir@/.. -c++ -$(patsubst %.d,%,$@) -MM -o $(patsubst %.d,%.cpp,$@) $<
-+	$(AM_V_GEN)$(SWIG) -I@builddir@/.. -c++ -$(patsubst %.d,%,$@) -MM -o $(patsubst %.d,%.cpp,$@) $< -I@srcdir@/../include -I@srcdir@/..
- # .PHONY so they get rebuilt each time
- .PHONY: .swig_deps $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS)))
- .swig_deps: $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS)))
 diff --git a/src/compat/cvc3_compat.cpp b/src/compat/cvc3_compat.cpp
 index 0cd35ce..0c593de 100644
 --- a/src/compat/cvc3_compat.cpp
@@ -744,36 +727,6 @@ index 30b5e27..78ab22c 100644
      }else{
        return nodeManager->realType();
      }
-diff --git a/src/theory/quantifiers/options b/src/theory/quantifiers/options
-index e12a7d7..222fc44 100644
---- a/src/theory/quantifiers/options
-+++ src/theory/quantifiers/options
-@@ -56,7 +56,7 @@ option relevantTriggers /--disable-relevant-triggers bool :default true
- option registerQuantBodyTerms --register-quant-body-terms bool :default false
-  consider ground terms within bodies of quantified formulas for matching
- 
--option instWhenMode --inst-when=MODE CVC4::theory::quantifiers::InstWhenMode :default CVC4::theory::quantifiers::INST_WHEN_FULL :read-write :include "theory/quantifiers/modes.h" :handler CVC4::theory::quantifiers::stringToInstWhenMode :handler-include "theory/quantifiers/options_handlers.h" :predicate CVC4::theory::quantifiers::checkInstWhenMode :predicate-include "theory/quantifiers/options_handlers.h"
-+option instWhenMode --inst-when=MODE CVC4::theory::quantifiers::InstWhenMode :default CVC4::theory::quantifiers::INST_WHEN_FULL_LAST_CALL :read-write :include "theory/quantifiers/modes.h" :handler CVC4::theory::quantifiers::stringToInstWhenMode :handler-include "theory/quantifiers/options_handlers.h" :predicate CVC4::theory::quantifiers::checkInstWhenMode :predicate-include "theory/quantifiers/options_handlers.h"
-  when to apply instantiation
-  
- option eagerInstQuant --eager-inst-quant bool :default false
-diff --git a/src/theory/quantifiers/options_handlers.h b/src/theory/quantifiers/options_handlers.h
-index 01538d8..312261d 100644
---- a/src/theory/quantifiers/options_handlers.h
-+++ src/theory/quantifiers/options_handlers.h
-@@ -29,10 +29,10 @@ namespace quantifiers {
- static const std::string instWhenHelp = "\
- Modes currently supported by the --inst-when option:\n\
- \n\
--full (default)\n\
-+full\n\
- + Run instantiation round at full effort, before theory combination.\n\
- \n\
--full-last-call\n\
-+full-last-call (default)\n\
- + Alternate running instantiation rounds at full effort and last\n\
-   call.  In other words, interleave instantiation and theory combination.\n\
- \n\
 diff --git a/src/theory/term_registration_visitor.cpp b/src/theory/term_registration_visitor.cpp
 index b41089b..3168d38 100644
 --- a/src/theory/term_registration_visitor.cpp
