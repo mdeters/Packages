@@ -1,3 +1,20 @@
+diff --git a/src/bindings/Makefile.am b/src/bindings/Makefile.am
+index 301150b..fbecad2 100644
+--- a/src/bindings/Makefile.am
++++ src/bindings/Makefile.am
+@@ -217,10 +217,10 @@ if CVC4_HAS_SWIG
+ 
+ $(patsubst %,%.cpp,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS))): %.cpp: @srcdir@/../cvc4.i
+ 	$(AM_V_at)mkdir -p $(patsubst %.cpp,%,$@)
+-	$(AM_V_GEN)$(SWIG) -Wall -I@builddir@/.. -I@srcdir@/../include -I@srcdir@/.. -c++ -$(patsubst %.cpp,%,$@) -outdir $(patsubst %.cpp,%,$@) $($(subst .,_,$@)_SWIGFLAGS) -o $@ $<
++	$(AM_V_GEN)$(SWIG) -Wall -I@builddir@/.. -c++ -$(patsubst %.cpp,%,$@) -outdir $(patsubst %.cpp,%,$@) $($(subst .,_,$@)_SWIGFLAGS) -o $@ $< -I@srcdir@/../include -I@srcdir@/..
+ 
+ $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS))): %.d: @srcdir@/../cvc4.i
+-	$(AM_V_GEN)$(SWIG) -I@builddir@/.. -I@srcdir@/../include -I@srcdir@/.. -c++ -$(patsubst %.d,%,$@) -MM -o $(patsubst %.d,%.cpp,$@) $<
++	$(AM_V_GEN)$(SWIG) -I@builddir@/.. -c++ -$(patsubst %.d,%,$@) -MM -o $(patsubst %.d,%.cpp,$@) $< -I@srcdir@/../include -I@srcdir@/..
+ # .PHONY so they get rebuilt each time
+ .PHONY: .swig_deps $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS)))
+ .swig_deps: $(patsubst %,%.d,$(filter-out c c++,$(CVC4_LANGUAGE_BINDINGS)))
 diff --git a/src/compat/cvc3_compat.cpp b/src/compat/cvc3_compat.cpp
 index 0cd35ce..0c593de 100644
 --- a/src/compat/cvc3_compat.cpp
@@ -48,6 +65,141 @@ index 0cd35ce..0c593de 100644
  }
  
  Expr ValidityChecker::getTypePred(const Type&t, const Expr& e) {
+diff --git a/src/decision/decision_engine.cpp b/src/decision/decision_engine.cpp
+index 08a3e49..98294f9 100644
+--- a/src/decision/decision_engine.cpp
++++ src/decision/decision_engine.cpp
+@@ -29,7 +29,7 @@ using namespace std;
+ namespace CVC4 {
+ 
+ DecisionEngine::DecisionEngine(context::Context *sc,
+-                                 context::Context *uc) :
++                               context::UserContext *uc) :
+   d_enabledStrategies(),
+   d_needIteSkolemMap(),
+   d_relevancyStrategy(NULL),
+diff --git a/src/decision/decision_engine.h b/src/decision/decision_engine.h
+index ea16cec..859443d 100644
+--- a/src/decision/decision_engine.h
++++ src/decision/decision_engine.h
+@@ -50,7 +50,7 @@ class DecisionEngine {
+   DPLLSatSolverInterface* d_satSolver;
+ 
+   context::Context* d_satContext;
+-  context::Context* d_userContext;
++  context::UserContext* d_userContext;
+ 
+   // Does decision engine know the answer?
+   context::CDO<SatValue> d_result;
+@@ -64,7 +64,7 @@ public:
+   // Necessary functions
+ 
+   /** Constructor */
+-  DecisionEngine(context::Context *sc, context::Context *uc);
++  DecisionEngine(context::Context *sc, context::UserContext *uc);
+ 
+   /** Destructor, currently does nothing */
+   ~DecisionEngine() {
+diff --git a/src/decision/justification_heuristic.cpp b/src/decision/justification_heuristic.cpp
+index 0b63dfb..b486411 100644
+--- a/src/decision/justification_heuristic.cpp
++++ src/decision/justification_heuristic.cpp
+@@ -28,7 +28,7 @@
+ using namespace CVC4;
+ 
+ JustificationHeuristic::JustificationHeuristic(CVC4::DecisionEngine* de,
+-                                               context::Context *uc,
++                                               context::UserContext *uc,
+                                                context::Context *c):
+   ITEDecisionStrategy(de, c),
+   d_justified(c),
+@@ -38,7 +38,7 @@ JustificationHeuristic::JustificationHeuristic(CVC4::DecisionEngine* de,
+   d_timestat("decision::jh::time"),
+   d_assertions(uc),
+   d_iteAssertions(uc),
+-  d_iteCache(),
++  d_iteCache(uc),
+   d_visited(),
+   d_visitedComputeITE(),
+   d_curDecision() {
+@@ -199,19 +199,20 @@ SatValue JustificationHeuristic::tryGetSatValue(Node n)
+   }//end of else
+ }
+ 
+-const JustificationHeuristic::IteList&
++JustificationHeuristic::IteList
+ JustificationHeuristic::getITEs(TNode n)
+ {
+   IteCache::iterator it = d_iteCache.find(n);
+   if(it != d_iteCache.end()) {
+-    return it->second;
++    return (*it).second;
+   } else {
+     // Compute the list of ITEs
+     // TODO: optimize by avoiding multiple lookup for d_iteCache[n]
+-    d_iteCache[n] = IteList();
+     d_visitedComputeITE.clear();
+-    computeITEs(n, d_iteCache[n]);
+-    return d_iteCache[n];
++    IteList ilist;
++    computeITEs(n, ilist);
++    d_iteCache.insert(n, ilist);
++    return d_iteCache[n].get();
+   }
+ }
+ 
+@@ -462,15 +463,15 @@ bool JustificationHeuristic::handleITE(TNode node, SatValue desiredVal)
+ 
+ bool JustificationHeuristic::handleEmbeddedITEs(TNode node)
+ {
+-  const IteList& l = getITEs(node);
++  const IteList l = getITEs(node);
+   Trace("decision::jh::ite") << " ite size = " << l.size() << std::endl;
+ 
+   for(IteList::const_iterator i = l.begin(); i != l.end(); ++i) {
+-    if(d_visited.find(i->first) == d_visited.end()) {
+-      d_visited.insert(i->first);
+-      if(findSplitterRec(i->second, SAT_VALUE_TRUE))
++    if(d_visited.find((*i).first) == d_visited.end()) {
++      d_visited.insert((*i).first);
++      if(findSplitterRec((*i).second, SAT_VALUE_TRUE))
+         return true;
+-      d_visited.erase(i->first);
++      d_visited.erase((*i).first);
+     }
+   }
+   return false;
+diff --git a/src/decision/justification_heuristic.h b/src/decision/justification_heuristic.h
+index 91c21d9..d8f9a15 100644
+--- a/src/decision/justification_heuristic.h
++++ src/decision/justification_heuristic.h
+@@ -38,7 +38,7 @@ namespace decision {
+ 
+ class JustificationHeuristic : public ITEDecisionStrategy {
+   typedef std::vector<pair<TNode,TNode> > IteList;
+-  typedef hash_map<TNode,IteList,TNodeHashFunction> IteCache;
++  typedef context::CDHashMap<TNode,IteList,TNodeHashFunction> IteCache;
+   typedef context::CDHashMap<TNode,TNode,TNodeHashFunction> SkolemMap;
+ 
+   // being 'justified' is monotonic with respect to decisions
+@@ -82,7 +82,7 @@ class JustificationHeuristic : public ITEDecisionStrategy {
+   SatLiteral d_curDecision;
+ public:
+   JustificationHeuristic(CVC4::DecisionEngine* de,
+-                         context::Context *uc,
++                         context::UserContext *uc,
+                          context::Context *c);
+ 
+   ~JustificationHeuristic();
+@@ -110,7 +110,7 @@ private:
+   SatValue tryGetSatValue(Node n);
+ 
+   /* Get list of all term-ITEs for the atomic formula v */
+-  const JustificationHeuristic::IteList& getITEs(TNode n);
++  JustificationHeuristic::IteList getITEs(TNode n);
+ 
+   /* Compute all term-ITEs in a node recursively */
+   void computeITEs(TNode n, IteList &l);
 diff --git a/src/expr/expr_manager_template.cpp b/src/expr/expr_manager_template.cpp
 index 5159f6b..9be56a0 100644
 --- a/src/expr/expr_manager_template.cpp
@@ -194,6 +346,176 @@ index ce6291c..18ba74a 100644
  
  /**
   * Class encapsulating an integer subrange type.
+diff --git a/src/main/command_executor.cpp b/src/main/command_executor.cpp
+index 6a4e18b..750afdd 100644
+--- a/src/main/command_executor.cpp
++++ src/main/command_executor.cpp
+@@ -24,7 +24,7 @@ namespace main {
+ 
+ CommandExecutor::CommandExecutor(ExprManager &exprMgr, Options &options):
+   d_exprMgr(exprMgr),
+-  d_smtEngine(SmtEngine(&exprMgr)),
++  d_smtEngine(new SmtEngine(&exprMgr)),
+   d_options(options),
+   d_stats("driver") {
+ }
+@@ -56,20 +56,29 @@ bool CommandExecutor::doCommand(Command* cmd)
+   }
+ }
+ 
++void CommandExecutor::reset()
++{
++  if(d_options[options::statistics]) {
++    flushStatistics(*d_options[options::err]);
++  }
++  delete d_smtEngine;
++  d_smtEngine = new SmtEngine(&d_exprMgr);
++}
++
+ bool CommandExecutor::doCommandSingleton(Command *cmd)
+ {
+   bool status = true;
+   if(d_options[options::verbosity] >= -1) {
+-    status = smtEngineInvoke(&d_smtEngine, cmd, d_options[options::out]);
++    status = smtEngineInvoke(d_smtEngine, cmd, d_options[options::out]);
+   } else {
+-    status = smtEngineInvoke(&d_smtEngine, cmd, NULL);
++    status = smtEngineInvoke(d_smtEngine, cmd, NULL);
+   }
+   return status;
+ }
+ 
+ std::string CommandExecutor::getSmtEngineStatus()
+ {
+-  return d_smtEngine.getInfo("status").getValue();
++  return d_smtEngine->getInfo("status").getValue();
+ }
+ 
+ bool smtEngineInvoke(SmtEngine* smt, Command* cmd, std::ostream *out)
+diff --git a/src/main/command_executor.h b/src/main/command_executor.h
+index f880410..e865ab0 100644
+--- a/src/main/command_executor.h
++++ src/main/command_executor.h
+@@ -31,7 +31,7 @@ class CommandExecutor {
+ 
+ protected:
+   ExprManager& d_exprMgr;
+-  SmtEngine d_smtEngine;
++  SmtEngine* d_smtEngine;
+   Options& d_options;
+   StatisticsRegistry d_stats;
+ 
+@@ -47,6 +47,8 @@ public:
+    */
+   bool doCommand(CVC4::Command* cmd);
+ 
++  void reset();
++
+   virtual std::string getSmtEngineStatus();
+ 
+   StatisticsRegistry& getStatisticsRegistry() {
+@@ -55,7 +57,7 @@ public:
+ 
+   virtual void flushStatistics(std::ostream& out) const {
+     d_exprMgr.getStatistics().flushInformation(out);
+-    d_smtEngine.getStatistics().flushInformation(out);
++    d_smtEngine->getStatistics().flushInformation(out);
+     d_stats.flushInformation(out);
+   }
+ 
+diff --git a/src/main/driver_unified.cpp b/src/main/driver_unified.cpp
+index 9fa40d3..713fa65 100644
+--- a/src/main/driver_unified.cpp
++++ src/main/driver_unified.cpp
+@@ -236,6 +236,9 @@ int runCvc4(int argc, char* argv[], Options& opts) {
+     Command* cmd;
+     bool status = true;
+     if( opts[options::interactive] ) {
++      if( opts[options::tearDownIncremental] ) {
++        throw OptionException("--tear-down-incremental incompatible with --interactive");
++      }
+       InteractiveShell shell(*exprMgr, opts);
+       Message() << Configuration::getPackageName()
+                 << " " << Configuration::getVersionString();
+@@ -256,6 +259,64 @@ int runCvc4(int argc, char* argv[], Options& opts) {
+         status = pExecutor->doCommand(cmd) && status;
+         delete cmd;
+       }
++    } else if(opts[options::tearDownIncremental]) {
++      if(opts[options::incrementalSolving]) {
++        throw OptionException("--tear-down-incremental incompatible with --incremental");
++      }
++
++      ParserBuilder parserBuilder(exprMgr, filename, opts);
++
++      if( inputFromStdin ) {
++#if defined(CVC4_COMPETITION_MODE) && !defined(CVC4_SMTCOMP_APPLICATION_TRACK)
++        parserBuilder.withStreamInput(cin);
++#else /* CVC4_COMPETITION_MODE && !CVC4_SMTCOMP_APPLICATION_TRACK */
++        parserBuilder.withLineBufferedStreamInput(cin);
++#endif /* CVC4_COMPETITION_MODE && !CVC4_SMTCOMP_APPLICATION_TRACK */
++      }
++
++      vector< vector<Command*> > allCommands;
++      allCommands.push_back(vector<Command*>());
++      Parser *parser = parserBuilder.build();
++      if(replayParser != NULL) {
++        // have the replay parser use the file's declarations
++        replayParser->useDeclarationsFrom(parser);
++      }
++      while(status && (cmd = parser->nextCommand())) {
++        if(dynamic_cast<PushCommand*>(cmd) != NULL) {
++          allCommands.push_back(vector<Command*>());
++        } else if(dynamic_cast<PopCommand*>(cmd) != NULL) {
++          allCommands.pop_back(); // fixme leaks cmds here
++          pExecutor->reset();
++          for(size_t i = 0; i < allCommands.size(); ++i) {
++            for(size_t j = 0; j < allCommands[i].size(); ++j) {
++              Command* cmd = allCommands[i][j]->clone();
++              pExecutor->doCommand(cmd);
++              delete cmd;
++            }
++          }
++        } else if(dynamic_cast<CheckSatCommand*>(cmd) != NULL ||
++                  dynamic_cast<QueryCommand*>(cmd) != NULL) {
++          status = pExecutor->doCommand(cmd);
++          pExecutor->reset();
++          for(size_t i = 0; i < allCommands.size(); ++i) {
++            for(size_t j = 0; j < allCommands[i].size(); ++j) {
++              Command* cmd = allCommands[i][j]->clone();
++              pExecutor->doCommand(cmd);
++              delete cmd;
++            }
++          }
++        } else {
++          allCommands.back().push_back(cmd->clone());
++          if(dynamic_cast<QuitCommand*>(cmd) != NULL) {
++            delete cmd;
++            break;
++          }
++          status = pExecutor->doCommand(cmd);
++        }
++        delete cmd;
++      }
++      // Remove the parser
++      delete parser;
+     } else {
+       ParserBuilder parserBuilder(exprMgr, filename, opts);
+ 
+diff --git a/src/main/options b/src/main/options
+index caea63f..1f57b3d 100644
+--- a/src/main/options
++++ src/main/options
+@@ -40,6 +40,9 @@ option fallbackSequential  --fallback-sequential bool :default false
+ option incrementalParallel --incremental-parallel bool :default false :link --incremental
+  Use parallel solver even in incremental mode (may print 'unknown's at times)
+ 
++expert-option tearDownIncremental --tear-down-incremental bool :default false
++ implement PUSH/POP/multi-query by destroying and recreating SmtEngine
++
+ expert-option waitToJoin --wait-to-join bool :default true
+  wait for other threads to join before quitting
+ 
 diff --git a/src/parser/cvc/Cvc.g b/src/parser/cvc/Cvc.g
 index b8ec160..655a8f2 100644
 --- a/src/parser/cvc/Cvc.g
@@ -211,11 +533,104 @@ index b8ec160..655a8f2 100644
      }
  
      /* subrange types */
+diff --git a/src/smt/options b/src/smt/options
+index 2680f41..96e0cae 100644
+--- a/src/smt/options
++++ src/smt/options
+@@ -10,6 +10,9 @@ common-option - --dump=MODE argument :handler CVC4::smt::dumpMode :handler-inclu
+ common-option - --dump-to=FILE argument :handler CVC4::smt::dumpToFile :handler-include "smt/options_handlers.h"
+  all dumping goes to FILE (instead of stdout)
+ 
++option forceLogic force-logic --force-logic=LOGIC LogicInfo :include "theory/logic_info.h" :handler CVC4::smt::stringToLogicInfo :handler-include "smt/options_handlers.h"
++ set the logic, and override all further attempts to change it
++
+ option simplificationMode simplification-mode --simplification=MODE SimplificationMode :handler CVC4::smt::stringToSimplificationMode :default SIMPLIFICATION_MODE_BATCH :read-write :include "smt/simplification_mode.h" :handler-include "smt/options_handlers.h"
+  choose simplification mode, see --simplification=help
+ alias --no-simplification = --simplification=none
+diff --git a/src/smt/options_handlers.h b/src/smt/options_handlers.h
+index a0a6429..e49b94f 100644
+--- a/src/smt/options_handlers.h
++++ src/smt/options_handlers.h
+@@ -249,6 +249,19 @@ inline void dumpMode(std::string option, std::string optarg, SmtEngine* smt) {
+ #endif /* CVC4_DUMPING */
+ }
+ 
++inline LogicInfo stringToLogicInfo(std::string option, std::string optarg, SmtEngine* smt) throw(OptionException) {
++  try {
++    LogicInfo logic(optarg);
++    if(smt != NULL) {
++      smt->setLogic(logic);
++    }
++    return logic;
++  } catch(IllegalArgumentException& e) {
++    throw OptionException(std::string("invalid logic specification for --force-logic: `") +
++                          optarg + "':\n" + e.what());
++  }
++}
++
+ inline SimplificationMode stringToSimplificationMode(std::string option, std::string optarg, SmtEngine* smt) throw(OptionException) {
+   if(optarg == "batch") {
+     return SIMPLIFICATION_MODE_BATCH;
 diff --git a/src/smt/smt_engine.cpp b/src/smt/smt_engine.cpp
-index e7c0999..7b37e71 100644
+index e7b3daa..7e57232 100644
 --- a/src/smt/smt_engine.cpp
 +++ src/smt/smt_engine.cpp
-@@ -1269,7 +1269,7 @@ Node SmtEnginePrivate::expandDefinitions(TNode n, hash_map<Node, Node, NodeHashF
+@@ -136,6 +136,12 @@ struct SmtEngineStatistics {
+   IntStat d_numAssertionsPost;
+   /** time spent in checkModel() */
+   TimerStat d_checkModelTime;
++  /** time spent in PropEngine::checkSat() */
++  TimerStat d_solveTime;
++  /** time spent in pushing/popping */
++  TimerStat d_pushPopTime;
++  /** time spent in processAssertions() */
++  TimerStat d_processAssertionsTime;
+ 
+   SmtEngineStatistics() :
+     d_definitionExpansionTime("smt::SmtEngine::definitionExpansionTime"),
+@@ -152,7 +158,10 @@ struct SmtEngineStatistics {
+     d_cnfConversionTime("smt::SmtEngine::cnfConversionTime"),
+     d_numAssertionsPre("smt::SmtEngine::numAssertionsPreITERemoval", 0),
+     d_numAssertionsPost("smt::SmtEngine::numAssertionsPostITERemoval", 0),
+-    d_checkModelTime("smt::SmtEngine::checkModelTime") {
++    d_checkModelTime("smt::SmtEngine::checkModelTime"),
++    d_solveTime("smt::SmtEngine::solveTime"),
++    d_pushPopTime("smt::SmtEngine::pushPopTime"),
++    d_processAssertionsTime("smt::SmtEngine::processAssertionsTime") {
+ 
+     StatisticsRegistry::registerStat(&d_definitionExpansionTime);
+     StatisticsRegistry::registerStat(&d_rewriteBooleanTermsTime);
+@@ -169,6 +178,9 @@ struct SmtEngineStatistics {
+     StatisticsRegistry::registerStat(&d_numAssertionsPre);
+     StatisticsRegistry::registerStat(&d_numAssertionsPost);
+     StatisticsRegistry::registerStat(&d_checkModelTime);
++    StatisticsRegistry::registerStat(&d_solveTime);
++    StatisticsRegistry::registerStat(&d_pushPopTime);
++    StatisticsRegistry::registerStat(&d_processAssertionsTime);
+   }
+ 
+   ~SmtEngineStatistics() {
+@@ -187,6 +199,9 @@ struct SmtEngineStatistics {
+     StatisticsRegistry::unregisterStat(&d_numAssertionsPre);
+     StatisticsRegistry::unregisterStat(&d_numAssertionsPost);
+     StatisticsRegistry::unregisterStat(&d_checkModelTime);
++    StatisticsRegistry::unregisterStat(&d_solveTime);
++    StatisticsRegistry::unregisterStat(&d_pushPopTime);
++    StatisticsRegistry::unregisterStat(&d_processAssertionsTime);
+   }
+ };/* struct SmtEngineStatistics */
+ 
+@@ -793,6 +808,9 @@ LogicInfo SmtEngine::getLogicInfo() const {
+ void SmtEngine::setLogicInternal() throw() {
+   Assert(!d_fullyInited, "setting logic in SmtEngine but the engine has already finished initializing for this run");
+ 
++  if(options::forceLogic.wasSetByUser()) {
++    d_logic = options::forceLogic();
++  }
+   d_logic.lock();
+ 
+   // may need to force uninterpreted functions to be on for non-linear
+@@ -1270,7 +1288,7 @@ Node SmtEnginePrivate::expandDefinitions(TNode n, hash_map<Node, Node, NodeHashF
      if(i != d_smt.d_definedFunctions->end()) {
        // replacement must be closed
        if((*i).second.getFormals().size() > 0) {
@@ -224,7 +639,25 @@ index e7c0999..7b37e71 100644
        }
        // don't bother putting in the cache
        return (*i).second.getFormula();
-@@ -2599,9 +2599,16 @@ void SmtEnginePrivate::processAssertions() {
+@@ -2455,6 +2473,8 @@ Result SmtEngine::check() {
+     resource = d_resourceBudgetPerCall;
+   }
+ 
++  TimerStat::CodeTimer solveTimer(d_stats->d_solveTime);
++
+   Chat() << "solving..." << endl;
+   Trace("smt") << "SmtEngine::check(): running check" << endl;
+   Result result = d_propEngine->checkSat(millis, resource);
+@@ -2537,6 +2557,8 @@ bool SmtEnginePrivate::checkForBadSkolems(TNode n, TNode skolem, hash_map<Node,
+ }
+ 
+ void SmtEnginePrivate::processAssertions() {
++  TimerStat::CodeTimer paTimer(d_smt.d_stats->d_processAssertionsTime);
++
+   Assert(d_smt.d_fullyInited);
+   Assert(d_smt.d_pendingPops == 0);
+ 
+@@ -2603,9 +2625,16 @@ void SmtEnginePrivate::processAssertions() {
      // We also can't use an iterator, because the vector may be moved in
      // memory during this loop.
      Chat() << "constraining subtypes..." << endl;
@@ -242,7 +675,7 @@ index e7c0999..7b37e71 100644
    }
    dumpAssertions("post-constrain-subtypes", d_assertionsToPreprocess);
  
-@@ -3086,7 +3093,15 @@ Expr SmtEngine::getValue(const Expr& ex) throw(ModalException, TypeCheckingExcep
+@@ -3090,7 +3119,15 @@ Expr SmtEngine::getValue(const Expr& ex) throw(ModalException, TypeCheckingExcep
    Trace("smt") << "--- model-post returned " << resultNode << endl;
  
    // type-check the result we got
@@ -259,6 +692,44 @@ index e7c0999..7b37e71 100644
  
    // ensure it's a constant
    Assert(resultNode.getKind() == kind::LAMBDA || resultNode.isConst());
+@@ -3513,6 +3550,7 @@ void SmtEngine::internalPush() {
+   doPendingPops();
+   if(options::incrementalSolving()) {
+     d_private->processAssertions();
++    TimerStat::CodeTimer pushPopTimer(d_stats->d_pushPopTime);
+     d_userContext->push();
+     // the d_context push is done inside of the SAT solver
+     d_propEngine->push();
+@@ -3533,6 +3571,7 @@ void SmtEngine::internalPop(bool immediate) {
+ void SmtEngine::doPendingPops() {
+   Assert(d_pendingPops == 0 || options::incrementalSolving());
+   while(d_pendingPops > 0) {
++    TimerStat::CodeTimer pushPopTimer(d_stats->d_pushPopTime);
+     d_propEngine->pop();
+     // the d_context pop is done inside of the SAT solver
+     d_userContext->pop();
+diff --git a/src/theory/arith/arith_rewriter.cpp b/src/theory/arith/arith_rewriter.cpp
+index 823b61d..ee9ff9e 100644
+--- a/src/theory/arith/arith_rewriter.cpp
++++ src/theory/arith/arith_rewriter.cpp
+@@ -86,7 +86,7 @@ RewriteResponse ArithRewriter::preRewriteTerm(TNode t){
+   }else if(t.isVar()){
+     return rewriteVariable(t);
+   }else{
+-    switch(t.getKind()){
++    switch(Kind k = t.getKind()){
+     case kind::MINUS:
+       return rewriteMinus(t, true);
+     case kind::UMINUS:
+@@ -104,7 +104,7 @@ RewriteResponse ArithRewriter::preRewriteTerm(TNode t){
+     case kind::INTS_MODULUS_TOTAL:
+       return rewriteIntsDivModTotal(t,true);
+     default:
+-      Unreachable();
++      Unhandled(k);
+     }
+   }
+ }
 diff --git a/src/theory/arith/theory_arith_type_rules.h b/src/theory/arith/theory_arith_type_rules.h
 index 30b5e27..78ab22c 100644
 --- a/src/theory/arith/theory_arith_type_rules.h
@@ -273,6 +744,36 @@ index 30b5e27..78ab22c 100644
      }else{
        return nodeManager->realType();
      }
+diff --git a/src/theory/quantifiers/options b/src/theory/quantifiers/options
+index e12a7d7..222fc44 100644
+--- a/src/theory/quantifiers/options
++++ src/theory/quantifiers/options
+@@ -56,7 +56,7 @@ option relevantTriggers /--disable-relevant-triggers bool :default true
+ option registerQuantBodyTerms --register-quant-body-terms bool :default false
+  consider ground terms within bodies of quantified formulas for matching
+ 
+-option instWhenMode --inst-when=MODE CVC4::theory::quantifiers::InstWhenMode :default CVC4::theory::quantifiers::INST_WHEN_FULL :read-write :include "theory/quantifiers/modes.h" :handler CVC4::theory::quantifiers::stringToInstWhenMode :handler-include "theory/quantifiers/options_handlers.h" :predicate CVC4::theory::quantifiers::checkInstWhenMode :predicate-include "theory/quantifiers/options_handlers.h"
++option instWhenMode --inst-when=MODE CVC4::theory::quantifiers::InstWhenMode :default CVC4::theory::quantifiers::INST_WHEN_FULL_LAST_CALL :read-write :include "theory/quantifiers/modes.h" :handler CVC4::theory::quantifiers::stringToInstWhenMode :handler-include "theory/quantifiers/options_handlers.h" :predicate CVC4::theory::quantifiers::checkInstWhenMode :predicate-include "theory/quantifiers/options_handlers.h"
+  when to apply instantiation
+  
+ option eagerInstQuant --eager-inst-quant bool :default false
+diff --git a/src/theory/quantifiers/options_handlers.h b/src/theory/quantifiers/options_handlers.h
+index 01538d8..312261d 100644
+--- a/src/theory/quantifiers/options_handlers.h
++++ src/theory/quantifiers/options_handlers.h
+@@ -29,10 +29,10 @@ namespace quantifiers {
+ static const std::string instWhenHelp = "\
+ Modes currently supported by the --inst-when option:\n\
+ \n\
+-full (default)\n\
++full\n\
+ + Run instantiation round at full effort, before theory combination.\n\
+ \n\
+-full-last-call\n\
++full-last-call (default)\n\
+ + Alternate running instantiation rounds at full effort and last\n\
+   call.  In other words, interleave instantiation and theory combination.\n\
+ \n\
 diff --git a/src/theory/term_registration_visitor.cpp b/src/theory/term_registration_visitor.cpp
 index b41089b..3168d38 100644
 --- a/src/theory/term_registration_visitor.cpp
@@ -297,3 +798,943 @@ index b41089b..3168d38 100644
        typeTheoryId = Theory::theoryOf(type);
        if (typeTheoryId != currentTheoryId) {
          if (options::finiteModelFind() && type.isSort()) {
+diff --git a/test/regress/regress0/Makefile.am b/test/regress/regress0/Makefile.am
+index cc38532..8ca2944 100644
+--- a/test/regress/regress0/Makefile.am
++++ test/regress/regress0/Makefile.am
+@@ -144,7 +144,8 @@ BUG_TESTS = \
+ 	bug421b.smt2 \
+ 	bug425.cvc \
+ 	bug480.smt2 \
+-	bug486.cvc
++	bug486.cvc \
++	bug497.cvc
+ 
+ TESTS =	$(SMT_TESTS) $(SMT2_TESTS) $(CVC_TESTS) $(TPTP_TESTS) $(BUG_TESTS)
+ 
+diff --git a/test/regress/regress0/bug497.cvc b/test/regress/regress0/bug497.cvc
+new file mode 100644
+index 0000000..9b37e03
+--- /dev/null
++++ test/regress/regress0/bug497.cvc
+@@ -0,0 +1,920 @@
++% COMMAND-LINE: --decision-justification --incremental
++% EXPECT: sat
++% EXPECT: sat
++% EXIT: 10
++OPTION "logic" "QF_UFLIA";
++_nat : TYPE = INT;
++_base : INT;
++ASSERT _base <= 0;
++_n : _nat;
++ASSERT _n >= _base;
++_check_quant : BOOLEAN;
++
++% maxdepth = 1
++x100 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state126_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL/200
++x101 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state122_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL/201
++x2 : _nat -> INT;
++			% GroundTrack_OrbitalPosition %  INPUT,STATE(1,)/102
++x102 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_OrbitalState_Attitude %  LOCAL,STATE(1,)/202
++x3 : _nat -> INT;
++			% GroundTrack_OrbitalVelocity %  INPUT,STATE(1,)/103
++x103 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteVelocity %  LOCAL/203
++x4 : _nat -> INT;
++			% dockVisibility_status %  INPUT,STATE(1,)/104
++x104 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_InertialNavigation_AbsolutePosition %  LOCAL/204
++x5 : _nat -> BOOLEAN;
++			% opticsAvailability_status %  INPUT,STATE(1,)/105
++x105 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_InertialNavigation_timer %  LOCAL/205
++x6 : _nat -> BOOLEAN;
++			% sunlight_status %  INPUT,STATE(1,)/106
++x106 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_OrbitalState_Velocity %  LOCAL,STATE(1,)/206
++x7 : _nat -> INT;
++			% GPS_satelliteVisibility_status %  INPUT,STATE(1,)/107
++x107 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_OrbitalState_Position %  LOCAL,STATE(1,)/207
++x8 : _nat -> BOOLEAN;
++			% GPS_receiverAvailability_status %  INPUT,STATE(1,)/108
++x108 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteAttitude %  LOCAL/208
++x9 : _nat -> INT;
++			% StarPlanetTracker_planetVisibility %  INPUT,STATE(1,)/109
++x109 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL,STATE(1,)/209
++x10 : _nat -> INT;
++			% StarPlanetTracker_starVisibility %  INPUT,STATE(1,)/110
++x110 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state221_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL/210
++x11 : _nat -> BOOLEAN;
++			% InertialNavigation_time %  INPUT/111
++x111 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state367_rlt_chart_data_vars_Chart_OrbitalState_Time %  LOCAL,STATE(1,)/211
++x12 : _nat -> INT;
++			% GroundTrack_Time %  INPUT/112
++x112 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state367_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState2 %  LOCAL,STATE(1,)/212
++x13 : _nat -> INT;
++			% RealTimeClock_time %  INPUT,STATE(1,)/113
++x113 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state499_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteVelocity %  LOCAL,STATE(1,)/213
++x14 : _nat -> INT;
++			% StageTransition %  INPUT,STATE(1,)/114
++x114 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state499_rlt_chart_data_vars_Chart_InertialNavigation_AbsolutePosition %  LOCAL,STATE(1,)/214
++x15 : _nat -> BOOLEAN;
++			% CaptureApproachComplete %  OUTPUT,STATE(1,)/115
++x115 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state499_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteAttitude %  LOCAL,STATE(1,)/215
++x16 : _nat -> BOOLEAN;
++			% DockingApproachComplete %  OUTPUT,STATE(1,)/116
++x116 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state499_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL,STATE(1,)/216
++x17 : _nat -> BOOLEAN;
++			% AttemptingToDock %  OUTPUT,STATE(1,)/117
++x117 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state627_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_dockingSensor %  LOCAL,STATE(1,)/217
++x118 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state545_rlt_chart_data_vars_Chart_dockingSensor_timer %  LOCAL/218
++x119 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state545_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_dockingSensor %  LOCAL/219
++x20 : _nat -> BOOLEAN;
++			% ApproachOrbitComplete %  OUTPUT,STATE(1,)/120
++x120 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state542_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_dockingSensor %  LOCAL/220
++x21 : _nat -> BOOLEAN;
++			% FarApproachComplete %  OUTPUT,STATE(1,)/121
++x121 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state540_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_dockingSensor %  LOCAL/221
++x22 : _nat -> BOOLEAN;
++			% ProximityOperationsComplete %  OUTPUT,STATE(1,)/122
++x122 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state765_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL,STATE(1,)/222
++x123 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state690_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_LatchCaptureCheck %  LOCAL,STATE(1,)/223
++x124 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state706_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL/224
++x125 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state702_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL/225
++x26 : _nat -> INT;
++			% MWI_FcnMin_Out110 %  LOCAL,STATE(1,)/126
++x126 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state759_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL/226
++x27 : _nat -> INT;
++			% MWI_FcnMin_Out19 %  LOCAL,STATE(1,)/127
++x127 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state757_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL/227
++x28 : _nat -> INT;
++			% MWI_FcnMin_In1n8 %  LOCAL/128
++x128 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state753_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL/228
++x29 : _nat -> INT;
++			% MWI_FcnMin_Out18 %  LOCAL,STATE(1,)/129
++x129 : _nat -> BOOLEAN;
++			% sequence1 %  LOCAL/229
++x30 : _nat -> INT;
++			% MWI_FcnMin_Out17 %  LOCAL/130
++x31 : _nat -> INT;
++			% MWI_FcnMin_Out13 %  LOCAL,STATE(1,)/131
++x32 : _nat -> INT;
++			% MWI_FcnMin_Out12 %  LOCAL,STATE(1,)/132
++x33 : _nat -> INT;
++			% MWI_FcnMin_Out11 %  LOCAL,STATE(1,)/133
++x34 : _nat -> INT;
++			% MWI_FcnMin_In1n %  LOCAL/134
++x35 : _nat -> INT;
++			% MWI_FcnMin_Out1 %  LOCAL,STATE(1,)/135
++x36 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_OrbitalState_Time %  LOCAL,STATE(1,)/136
++x37 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_LatchCapture_timer %  LOCAL,STATE(1,)/137
++x38 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_StarPlanetTracker_timer %  LOCAL,STATE(1,)/138
++x39 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_OrbitalState_Attitude %  LOCAL,STATE(1,)/139
++x40 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_CaptureApproach_timer %  LOCAL,STATE(1,)/140
++x41 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_GPS_timer %  LOCAL,STATE(1,)/141
++x42 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteVelocity %  LOCAL,STATE(1,)/142
++x43 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_InertialNavigation_AbsolutePosition %  LOCAL,STATE(1,)/143
++x44 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_InertialNavigation_timer %  LOCAL,STATE(1,)/144
++x45 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_latch_status %  LOCAL,STATE(1,)/145
++x46 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_dockingSensor_timer %  LOCAL,STATE(1,)/146
++x47 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_OrbitalState_Velocity %  LOCAL,STATE(1,)/147
++x48 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_OrbitalState_Position %  LOCAL,STATE(1,)/148
++x49 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_dockingSensor_RelativeAttitude %  LOCAL,STATE(1,)/149
++x50 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_GPS_AbsolutePosition %  LOCAL,STATE(1,)/150
++x51 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_DockingApproach_timer %  LOCAL,STATE(1,)/151
++x52 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteAttitude %  LOCAL,STATE(1,)/152
++x53 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_vars_Chart_StarPlanetTracker_AbsolutePosition %  LOCAL,STATE(1,)/153
++x54 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_dockingSensor %  LOCAL,STATE(1,)/154
++x55 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_DockingApproach_DockingApproach %  LOCAL,STATE(1,)/155
++x56 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_latch %  LOCAL,STATE(1,)/156
++x57 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_LatchCapture_LatchCaptureCheck %  LOCAL,STATE(1,)/157
++x58 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_GPS %  LOCAL,STATE(1,)/158
++x59 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart %  LOCAL,STATE(1,)/159
++x60 : _nat -> [0..2];
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState2 %  LOCAL,STATE(1,)/160
++x61 : _nat -> [0..4];
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL,STATE(1,)/161
++x62 : _nat -> [0..3];
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_StarPlanetTracker %  LOCAL,STATE(1,)/162
++x63 : _nat -> [0..5];
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_CaptureApproach %  LOCAL,STATE(1,)/163
++x64 : _nat -> [0..3];
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL,STATE(1,)/164
++x65 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_states_Chart_MissionPhaseStates %  LOCAL,STATE(1,)/165
++x66 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_FarApproachComplete %  LOCAL/166
++x68 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_AttemptingToDock %  LOCAL/168
++x71 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_ProximityOperationsComplete %  LOCAL/171
++x73 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_DockingApproachComplete %  LOCAL/173
++x74 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_ApproachOrbitComplete %  LOCAL/174
++x76 : _nat -> BOOLEAN;
++			% Chart_main_simp_rlt_node_state1_rlt_chart_data_outports_CaptureApproachComplete %  LOCAL/176
++x77 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state364_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteVelocity %  LOCAL,STATE(1,)/177
++x78 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state364_rlt_chart_data_vars_Chart_InertialNavigation_AbsolutePosition %  LOCAL,STATE(1,)/178
++x79 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state364_rlt_chart_data_vars_Chart_InertialNavigation_AbsoluteAttitude %  LOCAL,STATE(1,)/179
++x80 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state364_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL,STATE(1,)/180
++x81 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_GPS %  LOCAL,STATE(1,)/181
++x82 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState2 %  LOCAL,STATE(1,)/182
++x83 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL,STATE(1,)/183
++x84 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_StarPlanetTracker %  LOCAL,STATE(1,)/184
++x85 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL/185
++x86 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state155_rlt_chart_data_states_Chart_MissionPhaseStates %  LOCAL,STATE(1,)/186
++x87 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state104_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL/187
++x88 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state100_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_StarPlanetTracker %  LOCAL/188
++x89 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state98_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_StarPlanetTracker %  LOCAL/189
++x90 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state96_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_StarPlanetTracker %  LOCAL/190
++x91 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state82_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL/191
++x92 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state78_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState %  LOCAL/192
++x93 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state148_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL/193
++x94 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state144_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_InertialNavigation %  LOCAL/194
++x95 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state136_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_GPS %  LOCAL/195
++x96 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state134_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_GPS %  LOCAL/196
++x97 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state132_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_GPS %  LOCAL/197
++x98 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state130_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState2 %  LOCAL/198
++x99 : _nat -> INT;
++			% Chart_main_simp_rlt_node_state128_rlt_chart_data_states_Chart_MissionPhaseStates_CaptureApproach_OrbitalState_Active_OrbitalState_Complex_OrbitalState2 %  LOCAL/199
++
++
++% Generic definitions
++DEF__174 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x74(_M)) = (IF (_M = _base) THEN FALSE ELSE (x20((_M - 1))) ENDIF));
++DEF__176 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x76(_M)) = (IF (_M = _base) THEN FALSE ELSE (x15((_M - 1))) ENDIF));
++DEF__177 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x77(_M)) = (IF ((x83(_M)) = 1) THEN (x42(_M)) ELSE (IF ((x83(_M)) = 2) THEN (x42(_M)) ELSE (IF ((x83(_M)) = 3) THEN (x103(_M)) ELSE (IF ((x83(_M)) = 4) THEN (IF ((NOT ((((((((x2(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x2(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x2(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52(_M)) = 2) OR ((x53(_M)) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x3(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x3(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (x42(_M)) ELSE (x103(_M)) ENDIF) ELSE (x103(_M)) ENDIF) ELSE (x103(_M)) ENDIF) ELSE (x42(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__178 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x78(_M)) = (IF ((x83(_M)) = 1) THEN (x43(_M)) ELSE (IF ((x83(_M)) = 2) THEN (x43(_M)) ELSE (IF ((x83(_M)) = 3) THEN (x104(_M)) ELSE (IF ((x83(_M)) = 4) THEN (IF ((NOT ((((((((x2(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x2(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x2(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52(_M)) = 2) OR ((x53(_M)) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x3(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x3(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (x43(_M)) ELSE (x104(_M)) ENDIF) ELSE (x104(_M)) ENDIF) ELSE (x104(_M)) ENDIF) ELSE (x43(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__179 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x79(_M)) = (IF ((x83(_M)) = 1) THEN (x52(_M)) ELSE (IF ((x83(_M)) = 2) THEN (x52(_M)) ELSE (IF ((x83(_M)) = 3) THEN (x108(_M)) ELSE (IF ((x83(_M)) = 4) THEN (IF ((NOT ((((((((x2(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x2(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x2(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52(_M)) = 2) OR ((x53(_M)) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x3(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x3(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (x52(_M)) ELSE (x108(_M)) ENDIF) ELSE (x108(_M)) ENDIF) ELSE (x108(_M)) ENDIF) ELSE (x52(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__180 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x80(_M)) = (IF ((x83(_M)) = 1) THEN (x85(_M)) ELSE (IF ((x83(_M)) = 2) THEN (x85(_M)) ELSE (IF ((x83(_M)) = 3) THEN (x110(_M)) ELSE (IF ((x83(_M)) = 4) THEN (IF ((NOT ((((((((x2(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x2(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x2(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52(_M)) = 2) OR ((x53(_M)) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x3(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x3(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (x85(_M)) ELSE (x110(_M)) ENDIF) ELSE (x110(_M)) ENDIF) ELSE (x110(_M)) ENDIF) ELSE (x85(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__181 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x81(_M)) = (IF ((x63(_M)) = 1) THEN (x58(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x58(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x58(_M)) ELSE (IF ((x63(_M)) = 4) THEN (x95(_M)) ELSE (IF ((x63(_M)) = 5) THEN (x95(_M)) ELSE (x58(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__182 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x82(_M)) = (IF ((x63(_M)) = 1) THEN (x60(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x60(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x60(_M)) ELSE (IF ((x63(_M)) = 4) THEN (x98(_M)) ELSE (IF ((x63(_M)) = 5) THEN (x98(_M)) ELSE (x60(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__183 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x83(_M)) = (IF ((x63(_M)) = 1) THEN (x61(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x61(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x61(_M)) ELSE (IF ((x63(_M)) = 4) THEN (x100(_M)) ELSE (IF ((x63(_M)) = 5) THEN (x100(_M)) ELSE (x61(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__184 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x84(_M)) = (IF ((x63(_M)) = 1) THEN (x62(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x62(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x62(_M)) ELSE (IF ((x63(_M)) = 4) THEN (x88(_M)) ELSE (IF ((x63(_M)) = 5) THEN (x88(_M)) ELSE (x62(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__185 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x85(_M)) = (IF ((x63(_M)) = 1) THEN (x64(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x64(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x64(_M)) ELSE (IF ((x63(_M)) = 4) THEN (x93(_M)) ELSE (IF ((x63(_M)) = 5) THEN (x93(_M)) ELSE (x64(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__186 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x86(_M)) = (IF ((x63(_M)) = 1) THEN (x65(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x65(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x65(_M)) ELSE (IF ((x63(_M)) = 4) THEN 10 ELSE (IF ((x63(_M)) = 5) THEN 2 ELSE (x65(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__187 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x87(_M)) = (IF ((x94(_M)) = 2) THEN 0 ELSE (x94(_M)) ENDIF));
++DEF__188 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x88(_M)) = (IF ((x89(_M)) = 3) THEN 0 ELSE (x89(_M)) ENDIF));
++DEF__189 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x89(_M)) = (IF ((x90(_M)) = 2) THEN 0 ELSE (x90(_M)) ENDIF));
++DEF__190 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x90(_M)) = (IF ((x62(_M)) = 1) THEN 0 ELSE (x62(_M)) ENDIF));
++DEF__191 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x91(_M)) = (IF ((x101(_M)) = 3) THEN 0 ELSE (x101(_M)) ENDIF));
++DEF__192 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x92(_M)) = (IF ((x61(_M)) = 1) THEN 0 ELSE (x61(_M)) ENDIF));
++DEF__193 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x93(_M)) = (IF ((x87(_M)) = 3) THEN 0 ELSE (x87(_M)) ENDIF));
++DEF__194 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x94(_M)) = (IF ((x64(_M)) = 1) THEN 0 ELSE (x64(_M)) ENDIF));
++DEF__195 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x95(_M)) = (IF ((x96(_M)) = 3) THEN 0 ELSE (x96(_M)) ENDIF));
++DEF__196 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x96(_M)) = (IF ((x97(_M)) = 2) THEN 0 ELSE (x97(_M)) ENDIF));
++DEF__197 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x97(_M)) = (IF ((x58(_M)) = 1) THEN 0 ELSE (x58(_M)) ENDIF));
++DEF__198 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x98(_M)) = (IF ((x99(_M)) = 2) THEN 0 ELSE (x99(_M)) ENDIF));
++DEF__199 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x99(_M)) = (IF ((x60(_M)) = 1) THEN 0 ELSE (x60(_M)) ENDIF));
++DEF__200 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x100(_M)) = (IF ((x91(_M)) = 4) THEN 0 ELSE (x91(_M)) ENDIF));
++DEF__201 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x101(_M)) = (IF ((x92(_M)) = 2) THEN 0 ELSE (x92(_M)) ENDIF));
++DEF__202 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x102(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN 2 ELSE (x39(_M)) ENDIF));
++DEF__115 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x15(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 2) THEN ((NOT ((x14(_M)) = 8)) AND ((NOT ((x14(_M)) = 6)) AND (x76(_M)))) ELSE (IF ((x65(_M)) = 3) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 4) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 5) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 6) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 7) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 8) THEN (x76(_M)) ELSE (IF ((x65(_M)) = 9) THEN (IF ((x63(_M)) = 1) THEN (x76(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x76(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x76(_M)) ELSE (((x63(_M)) = 4) OR (x76(_M))) ENDIF) ENDIF) ENDIF) ELSE (x76(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x76(_M)) ENDIF));
++DEF__203 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x103(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN (IF ((x86(_M)) = 9) THEN (IF ((x85(_M)) = 1) THEN 2 ELSE (IF ((x85(_M)) = 2) THEN (IF ((x30(_M)) = 6) THEN 1 ELSE (IF ((x30(_M)) < 6) THEN 2 ELSE (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x42(_M)) ENDIF) ENDIF) ENDIF) ELSE (IF ((x85(_M)) = 3) THEN 2 ELSE (x42(_M)) ENDIF) ENDIF) ENDIF) ELSE (x42(_M)) ENDIF) ELSE (x42(_M)) ENDIF));
++DEF__116 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x16(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 2) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 3) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 4) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 5) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 6) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 7) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 8) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 9) THEN (IF ((x63(_M)) = 1) THEN (x73(_M)) ELSE (IF ((x63(_M)) = 2) THEN (x73(_M)) ELSE (IF ((x63(_M)) = 3) THEN (x73(_M)) ELSE ((NOT ((x63(_M)) = 4)) AND (x73(_M))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65(_M)) = 10) THEN (IF ((x55(_M)) = 1) THEN (x73(_M)) ELSE (IF ((x55(_M)) = 2) THEN (x73(_M)) ELSE (((x55(_M)) = 3) OR (x73(_M))) ENDIF) ENDIF) ELSE (IF ((x65(_M)) = 11) THEN (x73(_M)) ELSE (IF ((x65(_M)) = 12) THEN (IF ((x57(_M)) = 1) THEN (x73(_M)) ELSE (IF ((x57(_M)) = 2) THEN (x73(_M)) ELSE ((NOT ((x57(_M)) = 3)) AND (x73(_M))) ENDIF) ENDIF) ELSE (x73(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x73(_M)) ENDIF));
++DEF__204 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x104(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN (IF ((x86(_M)) = 9) THEN (IF ((x85(_M)) = 1) THEN 2 ELSE (IF ((x85(_M)) = 2) THEN (IF ((x30(_M)) = 6) THEN 1 ELSE (IF ((x30(_M)) < 6) THEN 2 ELSE (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x43(_M)) ENDIF) ENDIF) ENDIF) ELSE (IF ((x85(_M)) = 3) THEN 2 ELSE (x43(_M)) ENDIF) ENDIF) ENDIF) ELSE (x43(_M)) ENDIF) ELSE (x43(_M)) ENDIF));
++DEF__117 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x17(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 2) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 3) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 4) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 5) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 6) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 7) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 8) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 9) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 10) THEN (IF ((x55(_M)) = 1) THEN (x68(_M)) ELSE (IF ((x55(_M)) = 2) THEN (x68(_M)) ELSE (((x55(_M)) = 3) OR (x68(_M))) ENDIF) ENDIF) ELSE (IF ((x65(_M)) = 11) THEN (x68(_M)) ELSE (IF ((x65(_M)) = 12) THEN (IF ((x57(_M)) = 1) THEN (x68(_M)) ELSE (IF ((x57(_M)) = 2) THEN (x68(_M)) ELSE ((NOT ((x57(_M)) = 3)) AND ((NOT ((x57(_M)) = 4)) AND (x68(_M)))) ENDIF) ENDIF) ELSE (x68(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x68(_M)) ENDIF));
++DEF__205 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x105(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN (IF ((x86(_M)) = 9) THEN (IF ((x85(_M)) = 1) THEN 0 ELSE (IF ((x85(_M)) = 2) THEN (IF ((x30(_M)) = 6) THEN (x30(_M)) ELSE (IF ((x30(_M)) < 6) THEN 0 ELSE (x30(_M)) ENDIF) ENDIF) ELSE (IF ((x85(_M)) = 3) THEN 0 ELSE (x30(_M)) ENDIF) ENDIF) ENDIF) ELSE (x44(_M)) ENDIF) ELSE (x44(_M)) ENDIF));
++DEF__206 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x106(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN 2 ELSE (x47(_M)) ENDIF));
++DEF__207 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x107(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN 2 ELSE (x48(_M)) ENDIF));
++DEF__120 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x20(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x74(_M)) ELSE (IF ((x65(_M)) = 2) THEN ((NOT ((x14(_M)) = 8)) AND ((NOT ((x14(_M)) = 6)) AND (x74(_M)))) ELSE (IF ((x65(_M)) = 3) THEN (((x14(_M)) = 2) OR (x74(_M))) ELSE (IF ((x65(_M)) = 4) THEN ((NOT ((x14(_M)) = 1)) AND (x74(_M))) ELSE (x74(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x74(_M)) ENDIF));
++DEF__208 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x108(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN (IF ((x86(_M)) = 9) THEN (IF ((x85(_M)) = 1) THEN 2 ELSE (IF ((x85(_M)) = 2) THEN (IF ((x30(_M)) = 6) THEN 1 ELSE (IF ((x30(_M)) < 6) THEN 2 ELSE (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x52(_M)) ENDIF) ENDIF) ENDIF) ELSE (IF ((x85(_M)) = 3) THEN 2 ELSE (x52(_M)) ENDIF) ENDIF) ENDIF) ELSE (x52(_M)) ENDIF) ELSE (x52(_M)) ENDIF));
++DEF__121 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x21(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x66(_M)) ELSE (IF ((x65(_M)) = 2) THEN ((NOT ((x14(_M)) = 8)) AND ((NOT ((x14(_M)) = 6)) AND (x66(_M)))) ELSE (IF ((x65(_M)) = 3) THEN (x66(_M)) ELSE (IF ((x65(_M)) = 4) THEN (x66(_M)) ELSE (IF ((x65(_M)) = 5) THEN (x66(_M)) ELSE (IF ((x65(_M)) = 6) THEN (IF ((x14(_M)) = 5) THEN (x66(_M)) ELSE (((x14(_M)) = 4) OR (x66(_M))) ENDIF) ELSE (x66(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x66(_M)) ENDIF));
++DEF__209 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x109(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN 4 ELSE (x83(_M)) ENDIF));
++DEF__122 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x22(_M)) = (IF ((NOT ((x59(_M)) = 0)) <=> TRUE) THEN (IF ((x65(_M)) = 1) THEN (x71(_M)) ELSE (IF ((x65(_M)) = 2) THEN ((NOT ((x14(_M)) = 8)) AND ((NOT ((x14(_M)) = 6)) AND (x71(_M)))) ELSE (IF ((x65(_M)) = 3) THEN (x71(_M)) ELSE (IF ((x65(_M)) = 4) THEN (IF ((x14(_M)) = 1) THEN (x71(_M)) ELSE (((x14(_M)) = 3) OR (x71(_M))) ENDIF) ELSE (x71(_M)) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x71(_M)) ENDIF));
++DEF__210 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x110(_M)) = (IF (((((((x2(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) AND ((((x3(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2))) AND ((x53(_M)) = 2)) <=> TRUE) THEN (IF ((x86(_M)) = 9) THEN (IF ((x85(_M)) = 1) THEN 2 ELSE (IF ((x85(_M)) = 2) THEN (IF ((x30(_M)) = 6) THEN 3 ELSE (IF ((x30(_M)) < 6) THEN 2 ELSE (IF ((x11(_M)) <=> TRUE) THEN 1 ELSE (x85(_M)) ENDIF) ENDIF) ENDIF) ELSE (IF ((x85(_M)) = 3) THEN 2 ELSE (x85(_M)) ENDIF) ENDIF) ENDIF) ELSE (x85(_M)) ENDIF) ELSE (x85(_M)) ENDIF));
++DEF__211 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x111(_M)) = (IF (((((x12(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) <=> TRUE) THEN 2 ELSE (x36(_M)) ENDIF));
++DEF__212 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x112(_M)) = (IF (((((x12(_M)) = 2) OR ((x50(_M)) = 2)) OR ((x53(_M)) = 2)) <=> TRUE) THEN 2 ELSE (x82(_M)) ENDIF));
++DEF__126 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x26(_M)) = (IF (((x37(_M)) + 1) < 9) THEN ((x37(_M)) + 1) ELSE 9 ENDIF));
++DEF__213 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x113(_M)) = (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x77(_M)) ENDIF));
++DEF__127 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x27(_M)) = (IF (((x51(_M)) + 1) < 9) THEN ((x51(_M)) + 1) ELSE 9 ENDIF));
++DEF__214 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x114(_M)) = (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x78(_M)) ENDIF));
++DEF__128 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x28(_M)) = ((IF ((x55(_M)) = 1) THEN (x46(_M)) ELSE (IF ((x55(_M)) = 2) THEN (x46(_M)) ELSE (IF ((x55(_M)) = 3) THEN (x118(_M)) ELSE (IF ((x55(_M)) = 4) THEN (x118(_M)) ELSE (x46(_M)) ENDIF) ENDIF) ENDIF) ENDIF) + 1));
++DEF__215 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x115(_M)) = (IF ((x11(_M)) <=> TRUE) THEN 0 ELSE (x79(_M)) ENDIF));
++DEF__216 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x116(_M)) = (IF ((x11(_M)) <=> TRUE) THEN 1 ELSE (x80(_M)) ENDIF));
++DEF__129 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x29(_M)) = (IF ((x28(_M)) < 6) THEN (x28(_M)) ELSE 6 ENDIF));
++DEF__217 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x117(_M)) = (IF ((x55(_M)) = 1) THEN (x54(_M)) ELSE (IF ((x55(_M)) = 2) THEN (x54(_M)) ELSE (IF ((x55(_M)) = 3) THEN (x119(_M)) ELSE (IF ((x55(_M)) = 4) THEN (x119(_M)) ELSE (x54(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__130 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x30(_M)) = (IF (((x44(_M)) + 1) < 6) THEN ((x44(_M)) + 1) ELSE 6 ENDIF));
++DEF__131 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x31(_M)) = (IF (((x40(_M)) + 1) < 11) THEN ((x40(_M)) + 1) ELSE 11 ENDIF));
++DEF__218 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x118(_M)) = (IF ((x120(_M)) = 3) THEN 0 ELSE (IF ((x54(_M)) = 1) THEN 0 ELSE (x46(_M)) ENDIF) ENDIF));
++DEF__132 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x32(_M)) = (IF (((x41(_M)) + 1) < 6) THEN ((x41(_M)) + 1) ELSE 6 ENDIF));
++DEF__219 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x119(_M)) = (IF ((x120(_M)) = 3) THEN 0 ELSE (x120(_M)) ENDIF));
++DEF__133 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x33(_M)) = (IF (((x38(_M)) + 1) < 6) THEN ((x38(_M)) + 1) ELSE 6 ENDIF));
++DEF__220 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x120(_M)) = (IF ((x121(_M)) = 2) THEN 0 ELSE (x121(_M)) ENDIF));
++DEF__134 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x34(_M)) = ((IF ((x83(_M)) = 1) THEN (x44(_M)) ELSE (IF ((x83(_M)) = 2) THEN (x44(_M)) ELSE (IF ((x83(_M)) = 3) THEN (x105(_M)) ELSE (IF ((x83(_M)) = 4) THEN (IF ((NOT ((((((((x2(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x2(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x2(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x43(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52(_M)) = 2) OR ((x53(_M)) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3(_M)) = 2) AND ((x50(_M)) = 2)) OR (((x3(_M)) = 2) AND ((x53(_M)) = 2))) OR (((x53(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x3(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x50(_M)) = 2))) OR (((x42(_M)) = 2) AND ((x53(_M)) = 2)))) <=> TRUE) THEN (x44(_M)) ELSE (x105(_M)) ENDIF) ELSE (x105(_M)) ENDIF) ELSE (x105(_M)) ENDIF) ELSE (x44(_M)) ENDIF) ENDIF) ENDIF) ENDIF) + 1));
++DEF__221 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x121(_M)) = (IF ((x54(_M)) = 1) THEN 0 ELSE (x54(_M)) ENDIF));
++DEF__222 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x122(_M)) = (IF ((x57(_M)) = 1) THEN (x56(_M)) ELSE (IF ((x57(_M)) = 2) THEN (x56(_M)) ELSE (IF ((x57(_M)) = 3) THEN (x126(_M)) ELSE (IF ((x57(_M)) = 4) THEN (x126(_M)) ELSE (x56(_M)) ENDIF) ENDIF) ENDIF) ENDIF));
++DEF__135 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x35(_M)) = (IF ((x34(_M)) < 6) THEN (x34(_M)) ELSE 6 ENDIF));
++DEF__223 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x123(_M)) = (IF ((x26(_M)) = 8) THEN 3 ELSE (x57(_M)) ENDIF));
++DEF__136 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x36(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x36((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x36((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x36((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x82((_M - 1))) = 1) THEN (x111((_M - 1))) ELSE (IF ((x82((_M - 1))) = 2) THEN (IF ((NOT ((x13((_M - 1))) = 2)) <=> TRUE) THEN 1 ELSE (x111((_M - 1))) ENDIF) ELSE (x36((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x36((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x36((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x36((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x36((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x36((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x36((_M - 1))) ENDIF) ENDIF));
++DEF__224 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x124(_M)) = (IF ((x128(_M)) = 3) THEN 0 ELSE (x128(_M)) ENDIF));
++DEF__137 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x37(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x37((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x37((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN 0 ELSE (x37((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x37((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (x26((_M - 1))) ELSE (x37((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x37((_M - 1))) ENDIF) ENDIF));
++DEF__225 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x125(_M)) = (IF ((x56(_M)) = 1) THEN 0 ELSE (x56(_M)) ENDIF));
++DEF__138 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x38(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x38((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x84((_M - 1))) = 1) THEN (IF (((NOT (((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0))) AND (x5((_M - 1)))) <=> TRUE) THEN 0 ELSE (x33((_M - 1))) ENDIF) ELSE (IF ((x84((_M - 1))) = 2) THEN (IF ((((x33((_M - 1))) = 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) <=> TRUE) THEN (x33((_M - 1))) ELSE (IF (((((((x33((_M - 1))) = 6) AND ((x9((_M - 1))) = 2)) AND ((x10((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN (x33((_M - 1))) ELSE (IF (((((x33((_M - 1))) < 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) OR ((x5((_M - 1))) AND (((x6((_M - 1))) OR ((x9((_M - 1))) = 1)) OR ((x10((_M - 1))) = 1)))) <=> TRUE) THEN 0 ELSE (x33((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x84((_M - 1))) = 3) THEN (IF (((((NOT ((x9((_M - 1))) = 2)) AND (NOT ((x10((_M - 1))) = 2))) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 0 ELSE (x33((_M - 1))) ENDIF) ELSE (x33((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x38((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x38((_M - 1))) ENDIF) ENDIF));
++DEF__226 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x126(_M)) = (IF ((x127(_M)) = 5) THEN 0 ELSE (x127(_M)) ENDIF));
++DEF__139 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x39(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x39((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x39((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x39((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x83((_M - 1))) = 1) THEN (IF (((NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0))) AND (NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)))) <=> TRUE) THEN 0 ELSE (IF ((((((((x50((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)) <=> TRUE) THEN 0 ELSE (x39((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 2) THEN (IF ((((((x2((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((((x3((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0))) <=> TRUE) THEN 0 ELSE (IF (((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF (((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2)) <=> TRUE) THEN 1 ELSE (x39((_M - 1))) ENDIF) ELSE (x39((_M - 1))) ENDIF) ELSE (x39((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 3) THEN (x102((_M - 1))) ELSE (IF ((x83((_M - 1))) = 4) THEN (IF ((NOT ((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN 0 ELSE (x102((_M - 1))) ENDIF) ELSE (x102((_M - 1))) ENDIF) ELSE (x102((_M - 1))) ENDIF) ELSE (x39((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x39((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x39((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x39((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x39((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x39((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x39((_M - 1))) ENDIF) ENDIF));
++DEF__227 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x127(_M)) = (IF ((x124(_M)) = 4) THEN 0 ELSE (x124(_M)) ENDIF));
++DEF__140 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x40(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x40((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x40((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x40((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x31((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x40((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x40((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x40((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x40((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x40((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x40((_M - 1))) ENDIF) ENDIF));
++DEF__228 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x128(_M)) = (IF ((x125(_M)) = 2) THEN 0 ELSE (x125(_M)) ENDIF));
++DEF__141 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x41(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x41((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x81((_M - 1))) = 1) THEN (IF (((NOT ((x7((_M - 1))) = 0)) AND (x8((_M - 1)))) <=> TRUE) THEN 0 ELSE (x32((_M - 1))) ENDIF) ELSE (IF ((x81((_M - 1))) = 2) THEN (IF ((((x32((_M - 1))) = 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) <=> TRUE) THEN (x32((_M - 1))) ELSE (IF ((((((x32((_M - 1))) = 6) AND ((x7((_M - 1))) = 2)) AND (x8((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN (x32((_M - 1))) ELSE (IF (((((x32((_M - 1))) < 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) OR ((x8((_M - 1))) AND (((x7((_M - 1))) = 1) OR (x6((_M - 1)))))) <=> TRUE) THEN 0 ELSE (x32((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x81((_M - 1))) = 3) THEN (IF (((NOT (((x7((_M - 1))) = 2) AND (x8((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 0 ELSE (x32((_M - 1))) ENDIF) ELSE (x32((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x41((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x41((_M - 1))) ENDIF) ENDIF));
++DEF__229 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x129(_M)) = ((NOT (x17(_M))) OR (((((x20(_M)) AND (x22(_M))) AND (x21(_M))) AND (x15(_M))) AND (x16(_M)))));
++DEF__142 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x42(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x42((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x42((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x42((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x80((_M - 1))) = 1) THEN (x77((_M - 1))) ELSE (IF ((x80((_M - 1))) = 2) THEN (IF ((x35((_M - 1))) = 6) THEN 1 ELSE (IF ((x35((_M - 1))) < 6) THEN 2 ELSE (x113((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x80((_M - 1))) = 3) THEN (x113((_M - 1))) ELSE (x77((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x42((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x42((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x42((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x42((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x42((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x42((_M - 1))) ENDIF) ENDIF));
++DEF__143 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x43(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x43((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x43((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x43((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x80((_M - 1))) = 1) THEN (x78((_M - 1))) ELSE (IF ((x80((_M - 1))) = 2) THEN (IF ((x35((_M - 1))) = 6) THEN 1 ELSE (IF ((x35((_M - 1))) < 6) THEN 2 ELSE (x114((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x80((_M - 1))) = 3) THEN (x114((_M - 1))) ELSE (x78((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x43((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x43((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x43((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x43((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x43((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x43((_M - 1))) ENDIF) ENDIF));
++DEF__144 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x44(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x44((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x80((_M - 1))) = 1) THEN (x35((_M - 1))) ELSE (IF ((x80((_M - 1))) = 2) THEN (IF ((x35((_M - 1))) = 6) THEN (x35((_M - 1))) ELSE (IF ((x35((_M - 1))) < 6) THEN 0 ELSE (x35((_M - 1))) ENDIF) ENDIF) ELSE (x35((_M - 1))) ENDIF) ENDIF) ELSE (x44((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x44((_M - 1))) ENDIF) ENDIF));
++DEF__145 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x45(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x45((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x45((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN 0 ELSE (x45((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x45((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x122((_M - 1))) = 1) THEN 1 ELSE (IF ((x122((_M - 1))) = 2) THEN 0 ELSE (IF ((x122((_M - 1))) = 3) THEN 3 ELSE (IF ((x122((_M - 1))) = 4) THEN 0 ELSE (IF ((x122((_M - 1))) = 5) THEN 0 ELSE (x45((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x45((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x45((_M - 1))) ENDIF) ENDIF));
++DEF__146 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x46(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x46((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x117((_M - 1))) = 1) THEN (IF (((NOT ((x4((_M - 1))) = 0)) AND (x5((_M - 1)))) <=> TRUE) THEN 0 ELSE (IF ((((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1))))) <=> TRUE) THEN 0 ELSE (x29((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x117((_M - 1))) = 2) THEN (x29((_M - 1))) ELSE (IF ((x117((_M - 1))) = 3) THEN (IF ((((NOT ((x4((_M - 1))) = 2)) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 0 ELSE (IF (((((x4((_M - 1))) = 2) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 0 ELSE (x29((_M - 1))) ENDIF) ENDIF) ELSE (x29((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x46((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x46((_M - 1))) ENDIF) ENDIF));
++DEF__147 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x47(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x47((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x47((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x47((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x83((_M - 1))) = 1) THEN (IF (((NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0))) AND (NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)))) <=> TRUE) THEN 1 ELSE (IF ((((((((x50((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)) <=> TRUE) THEN 0 ELSE (x47((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 2) THEN (IF ((((((x2((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((((x3((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0))) <=> TRUE) THEN 0 ELSE (IF (((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF (((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2)) <=> TRUE) THEN 2 ELSE (x47((_M - 1))) ENDIF) ELSE (x47((_M - 1))) ENDIF) ELSE (x47((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 3) THEN (x106((_M - 1))) ELSE (IF ((x83((_M - 1))) = 4) THEN (IF ((NOT ((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN 1 ELSE (x106((_M - 1))) ENDIF) ELSE (x106((_M - 1))) ENDIF) ELSE (x106((_M - 1))) ENDIF) ELSE (x47((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x47((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x47((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x47((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x47((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x47((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x47((_M - 1))) ENDIF) ENDIF));
++DEF__148 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x48(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x48((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x48((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x48((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x83((_M - 1))) = 1) THEN (IF (((NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0))) AND (NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)))) <=> TRUE) THEN 1 ELSE (IF ((((((((x50((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)) <=> TRUE) THEN 0 ELSE (x48((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 2) THEN (IF ((((((x2((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((((x3((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0))) <=> TRUE) THEN 0 ELSE (IF (((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF (((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2)) <=> TRUE) THEN 2 ELSE (x48((_M - 1))) ENDIF) ELSE (x48((_M - 1))) ENDIF) ELSE (x48((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 3) THEN (x107((_M - 1))) ELSE (IF ((x83((_M - 1))) = 4) THEN (IF ((NOT ((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN 1 ELSE (x107((_M - 1))) ENDIF) ELSE (x107((_M - 1))) ENDIF) ELSE (x107((_M - 1))) ENDIF) ELSE (x48((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x48((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x48((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x48((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x48((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x48((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x48((_M - 1))) ENDIF) ENDIF));
++DEF__149 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x49(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x63((_M - 1))) = 1) THEN (x49((_M - 1))) ELSE (IF ((x63((_M - 1))) = 2) THEN (x49((_M - 1))) ELSE (IF ((x63((_M - 1))) = 3) THEN (x49((_M - 1))) ELSE (IF ((x63((_M - 1))) = 4) THEN 0 ELSE (x49((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x117((_M - 1))) = 1) THEN (IF (((NOT ((x4((_M - 1))) = 0)) AND (x5((_M - 1)))) <=> TRUE) THEN 1 ELSE (IF ((((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1))))) <=> TRUE) THEN 0 ELSE (x49((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x117((_M - 1))) = 2) THEN (IF ((((x29((_M - 1))) = 6) AND (((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1)))))) <=> TRUE) THEN 0 ELSE (IF ((((((x29((_M - 1))) < 6) AND ((x4((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 2 ELSE (IF (((((x29((_M - 1))) < 6) AND (((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1)))))) OR ((x5((_M - 1))) AND (((x4((_M - 1))) = 1) OR (x6((_M - 1)))))) <=> TRUE) THEN 1 ELSE (x49((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x117((_M - 1))) = 3) THEN (IF ((((NOT ((x4((_M - 1))) = 2)) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 1 ELSE (IF (((((x4((_M - 1))) = 2) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 2 ELSE (x49((_M - 1))) ENDIF) ENDIF) ELSE (x49((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x49((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (x49((_M - 1))) ELSE (IF ((x57((_M - 1))) = 2) THEN (x49((_M - 1))) ELSE (IF ((x57((_M - 1))) = 3) THEN 0 ELSE (x49((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x49((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x49((_M - 1))) ENDIF) ENDIF));
++DEF__150 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x50(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x50((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x50((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x50((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x81((_M - 1))) = 1) THEN (IF (((NOT ((x7((_M - 1))) = 0)) AND (x8((_M - 1)))) <=> TRUE) THEN 1 ELSE (IF ((((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1))))) <=> TRUE) THEN 0 ELSE (x50((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x81((_M - 1))) = 2) THEN (IF ((((x32((_M - 1))) = 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) <=> TRUE) THEN 0 ELSE (IF ((((((x32((_M - 1))) = 6) AND ((x7((_M - 1))) = 2)) AND (x8((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 2 ELSE (IF (((((x32((_M - 1))) < 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) OR ((x8((_M - 1))) AND (((x7((_M - 1))) = 1) OR (x6((_M - 1)))))) <=> TRUE) THEN 1 ELSE (x50((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x81((_M - 1))) = 3) THEN (IF (((NOT (((x7((_M - 1))) = 2) AND (x8((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 1 ELSE 2 ENDIF) ELSE (x50((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x50((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x50((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x50((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x50((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x50((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x50((_M - 1))) ENDIF) ENDIF));
++DEF__151 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x51(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x63((_M - 1))) = 1) THEN (x51((_M - 1))) ELSE (IF ((x63((_M - 1))) = 2) THEN (x51((_M - 1))) ELSE (IF ((x63((_M - 1))) = 3) THEN (x51((_M - 1))) ELSE (IF ((x63((_M - 1))) = 4) THEN 0 ELSE (x51((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (x27((_M - 1))) ELSE (IF ((x65((_M - 1))) = 11) THEN (x51((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (x51((_M - 1))) ELSE (IF ((x57((_M - 1))) = 2) THEN (x51((_M - 1))) ELSE (IF ((x57((_M - 1))) = 3) THEN 0 ELSE (x51((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x51((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x51((_M - 1))) ENDIF) ENDIF));
++DEF__152 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x52(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x52((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x52((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x52((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x80((_M - 1))) = 1) THEN (x79((_M - 1))) ELSE (IF ((x80((_M - 1))) = 2) THEN (IF ((x35((_M - 1))) = 6) THEN 1 ELSE (IF ((x35((_M - 1))) < 6) THEN 2 ELSE (x115((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x80((_M - 1))) = 3) THEN (x115((_M - 1))) ELSE (x79((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x52((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x52((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x52((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x52((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x52((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x52((_M - 1))) ENDIF) ENDIF));
++DEF__153 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x53(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x53((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 0 ELSE (x53((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x53((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x84((_M - 1))) = 1) THEN (IF (((NOT (((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0))) AND (x5((_M - 1)))) <=> TRUE) THEN 1 ELSE 0 ENDIF) ELSE (IF ((x84((_M - 1))) = 2) THEN (IF ((((x33((_M - 1))) = 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) <=> TRUE) THEN 0 ELSE (IF (((((((x33((_M - 1))) = 6) AND ((x9((_M - 1))) = 2)) AND ((x10((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 2 ELSE (IF (((((x33((_M - 1))) < 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) OR ((x5((_M - 1))) AND (((x6((_M - 1))) OR ((x9((_M - 1))) = 1)) OR ((x10((_M - 1))) = 1)))) <=> TRUE) THEN 1 ELSE (x53((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x84((_M - 1))) = 3) THEN (IF (((((NOT ((x9((_M - 1))) = 2)) AND (NOT ((x10((_M - 1))) = 2))) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 1 ELSE (IF ((((((x9((_M - 1))) = 2) AND ((x10((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 2 ELSE (x53((_M - 1))) ENDIF) ENDIF) ELSE (x53((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x53((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x53((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x53((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (x53((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x53((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x53((_M - 1))) ENDIF) ENDIF));
++DEF__154 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x54(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x63((_M - 1))) = 1) THEN (x54((_M - 1))) ELSE (IF ((x63((_M - 1))) = 2) THEN (x54((_M - 1))) ELSE (IF ((x63((_M - 1))) = 3) THEN (x54((_M - 1))) ELSE (IF ((x63((_M - 1))) = 4) THEN 1 ELSE (x54((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x117((_M - 1))) = 1) THEN (IF (((NOT ((x4((_M - 1))) = 0)) AND (x5((_M - 1)))) <=> TRUE) THEN 2 ELSE (IF ((((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1))))) <=> TRUE) THEN 1 ELSE (x117((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x117((_M - 1))) = 2) THEN (IF ((((x29((_M - 1))) = 6) AND (((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1)))))) <=> TRUE) THEN 1 ELSE (IF ((((((x29((_M - 1))) < 6) AND ((x4((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 3 ELSE (IF (((((x29((_M - 1))) < 6) AND (((x4((_M - 1))) = 0) OR (NOT (x5((_M - 1)))))) OR ((x5((_M - 1))) AND (((x4((_M - 1))) = 1) OR (x6((_M - 1)))))) <=> TRUE) THEN 2 ELSE (x117((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x117((_M - 1))) = 3) THEN (IF ((((NOT ((x4((_M - 1))) = 2)) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 2 ELSE (IF (((((x4((_M - 1))) = 2) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 3 ELSE (x117((_M - 1))) ENDIF) ENDIF) ELSE (x117((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x54((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (x54((_M - 1))) ELSE (IF ((x57((_M - 1))) = 2) THEN (x54((_M - 1))) ELSE (IF ((x57((_M - 1))) = 3) THEN 1 ELSE (x54((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x54((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x54((_M - 1))) ENDIF) ENDIF));
++DEF__155 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x55(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x63((_M - 1))) = 1) THEN (x55((_M - 1))) ELSE (IF ((x63((_M - 1))) = 2) THEN (x55((_M - 1))) ELSE (IF ((x63((_M - 1))) = 3) THEN (x55((_M - 1))) ELSE (IF ((x63((_M - 1))) = 4) THEN 1 ELSE (x55((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (IF (((((NOT ((x49((_M - 1))) = 0)) AND (NOT ((x49((_M - 1))) = 0))) AND (NOT ((x49((_M - 1))) = 0))) AND ((x27((_M - 1))) < 9)) <=> TRUE) THEN 2 ELSE (IF ((x27((_M - 1))) = 9) THEN 4 ELSE (x55((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x55((_M - 1))) = 2) THEN (IF (((((x49((_M - 1))) = 2) AND (((x49((_M - 1))) = 2) AND ((x49((_M - 1))) = 2))) AND ((x49((_M - 1))) = 2)) <=> TRUE) THEN 3 ELSE (IF ((((((x49((_M - 1))) = 1) AND ((x49((_M - 1))) = 1)) AND ((x49((_M - 1))) = 1)) AND ((x49((_M - 1))) = 1)) <=> TRUE) THEN 5 ELSE (IF ((x27((_M - 1))) = 9) THEN 4 ELSE (IF (((((x49((_M - 1))) = 0) OR ((x49((_M - 1))) = 0)) OR ((x49((_M - 1))) = 0)) <=> TRUE) THEN 4 ELSE (IF ((NOT ((x49((_M - 1))) = 2)) <=> TRUE) THEN 4 ELSE (x55((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x55((_M - 1))) = 3) THEN 0 ELSE (IF ((x55((_M - 1))) = 4) THEN 0 ELSE (IF ((x55((_M - 1))) = 5) THEN 4 ELSE (x55((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x55((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (x55((_M - 1))) ELSE (IF ((x57((_M - 1))) = 2) THEN (x55((_M - 1))) ELSE (IF ((x57((_M - 1))) = 3) THEN 1 ELSE (x55((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (x55((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x55((_M - 1))) ENDIF) ENDIF));
++DEF__156 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x56(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x56((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x56((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN 1 ELSE (x56((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x56((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x122((_M - 1))) = 1) THEN 2 ELSE (IF ((x122((_M - 1))) = 2) THEN 3 ELSE (IF ((x122((_M - 1))) = 3) THEN 4 ELSE (IF ((x122((_M - 1))) = 4) THEN 1 ELSE (IF ((x122((_M - 1))) = 5) THEN 1 ELSE (x122((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x56((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x56((_M - 1))) ENDIF) ENDIF));
++DEF__157 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x57(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 7) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x57((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x57((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN 1 ELSE (x57((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (x57((_M - 1))) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (IF ((x45((_M - 1))) = 1) THEN 2 ELSE (x123((_M - 1))) ENDIF) ELSE (IF ((x57((_M - 1))) = 2) THEN (IF ((x45((_M - 1))) = 3) THEN 4 ELSE (IF ((x45((_M - 1))) = 2) THEN 3 ELSE (x123((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x57((_M - 1))) = 3) THEN 0 ELSE (IF ((x57((_M - 1))) = 4) THEN 0 ELSE (x57((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x57((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x57((_M - 1))) ENDIF) ENDIF));
++DEF__158 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x58(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x58((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x58((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x58((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x81((_M - 1))) = 1) THEN (IF (((NOT ((x7((_M - 1))) = 0)) AND (x8((_M - 1)))) <=> TRUE) THEN 2 ELSE (IF ((((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1))))) <=> TRUE) THEN 1 ELSE (x81((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x81((_M - 1))) = 2) THEN (IF ((((x32((_M - 1))) = 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) <=> TRUE) THEN 1 ELSE (IF ((((((x32((_M - 1))) = 6) AND ((x7((_M - 1))) = 2)) AND (x8((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 3 ELSE (IF (((((x32((_M - 1))) < 6) AND (((x7((_M - 1))) = 0) OR (NOT (x8((_M - 1)))))) OR ((x8((_M - 1))) AND (((x7((_M - 1))) = 1) OR (x6((_M - 1)))))) <=> TRUE) THEN 2 ELSE (x81((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x81((_M - 1))) = 3) THEN (IF (((NOT (((x7((_M - 1))) = 2) AND (x8((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 2 ELSE 3 ENDIF) ELSE (x81((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x58((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x58((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x58((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x58((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x58((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x58((_M - 1))) ENDIF) ENDIF));
++DEF__159 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x59(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (x59((_M - 1))) ELSE 1 ENDIF) ENDIF));
++DEF__160 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x60(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x60((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x60((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x60((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x82((_M - 1))) = 1) THEN (x112((_M - 1))) ELSE (IF ((x82((_M - 1))) = 2) THEN (IF ((NOT ((x13((_M - 1))) = 2)) <=> TRUE) THEN 1 ELSE (x112((_M - 1))) ENDIF) ELSE (x82((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x60((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x60((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x60((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x60((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x60((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x60((_M - 1))) ENDIF) ENDIF));
++DEF__161 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x61(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x61((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x61((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x61((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x83((_M - 1))) = 1) THEN (IF (((NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0))) AND (NOT ((((x50((_M - 1))) = 0) AND ((x53((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)))) <=> TRUE) THEN 2 ELSE (IF ((((((((x50((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((x2((_M - 1))) = 0)) AND ((x3((_M - 1))) = 0)) <=> TRUE) THEN 1 ELSE (x83((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 2) THEN (IF ((((((x2((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0)) AND ((((x3((_M - 1))) = 0) AND ((x50((_M - 1))) = 0)) AND ((x53((_M - 1))) = 0))) <=> TRUE) THEN 1 ELSE (IF (((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF (((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2)) <=> TRUE) THEN 3 ELSE (x83((_M - 1))) ENDIF) ELSE (x83((_M - 1))) ENDIF) ELSE (x83((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x83((_M - 1))) = 3) THEN (x109((_M - 1))) ELSE (IF ((x83((_M - 1))) = 4) THEN (IF ((NOT ((((((((x2((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x2((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x2((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x43((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN (IF ((NOT (((x52((_M - 1))) = 2) OR ((x53((_M - 1))) = 2))) <=> TRUE) THEN (IF ((NOT ((((((((x3((_M - 1))) = 2) AND ((x50((_M - 1))) = 2)) OR (((x3((_M - 1))) = 2) AND ((x53((_M - 1))) = 2))) OR (((x53((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x3((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x50((_M - 1))) = 2))) OR (((x42((_M - 1))) = 2) AND ((x53((_M - 1))) = 2)))) <=> TRUE) THEN 2 ELSE (x109((_M - 1))) ENDIF) ELSE (x109((_M - 1))) ENDIF) ELSE (x109((_M - 1))) ENDIF) ELSE (x83((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x61((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x61((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x61((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x61((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x61((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x61((_M - 1))) ENDIF) ENDIF));
++DEF__162 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x62(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x62((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x62((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x62((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x84((_M - 1))) = 1) THEN (IF (((NOT (((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0))) AND (x5((_M - 1)))) <=> TRUE) THEN 2 ELSE 1 ENDIF) ELSE (IF ((x84((_M - 1))) = 2) THEN (IF ((((x33((_M - 1))) = 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) <=> TRUE) THEN 1 ELSE (IF (((((((x33((_M - 1))) = 6) AND ((x9((_M - 1))) = 2)) AND ((x10((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 3 ELSE (IF (((((x33((_M - 1))) < 6) AND ((((x9((_M - 1))) = 0) OR ((x10((_M - 1))) = 0)) OR (NOT (x5((_M - 1)))))) OR ((x5((_M - 1))) AND (((x6((_M - 1))) OR ((x9((_M - 1))) = 1)) OR ((x10((_M - 1))) = 1)))) <=> TRUE) THEN 2 ELSE (x84((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x84((_M - 1))) = 3) THEN (IF (((((NOT ((x9((_M - 1))) = 2)) AND (NOT ((x10((_M - 1))) = 2))) AND (NOT (x5((_M - 1))))) OR (x6((_M - 1)))) <=> TRUE) THEN 2 ELSE (IF ((((((x9((_M - 1))) = 2) AND ((x10((_M - 1))) = 2)) AND (x5((_M - 1)))) AND (NOT (x6((_M - 1))))) <=> TRUE) THEN 3 ELSE (x84((_M - 1))) ENDIF) ENDIF) ELSE (x84((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x62((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x62((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x62((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x62((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x62((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x62((_M - 1))) ENDIF) ENDIF));
++DEF__163 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x63(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x63((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x63((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x63((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x63((_M - 1))) = 1) THEN (IF ((((((NOT ((x48((_M - 1))) = 0)) AND (NOT ((x47((_M - 1))) = 0))) AND (NOT ((x39((_M - 1))) = 0))) AND (NOT ((x36((_M - 1))) = 0))) AND ((x31((_M - 1))) < 11)) <=> TRUE) THEN 2 ELSE (IF ((x31((_M - 1))) = 11) THEN 5 ELSE (x63((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x63((_M - 1))) = 2) THEN (IF ((((((x48((_M - 1))) = 2) AND ((x47((_M - 1))) = 2)) AND (NOT ((x39((_M - 1))) = 0))) AND ((x36((_M - 1))) = 2)) <=> TRUE) THEN 4 ELSE (IF ((((((x48((_M - 1))) = 1) AND ((x47((_M - 1))) = 1)) AND ((x39((_M - 1))) = 0)) AND ((x36((_M - 1))) = 1)) <=> TRUE) THEN 3 ELSE (IF (((((((x48((_M - 1))) = 0) OR ((x47((_M - 1))) = 0)) OR ((x39((_M - 1))) = 0)) OR ((x36((_M - 1))) = 0)) OR ((x31((_M - 1))) = 11)) <=> TRUE) THEN 5 ELSE (x63((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x63((_M - 1))) = 3) THEN 5 ELSE (IF ((x63((_M - 1))) = 4) THEN 0 ELSE (IF ((x63((_M - 1))) = 5) THEN 0 ELSE (x63((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x63((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x63((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x63((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x63((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x63((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x63((_M - 1))) ENDIF) ENDIF));
++DEF__164 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x64(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 2) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 3) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 4) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 5) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN (x64((_M - 1))) ELSE (IF ((x14((_M - 1))) = 4) THEN 1 ELSE (x64((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x64((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (IF ((x80((_M - 1))) = 1) THEN (x80((_M - 1))) ELSE (IF ((x80((_M - 1))) = 2) THEN (IF ((x35((_M - 1))) = 6) THEN 3 ELSE (IF ((x35((_M - 1))) < 6) THEN 2 ELSE (x116((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x80((_M - 1))) = 3) THEN (x116((_M - 1))) ELSE (x80((_M - 1))) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x64((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x64((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN (x64((_M - 1))) ELSE (IF ((x55((_M - 1))) = 4) THEN 1 ELSE (x64((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x64((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x64((_M - 1))) ENDIF) ENDIF));
++DEF__165 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x65(_M)) = (IF (_M = _base) THEN 0 ELSE (IF ((NOT ((x59((_M - 1))) = 0)) <=> TRUE) THEN (IF ((x65((_M - 1))) = 1) THEN (IF ((x14((_M - 1))) = 0) THEN 3 ELSE (x65((_M - 1))) ENDIF) ELSE (IF ((x65((_M - 1))) = 2) THEN (IF ((x14((_M - 1))) = 8) THEN 7 ELSE (IF ((x14((_M - 1))) = 6) THEN 3 ELSE (x65((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 3) THEN (IF ((x14((_M - 1))) = 2) THEN 4 ELSE (x65((_M - 1))) ENDIF) ELSE (IF ((x65((_M - 1))) = 4) THEN (IF ((x14((_M - 1))) = 1) THEN 3 ELSE (IF ((x14((_M - 1))) = 3) THEN 6 ELSE (x65((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 5) THEN (IF ((x14((_M - 1))) = 7) THEN 2 ELSE (x65((_M - 1))) ENDIF) ELSE (IF ((x65((_M - 1))) = 6) THEN (IF ((x14((_M - 1))) = 5) THEN 2 ELSE (IF ((x14((_M - 1))) = 4) THEN 9 ELSE (x65((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 7) THEN (x65((_M - 1))) ELSE (IF ((x65((_M - 1))) = 8) THEN (x65((_M - 1))) ELSE (IF ((x65((_M - 1))) = 9) THEN (x86((_M - 1))) ELSE (IF ((x65((_M - 1))) = 10) THEN (IF ((x55((_M - 1))) = 1) THEN (x65((_M - 1))) ELSE (IF ((x55((_M - 1))) = 2) THEN (x65((_M - 1))) ELSE (IF ((x55((_M - 1))) = 3) THEN 12 ELSE (IF ((x55((_M - 1))) = 4) THEN 9 ELSE (x65((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 11) THEN (IF ((x14((_M - 1))) = 9) THEN 5 ELSE (IF ((x14((_M - 1))) = 10) THEN 8 ELSE (x65((_M - 1))) ENDIF) ENDIF) ELSE (IF ((x65((_M - 1))) = 12) THEN (IF ((x57((_M - 1))) = 1) THEN (x65((_M - 1))) ELSE (IF ((x57((_M - 1))) = 2) THEN (x65((_M - 1))) ELSE (IF ((x57((_M - 1))) = 3) THEN 10 ELSE (IF ((x57((_M - 1))) = 4) THEN 11 ELSE (x65((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ELSE (x65((_M - 1))) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ENDIF) ELSE 1 ENDIF) ENDIF));
++DEF__166 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x66(_M)) = (IF (_M = _base) THEN FALSE ELSE (x21((_M - 1))) ENDIF));
++DEF__168 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x68(_M)) = (IF (_M = _base) THEN FALSE ELSE (x17((_M - 1))) ENDIF));
++DEF__171 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x71(_M)) = (IF (_M = _base) THEN FALSE ELSE (x22((_M - 1))) ENDIF));
++DEF__173 : _nat -> BOOLEAN = LAMBDA( _M : _nat): ((x73(_M)) = (IF (_M = _base) THEN FALSE ELSE (x16((_M - 1))) ENDIF));
++% Property(ies)
++
++P : _nat -> BOOLEAN = LAMBDA(_M : _nat): (x129(_M));
++
++
++
++
++% INDUCT : Single property verification.
++% INDUCT :  MAIN.
++% INDUCT :  not refinement_pass.
++% INDUCT :  Checking K = 2. No message received.
++% INDUCT :  setup step loop - initialize step.
++PUSH;
++% INDUCT : ;4b 
++ASSERT (DEF__174( (_n + 0)));
++ASSERT (DEF__176( (_n + 0)));
++ASSERT (DEF__177( (_n + 0)));
++ASSERT (DEF__178( (_n + 0)));
++ASSERT (DEF__179( (_n + 0)));
++ASSERT (DEF__180( (_n + 0)));
++ASSERT (DEF__181( (_n + 0)));
++ASSERT (DEF__182( (_n + 0)));
++ASSERT (DEF__183( (_n + 0)));
++ASSERT (DEF__184( (_n + 0)));
++ASSERT (DEF__185( (_n + 0)));
++ASSERT (DEF__186( (_n + 0)));
++ASSERT (DEF__187( (_n + 0)));
++ASSERT (DEF__188( (_n + 0)));
++ASSERT (DEF__189( (_n + 0)));
++ASSERT (DEF__190( (_n + 0)));
++ASSERT (DEF__191( (_n + 0)));
++ASSERT (DEF__192( (_n + 0)));
++ASSERT (DEF__193( (_n + 0)));
++ASSERT (DEF__194( (_n + 0)));
++ASSERT (DEF__195( (_n + 0)));
++ASSERT (DEF__196( (_n + 0)));
++ASSERT (DEF__197( (_n + 0)));
++ASSERT (DEF__198( (_n + 0)));
++ASSERT (DEF__199( (_n + 0)));
++ASSERT (DEF__200( (_n + 0)));
++ASSERT (DEF__201( (_n + 0)));
++ASSERT (DEF__202( (_n + 0)));
++ASSERT (DEF__115( (_n + 0)));
++ASSERT (DEF__203( (_n + 0)));
++ASSERT (DEF__116( (_n + 0)));
++ASSERT (DEF__204( (_n + 0)));
++ASSERT (DEF__117( (_n + 0)));
++ASSERT (DEF__205( (_n + 0)));
++ASSERT (DEF__206( (_n + 0)));
++ASSERT (DEF__207( (_n + 0)));
++ASSERT (DEF__120( (_n + 0)));
++ASSERT (DEF__208( (_n + 0)));
++ASSERT (DEF__121( (_n + 0)));
++ASSERT (DEF__209( (_n + 0)));
++ASSERT (DEF__122( (_n + 0)));
++ASSERT (DEF__210( (_n + 0)));
++ASSERT (DEF__211( (_n + 0)));
++ASSERT (DEF__212( (_n + 0)));
++ASSERT (DEF__126( (_n + 0)));
++ASSERT (DEF__213( (_n + 0)));
++ASSERT (DEF__127( (_n + 0)));
++ASSERT (DEF__214( (_n + 0)));
++ASSERT (DEF__128( (_n + 0)));
++ASSERT (DEF__215( (_n + 0)));
++ASSERT (DEF__216( (_n + 0)));
++ASSERT (DEF__129( (_n + 0)));
++ASSERT (DEF__217( (_n + 0)));
++ASSERT (DEF__130( (_n + 0)));
++ASSERT (DEF__131( (_n + 0)));
++ASSERT (DEF__218( (_n + 0)));
++ASSERT (DEF__132( (_n + 0)));
++ASSERT (DEF__219( (_n + 0)));
++ASSERT (DEF__133( (_n + 0)));
++ASSERT (DEF__220( (_n + 0)));
++ASSERT (DEF__134( (_n + 0)));
++ASSERT (DEF__221( (_n + 0)));
++ASSERT (DEF__222( (_n + 0)));
++ASSERT (DEF__135( (_n + 0)));
++ASSERT (DEF__223( (_n + 0)));
++ASSERT (DEF__136( (_n + 0)));
++ASSERT (DEF__224( (_n + 0)));
++ASSERT (DEF__137( (_n + 0)));
++ASSERT (DEF__225( (_n + 0)));
++ASSERT (DEF__138( (_n + 0)));
++ASSERT (DEF__226( (_n + 0)));
++ASSERT (DEF__139( (_n + 0)));
++ASSERT (DEF__227( (_n + 0)));
++ASSERT (DEF__140( (_n + 0)));
++ASSERT (DEF__228( (_n + 0)));
++ASSERT (DEF__141( (_n + 0)));
++ASSERT (DEF__229( (_n + 0)));
++ASSERT (DEF__142( (_n + 0)));
++ASSERT (DEF__143( (_n + 0)));
++ASSERT (DEF__144( (_n + 0)));
++ASSERT (DEF__145( (_n + 0)));
++ASSERT (DEF__146( (_n + 0)));
++ASSERT (DEF__147( (_n + 0)));
++ASSERT (DEF__148( (_n + 0)));
++ASSERT (DEF__149( (_n + 0)));
++ASSERT (DEF__150( (_n + 0)));
++ASSERT (DEF__151( (_n + 0)));
++ASSERT (DEF__152( (_n + 0)));
++ASSERT (DEF__153( (_n + 0)));
++ASSERT (DEF__154( (_n + 0)));
++ASSERT (DEF__155( (_n + 0)));
++ASSERT (DEF__156( (_n + 0)));
++ASSERT (DEF__157( (_n + 0)));
++ASSERT (DEF__158( (_n + 0)));
++ASSERT (DEF__159( (_n + 0)));
++ASSERT (DEF__160( (_n + 0)));
++ASSERT (DEF__161( (_n + 0)));
++ASSERT (DEF__162( (_n + 0)));
++ASSERT (DEF__163( (_n + 0)));
++ASSERT (DEF__164( (_n + 0)));
++ASSERT (DEF__165( (_n + 0)));
++ASSERT (DEF__166( (_n + 0)));
++ASSERT (DEF__168( (_n + 0)));
++ASSERT (DEF__171( (_n + 0)));
++ASSERT (DEF__173( (_n + 0)));
++ASSERT (DEF__174( (_n - 1)));
++ASSERT (DEF__176( (_n - 1)));
++ASSERT (DEF__177( (_n - 1)));
++ASSERT (DEF__178( (_n - 1)));
++ASSERT (DEF__179( (_n - 1)));
++ASSERT (DEF__180( (_n - 1)));
++ASSERT (DEF__181( (_n - 1)));
++ASSERT (DEF__182( (_n - 1)));
++ASSERT (DEF__183( (_n - 1)));
++ASSERT (DEF__184( (_n - 1)));
++ASSERT (DEF__185( (_n - 1)));
++ASSERT (DEF__186( (_n - 1)));
++ASSERT (DEF__187( (_n - 1)));
++ASSERT (DEF__188( (_n - 1)));
++ASSERT (DEF__189( (_n - 1)));
++ASSERT (DEF__190( (_n - 1)));
++ASSERT (DEF__191( (_n - 1)));
++ASSERT (DEF__192( (_n - 1)));
++ASSERT (DEF__193( (_n - 1)));
++ASSERT (DEF__194( (_n - 1)));
++ASSERT (DEF__195( (_n - 1)));
++ASSERT (DEF__196( (_n - 1)));
++ASSERT (DEF__197( (_n - 1)));
++ASSERT (DEF__198( (_n - 1)));
++ASSERT (DEF__199( (_n - 1)));
++ASSERT (DEF__200( (_n - 1)));
++ASSERT (DEF__201( (_n - 1)));
++ASSERT (DEF__202( (_n - 1)));
++ASSERT (DEF__115( (_n - 1)));
++ASSERT (DEF__203( (_n - 1)));
++ASSERT (DEF__116( (_n - 1)));
++ASSERT (DEF__204( (_n - 1)));
++ASSERT (DEF__117( (_n - 1)));
++ASSERT (DEF__205( (_n - 1)));
++ASSERT (DEF__206( (_n - 1)));
++ASSERT (DEF__207( (_n - 1)));
++ASSERT (DEF__120( (_n - 1)));
++ASSERT (DEF__208( (_n - 1)));
++ASSERT (DEF__121( (_n - 1)));
++ASSERT (DEF__209( (_n - 1)));
++ASSERT (DEF__122( (_n - 1)));
++ASSERT (DEF__210( (_n - 1)));
++ASSERT (DEF__211( (_n - 1)));
++ASSERT (DEF__212( (_n - 1)));
++ASSERT (DEF__126( (_n - 1)));
++ASSERT (DEF__213( (_n - 1)));
++ASSERT (DEF__127( (_n - 1)));
++ASSERT (DEF__214( (_n - 1)));
++ASSERT (DEF__128( (_n - 1)));
++ASSERT (DEF__215( (_n - 1)));
++ASSERT (DEF__216( (_n - 1)));
++ASSERT (DEF__129( (_n - 1)));
++ASSERT (DEF__217( (_n - 1)));
++ASSERT (DEF__130( (_n - 1)));
++ASSERT (DEF__131( (_n - 1)));
++ASSERT (DEF__218( (_n - 1)));
++ASSERT (DEF__132( (_n - 1)));
++ASSERT (DEF__219( (_n - 1)));
++ASSERT (DEF__133( (_n - 1)));
++ASSERT (DEF__220( (_n - 1)));
++ASSERT (DEF__134( (_n - 1)));
++ASSERT (DEF__221( (_n - 1)));
++ASSERT (DEF__222( (_n - 1)));
++ASSERT (DEF__135( (_n - 1)));
++ASSERT (DEF__223( (_n - 1)));
++ASSERT (DEF__136( (_n - 1)));
++ASSERT (DEF__224( (_n - 1)));
++ASSERT (DEF__137( (_n - 1)));
++ASSERT (DEF__225( (_n - 1)));
++ASSERT (DEF__138( (_n - 1)));
++ASSERT (DEF__226( (_n - 1)));
++ASSERT (DEF__139( (_n - 1)));
++ASSERT (DEF__227( (_n - 1)));
++ASSERT (DEF__140( (_n - 1)));
++ASSERT (DEF__228( (_n - 1)));
++ASSERT (DEF__141( (_n - 1)));
++ASSERT (DEF__229( (_n - 1)));
++ASSERT (DEF__142( (_n - 1)));
++ASSERT (DEF__143( (_n - 1)));
++ASSERT (DEF__144( (_n - 1)));
++ASSERT (DEF__145( (_n - 1)));
++ASSERT (DEF__146( (_n - 1)));
++ASSERT (DEF__147( (_n - 1)));
++ASSERT (DEF__148( (_n - 1)));
++ASSERT (DEF__149( (_n - 1)));
++ASSERT (DEF__150( (_n - 1)));
++ASSERT (DEF__151( (_n - 1)));
++ASSERT (DEF__152( (_n - 1)));
++ASSERT (DEF__153( (_n - 1)));
++ASSERT (DEF__154( (_n - 1)));
++ASSERT (DEF__155( (_n - 1)));
++ASSERT (DEF__156( (_n - 1)));
++ASSERT (DEF__157( (_n - 1)));
++ASSERT (DEF__158( (_n - 1)));
++ASSERT (DEF__159( (_n - 1)));
++ASSERT (DEF__160( (_n - 1)));
++ASSERT (DEF__161( (_n - 1)));
++ASSERT (DEF__162( (_n - 1)));
++ASSERT (DEF__163( (_n - 1)));
++ASSERT (DEF__164( (_n - 1)));
++ASSERT (DEF__165( (_n - 1)));
++ASSERT (DEF__166( (_n - 1)));
++ASSERT (DEF__168( (_n - 1)));
++ASSERT (DEF__171( (_n - 1)));
++ASSERT (DEF__173( (_n - 1)));
++ASSERT (P( (_n - 1)));
++ASSERT (NOT (P( _n)));
++% PUSH; %safe
++ASSERT TRUE;
++CHECKSAT;
++%ECHO "__DONE__";
++% INDUCT : sat
++% INDUCT : __DONE__
++% POP; %safe
++% INDUCT :  Inductive step is Invalid at K = 2. Continuing search.
++POP;
++ASSERT (P( (_n - 1)));
++ASSERT (P( (_n - 2)));
++ASSERT (DEF__174( (_n + 0)));
++ASSERT (DEF__176( (_n + 0)));
++ASSERT (DEF__177( (_n + 0)));
++ASSERT (DEF__178( (_n + 0)));
++ASSERT (DEF__179( (_n + 0)));
++ASSERT (DEF__180( (_n + 0)));
++ASSERT (DEF__181( (_n + 0)));
++ASSERT (DEF__182( (_n + 0)));
++ASSERT (DEF__183( (_n + 0)));
++ASSERT (DEF__184( (_n + 0)));
++ASSERT (DEF__185( (_n + 0)));
++ASSERT (DEF__186( (_n + 0)));
++ASSERT (DEF__187( (_n + 0)));
++ASSERT (DEF__188( (_n + 0)));
++ASSERT (DEF__189( (_n + 0)));
++ASSERT (DEF__190( (_n + 0)));
++ASSERT (DEF__191( (_n + 0)));
++ASSERT (DEF__192( (_n + 0)));
++ASSERT (DEF__193( (_n + 0)));
++ASSERT (DEF__194( (_n + 0)));
++ASSERT (DEF__195( (_n + 0)));
++ASSERT (DEF__196( (_n + 0)));
++ASSERT (DEF__197( (_n + 0)));
++ASSERT (DEF__198( (_n + 0)));
++ASSERT (DEF__199( (_n + 0)));
++ASSERT (DEF__200( (_n + 0)));
++ASSERT (DEF__201( (_n + 0)));
++ASSERT (DEF__202( (_n + 0)));
++ASSERT (DEF__115( (_n + 0)));
++ASSERT (DEF__203( (_n + 0)));
++ASSERT (DEF__116( (_n + 0)));
++ASSERT (DEF__204( (_n + 0)));
++ASSERT (DEF__117( (_n + 0)));
++ASSERT (DEF__205( (_n + 0)));
++ASSERT (DEF__206( (_n + 0)));
++ASSERT (DEF__207( (_n + 0)));
++ASSERT (DEF__120( (_n + 0)));
++ASSERT (DEF__208( (_n + 0)));
++ASSERT (DEF__121( (_n + 0)));
++ASSERT (DEF__209( (_n + 0)));
++ASSERT (DEF__122( (_n + 0)));
++ASSERT (DEF__210( (_n + 0)));
++ASSERT (DEF__211( (_n + 0)));
++ASSERT (DEF__212( (_n + 0)));
++ASSERT (DEF__126( (_n + 0)));
++ASSERT (DEF__213( (_n + 0)));
++ASSERT (DEF__127( (_n + 0)));
++ASSERT (DEF__214( (_n + 0)));
++ASSERT (DEF__128( (_n + 0)));
++ASSERT (DEF__215( (_n + 0)));
++ASSERT (DEF__216( (_n + 0)));
++ASSERT (DEF__129( (_n + 0)));
++ASSERT (DEF__217( (_n + 0)));
++ASSERT (DEF__130( (_n + 0)));
++ASSERT (DEF__131( (_n + 0)));
++ASSERT (DEF__218( (_n + 0)));
++ASSERT (DEF__132( (_n + 0)));
++ASSERT (DEF__219( (_n + 0)));
++ASSERT (DEF__133( (_n + 0)));
++ASSERT (DEF__220( (_n + 0)));
++ASSERT (DEF__134( (_n + 0)));
++ASSERT (DEF__221( (_n + 0)));
++ASSERT (DEF__222( (_n + 0)));
++ASSERT (DEF__135( (_n + 0)));
++ASSERT (DEF__223( (_n + 0)));
++ASSERT (DEF__136( (_n + 0)));
++ASSERT (DEF__224( (_n + 0)));
++ASSERT (DEF__137( (_n + 0)));
++ASSERT (DEF__225( (_n + 0)));
++ASSERT (DEF__138( (_n + 0)));
++ASSERT (DEF__226( (_n + 0)));
++ASSERT (DEF__139( (_n + 0)));
++ASSERT (DEF__227( (_n + 0)));
++ASSERT (DEF__140( (_n + 0)));
++ASSERT (DEF__228( (_n + 0)));
++ASSERT (DEF__141( (_n + 0)));
++ASSERT (DEF__229( (_n + 0)));
++ASSERT (DEF__142( (_n + 0)));
++ASSERT (DEF__143( (_n + 0)));
++ASSERT (DEF__144( (_n + 0)));
++ASSERT (DEF__145( (_n + 0)));
++ASSERT (DEF__146( (_n + 0)));
++ASSERT (DEF__147( (_n + 0)));
++ASSERT (DEF__148( (_n + 0)));
++ASSERT (DEF__149( (_n + 0)));
++ASSERT (DEF__150( (_n + 0)));
++ASSERT (DEF__151( (_n + 0)));
++ASSERT (DEF__152( (_n + 0)));
++ASSERT (DEF__153( (_n + 0)));
++ASSERT (DEF__154( (_n + 0)));
++ASSERT (DEF__155( (_n + 0)));
++ASSERT (DEF__156( (_n + 0)));
++ASSERT (DEF__157( (_n + 0)));
++ASSERT (DEF__158( (_n + 0)));
++ASSERT (DEF__159( (_n + 0)));
++ASSERT (DEF__160( (_n + 0)));
++ASSERT (DEF__161( (_n + 0)));
++ASSERT (DEF__162( (_n + 0)));
++ASSERT (DEF__163( (_n + 0)));
++ASSERT (DEF__164( (_n + 0)));
++ASSERT (DEF__165( (_n + 0)));
++ASSERT (DEF__166( (_n + 0)));
++ASSERT (DEF__168( (_n + 0)));
++ASSERT (DEF__171( (_n + 0)));
++ASSERT (DEF__173( (_n + 0)));
++% INDUCT :  not refinement_pass.
++% INDUCT :  Checking K = 3. No message received.
++% INDUCT :  setup step loop - initialize step.
++PUSH;
++% INDUCT : ;4b 
++ASSERT (DEF__174( (_n - 1)));
++ASSERT (DEF__176( (_n - 1)));
++ASSERT (DEF__177( (_n - 1)));
++ASSERT (DEF__178( (_n - 1)));
++ASSERT (DEF__179( (_n - 1)));
++ASSERT (DEF__180( (_n - 1)));
++ASSERT (DEF__181( (_n - 1)));
++ASSERT (DEF__182( (_n - 1)));
++ASSERT (DEF__183( (_n - 1)));
++ASSERT (DEF__184( (_n - 1)));
++ASSERT (DEF__185( (_n - 1)));
++ASSERT (DEF__186( (_n - 1)));
++ASSERT (DEF__187( (_n - 1)));
++ASSERT (DEF__188( (_n - 1)));
++ASSERT (DEF__189( (_n - 1)));
++ASSERT (DEF__190( (_n - 1)));
++ASSERT (DEF__191( (_n - 1)));
++ASSERT (DEF__192( (_n - 1)));
++ASSERT (DEF__193( (_n - 1)));
++ASSERT (DEF__194( (_n - 1)));
++ASSERT (DEF__195( (_n - 1)));
++ASSERT (DEF__196( (_n - 1)));
++ASSERT (DEF__197( (_n - 1)));
++ASSERT (DEF__198( (_n - 1)));
++ASSERT (DEF__199( (_n - 1)));
++ASSERT (DEF__200( (_n - 1)));
++ASSERT (DEF__201( (_n - 1)));
++ASSERT (DEF__202( (_n - 1)));
++ASSERT (DEF__115( (_n - 1)));
++ASSERT (DEF__203( (_n - 1)));
++ASSERT (DEF__116( (_n - 1)));
++ASSERT (DEF__204( (_n - 1)));
++ASSERT (DEF__117( (_n - 1)));
++ASSERT (DEF__205( (_n - 1)));
++ASSERT (DEF__206( (_n - 1)));
++ASSERT (DEF__207( (_n - 1)));
++ASSERT (DEF__120( (_n - 1)));
++ASSERT (DEF__208( (_n - 1)));
++ASSERT (DEF__121( (_n - 1)));
++ASSERT (DEF__209( (_n - 1)));
++ASSERT (DEF__122( (_n - 1)));
++ASSERT (DEF__210( (_n - 1)));
++ASSERT (DEF__211( (_n - 1)));
++ASSERT (DEF__212( (_n - 1)));
++ASSERT (DEF__126( (_n - 1)));
++ASSERT (DEF__213( (_n - 1)));
++ASSERT (DEF__127( (_n - 1)));
++ASSERT (DEF__214( (_n - 1)));
++ASSERT (DEF__128( (_n - 1)));
++ASSERT (DEF__215( (_n - 1)));
++ASSERT (DEF__216( (_n - 1)));
++ASSERT (DEF__129( (_n - 1)));
++ASSERT (DEF__217( (_n - 1)));
++ASSERT (DEF__130( (_n - 1)));
++ASSERT (DEF__131( (_n - 1)));
++ASSERT (DEF__218( (_n - 1)));
++ASSERT (DEF__132( (_n - 1)));
++ASSERT (DEF__219( (_n - 1)));
++ASSERT (DEF__133( (_n - 1)));
++ASSERT (DEF__220( (_n - 1)));
++ASSERT (DEF__134( (_n - 1)));
++ASSERT (DEF__221( (_n - 1)));
++ASSERT (DEF__222( (_n - 1)));
++ASSERT (DEF__135( (_n - 1)));
++ASSERT (DEF__223( (_n - 1)));
++ASSERT (DEF__136( (_n - 1)));
++ASSERT (DEF__224( (_n - 1)));
++ASSERT (DEF__137( (_n - 1)));
++ASSERT (DEF__225( (_n - 1)));
++ASSERT (DEF__138( (_n - 1)));
++ASSERT (DEF__226( (_n - 1)));
++ASSERT (DEF__139( (_n - 1)));
++ASSERT (DEF__227( (_n - 1)));
++ASSERT (DEF__140( (_n - 1)));
++ASSERT (DEF__228( (_n - 1)));
++ASSERT (DEF__141( (_n - 1)));
++ASSERT (DEF__229( (_n - 1)));
++ASSERT (DEF__142( (_n - 1)));
++ASSERT (DEF__143( (_n - 1)));
++ASSERT (DEF__144( (_n - 1)));
++ASSERT (DEF__145( (_n - 1)));
++ASSERT (DEF__146( (_n - 1)));
++ASSERT (DEF__147( (_n - 1)));
++ASSERT (DEF__148( (_n - 1)));
++ASSERT (DEF__149( (_n - 1)));
++ASSERT (DEF__150( (_n - 1)));
++ASSERT (DEF__151( (_n - 1)));
++ASSERT (DEF__152( (_n - 1)));
++ASSERT (DEF__153( (_n - 1)));
++ASSERT (DEF__154( (_n - 1)));
++ASSERT (DEF__155( (_n - 1)));
++ASSERT (DEF__156( (_n - 1)));
++ASSERT (DEF__157( (_n - 1)));
++ASSERT (DEF__158( (_n - 1)));
++ASSERT (DEF__159( (_n - 1)));
++ASSERT (DEF__160( (_n - 1)));
++ASSERT (DEF__161( (_n - 1)));
++ASSERT (DEF__162( (_n - 1)));
++ASSERT (DEF__163( (_n - 1)));
++ASSERT (DEF__164( (_n - 1)));
++ASSERT (DEF__165( (_n - 1)));
++ASSERT (DEF__166( (_n - 1)));
++ASSERT (DEF__168( (_n - 1)));
++ASSERT (DEF__171( (_n - 1)));
++ASSERT (DEF__173( (_n - 1)));
++ASSERT (DEF__174( (_n - 2)));
++ASSERT (DEF__176( (_n - 2)));
++ASSERT (DEF__177( (_n - 2)));
++ASSERT (DEF__178( (_n - 2)));
++ASSERT (DEF__179( (_n - 2)));
++ASSERT (DEF__180( (_n - 2)));
++ASSERT (DEF__181( (_n - 2)));
++ASSERT (DEF__182( (_n - 2)));
++ASSERT (DEF__183( (_n - 2)));
++ASSERT (DEF__184( (_n - 2)));
++ASSERT (DEF__185( (_n - 2)));
++ASSERT (DEF__186( (_n - 2)));
++ASSERT (DEF__187( (_n - 2)));
++ASSERT (DEF__188( (_n - 2)));
++ASSERT (DEF__189( (_n - 2)));
++ASSERT (DEF__190( (_n - 2)));
++ASSERT (DEF__191( (_n - 2)));
++ASSERT (DEF__192( (_n - 2)));
++ASSERT (DEF__193( (_n - 2)));
++ASSERT (DEF__194( (_n - 2)));
++ASSERT (DEF__195( (_n - 2)));
++ASSERT (DEF__196( (_n - 2)));
++ASSERT (DEF__197( (_n - 2)));
++ASSERT (DEF__198( (_n - 2)));
++ASSERT (DEF__199( (_n - 2)));
++ASSERT (DEF__200( (_n - 2)));
++ASSERT (DEF__201( (_n - 2)));
++ASSERT (DEF__202( (_n - 2)));
++ASSERT (DEF__115( (_n - 2)));
++ASSERT (DEF__203( (_n - 2)));
++ASSERT (DEF__116( (_n - 2)));
++ASSERT (DEF__204( (_n - 2)));
++ASSERT (DEF__117( (_n - 2)));
++ASSERT (DEF__205( (_n - 2)));
++ASSERT (DEF__206( (_n - 2)));
++ASSERT (DEF__207( (_n - 2)));
++ASSERT (DEF__120( (_n - 2)));
++ASSERT (DEF__208( (_n - 2)));
++ASSERT (DEF__121( (_n - 2)));
++ASSERT (DEF__209( (_n - 2)));
++ASSERT (DEF__122( (_n - 2)));
++ASSERT (DEF__210( (_n - 2)));
++ASSERT (DEF__211( (_n - 2)));
++ASSERT (DEF__212( (_n - 2)));
++ASSERT (DEF__126( (_n - 2)));
++ASSERT (DEF__213( (_n - 2)));
++ASSERT (DEF__127( (_n - 2)));
++ASSERT (DEF__214( (_n - 2)));
++ASSERT (DEF__128( (_n - 2)));
++ASSERT (DEF__215( (_n - 2)));
++ASSERT (DEF__216( (_n - 2)));
++ASSERT (DEF__129( (_n - 2)));
++ASSERT (DEF__217( (_n - 2)));
++ASSERT (DEF__130( (_n - 2)));
++ASSERT (DEF__131( (_n - 2)));
++ASSERT (DEF__218( (_n - 2)));
++ASSERT (DEF__132( (_n - 2)));
++ASSERT (DEF__219( (_n - 2)));
++ASSERT (DEF__133( (_n - 2)));
++ASSERT (DEF__220( (_n - 2)));
++ASSERT (DEF__134( (_n - 2)));
++ASSERT (DEF__221( (_n - 2)));
++ASSERT (DEF__222( (_n - 2)));
++ASSERT (DEF__135( (_n - 2)));
++ASSERT (DEF__223( (_n - 2)));
++ASSERT (DEF__136( (_n - 2)));
++ASSERT (DEF__224( (_n - 2)));
++ASSERT (DEF__137( (_n - 2)));
++ASSERT (DEF__225( (_n - 2)));
++ASSERT (DEF__138( (_n - 2)));
++ASSERT (DEF__226( (_n - 2)));
++ASSERT (DEF__139( (_n - 2)));
++ASSERT (DEF__227( (_n - 2)));
++ASSERT (DEF__140( (_n - 2)));
++ASSERT (DEF__228( (_n - 2)));
++ASSERT (DEF__141( (_n - 2)));
++ASSERT (DEF__229( (_n - 2)));
++ASSERT (DEF__142( (_n - 2)));
++ASSERT (DEF__143( (_n - 2)));
++ASSERT (DEF__144( (_n - 2)));
++ASSERT (DEF__145( (_n - 2)));
++ASSERT (DEF__146( (_n - 2)));
++ASSERT (DEF__147( (_n - 2)));
++ASSERT (DEF__148( (_n - 2)));
++ASSERT (DEF__149( (_n - 2)));
++ASSERT (DEF__150( (_n - 2)));
++ASSERT (DEF__151( (_n - 2)));
++ASSERT (DEF__152( (_n - 2)));
++ASSERT (DEF__153( (_n - 2)));
++ASSERT (DEF__154( (_n - 2)));
++ASSERT (DEF__155( (_n - 2)));
++ASSERT (DEF__156( (_n - 2)));
++ASSERT (DEF__157( (_n - 2)));
++ASSERT (DEF__158( (_n - 2)));
++ASSERT (DEF__159( (_n - 2)));
++ASSERT (DEF__160( (_n - 2)));
++ASSERT (DEF__161( (_n - 2)));
++ASSERT (DEF__162( (_n - 2)));
++ASSERT (DEF__163( (_n - 2)));
++ASSERT (DEF__164( (_n - 2)));
++ASSERT (DEF__165( (_n - 2)));
++ASSERT (DEF__166( (_n - 2)));
++ASSERT (DEF__168( (_n - 2)));
++ASSERT (DEF__171( (_n - 2)));
++ASSERT (DEF__173( (_n - 2)));
++ASSERT (NOT (P( _n)));
++% PUSH; %safe
++ASSERT TRUE;
++CHECKSAT;
++%ECHO "__DONE__";
++% INDUCT :  Abort in 3 step.
