@@ -32,7 +32,7 @@ depends_lib         port:gmp \
 depends_build       port:doxygen \
                     bin:curl:curl \
                     bin:bash:bash \
-                    bin:awk:awk
+                    bin:awk:gawk
 conflicts           cvc4 \
                     cvc4-devel
 patchfiles          kind.patch

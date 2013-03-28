@@ -28,7 +28,7 @@ depends_lib         port:gmp \
 depends_build       port:doxygen \
                     bin:curl:curl \
                     bin:bash:bash \
-                    bin:awk:awk
+                    bin:awk:gawk
 conflicts           cvc4-devel \
                     cvc4-kind-devel
 patchfiles          clang.patch \
