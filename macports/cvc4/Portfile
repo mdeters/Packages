@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.1
-revision            1
+revision            2
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -23,9 +23,9 @@ master_sites        http://cvc4.cs.nyu.edu/builds/src/
 checksums           rmd160 0aed7cf9387ea10473960476aecd854a1fc8473c \
                     sha256 e90561f958e82b03160863eb0dd569faa636506f00e9da0f315ab4d13331c4ef
 depends_lib         port:gmp \
-                    port:boost \
                     port:readline
-depends_build       port:doxygen \
+depends_build       port:boost \
+                    port:doxygen \
                     bin:curl:curl \
                     bin:bash:bash \
                     bin:awk:gawk

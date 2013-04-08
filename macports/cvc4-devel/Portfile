@@ -26,9 +26,9 @@ distname            cvc4-${version}
 checksums           rmd160 32ae520135b33df7125b4bc3ba473acf51361160 \
                     sha256 2467a28079e9e5e89709cedbb67bc327fd8aa67d508150f501d363e7894e7e62
 depends_lib         port:gmp \
-                    port:boost \
                     port:readline
-depends_build       port:doxygen \
+depends_build       port:boost \
+                    port:doxygen \
                     bin:curl:curl \
                     bin:bash:bash \
                     bin:awk:gawk
