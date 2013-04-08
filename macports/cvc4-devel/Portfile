@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2013-03-27
+version             2013-03-31
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -23,8 +23,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 811754964c4f6a62c48247c64adcb53c9b264460 \
-                    sha256 9d4e290d2140dfbb45f9c2051ebf37081d75e1f2384495fe546676205602220c
+checksums           rmd160 32ae520135b33df7125b4bc3ba473acf51361160 \
+                    sha256 2467a28079e9e5e89709cedbb67bc327fd8aa67d508150f501d363e7894e7e62
 depends_lib         port:gmp \
                     port:boost \
                     port:readline
@@ -42,6 +42,10 @@ configure.args      --enable-static --enable-shared --with-build=default \
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
+
+variant no_static {Do not build static libraries} {
+    configure.args-delete --enable-static
+}
 
 pre-configure {
     system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ${worksrcpath}/contrib/get-antlr-3.4"

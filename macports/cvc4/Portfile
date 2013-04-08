@@ -40,6 +40,10 @@ configure.args      --enable-static --enable-shared --with-build=default \
 # --with-portfolio
 test.run            yes
 
+variant no_static {Do not build static libraries} {
+    configure.args-delete --enable-static
+}
+
 pre-configure {
     system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ${worksrcpath}/contrib/get-antlr-3.4"
 }
