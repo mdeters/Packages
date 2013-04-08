@@ -40,7 +40,7 @@ configure.args      --enable-static --enable-shared --with-build=default \
 # --with-portfolio
 test.run            yes
 
-variant no_static {Do not build static libraries} {
+variant no_static description {Do not build static libraries} {
     configure.args-delete --enable-static
 }
 
