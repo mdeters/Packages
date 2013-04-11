@@ -89,7 +89,7 @@ want a stable, release version of CVC4, install the "cvc4" packages
 instead of the "cvc4-nightly" packages.
 
 %prep
-%setup -q
+%setup -q -n cvc4-2013-04-11
 %patch0 -p1
 
 %build
