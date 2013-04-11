@@ -2,16 +2,16 @@
 # Spec file for CVC4 packages.
 #
 Summary: First order formula validity checker (version 4)
-Name: cvc4
-Version: 1.1
+Name: cvc4-nightly
+Version: 2013-04-11
 Release: 1
 License: BSD
-Source: http://cvc4.cs.nyu.edu/builds/src/cvc4-1.1.tar.gz
+Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-%{version}.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
 # for other language bindings: python-devel, perl-devel, ruby-devel, tcl-devel, php-devel
-Conflicts: cvc4-nightly
+Conflicts: cvc4
 Packager: Morgan Deters <mdeters@cs.nyu.edu>
 
 %package devel
@@ -33,6 +33,10 @@ CVC4 is intended to be an open and extensible SMT engine. It can be used
 as a stand-alone tool or as a library. It has been designed to increase
 the performance and reduce the memory overhead of its predecessors.
 
+This version corresponds to nightly development builds of CVC4.  If you
+want a stable, release version of CVC4, install the "cvc4" packages
+instead of the "cvc4-nightly" packages.
+
 %description devel
 This is the CVC4 development package, containing headers and static
 libraries for CVC4.  Install this package only if you need to build
@@ -47,6 +51,10 @@ CVC4 is intended to be an open and extensible SMT engine. It can be used
 as a stand-alone tool or as a library. It has been designed to increase
 the performance and reduce the memory overhead of its predecessors.
 
+This version corresponds to nightly development builds of CVC4.  If you
+want a stable, release version of CVC4, install the "cvc4" packages
+instead of the "cvc4-nightly" packages.
+
 %description java
 This package contains the CVC4 Java bindings.  "CVC4.so" and "CVC4.jar"
 contain the Java API that allows CVC4 to support Java programs.
@@ -60,6 +68,10 @@ CVC4 is intended to be an open and extensible SMT engine. It can be used
 as a stand-alone tool or as a library. It has been designed to increase
 the performance and reduce the memory overhead of its predecessors.
 
+This version corresponds to nightly development builds of CVC4.  If you
+want a stable, release version of CVC4, install the "cvc4" packages
+instead of the "cvc4-nightly" packages.
+
 %description doc
 This package contains CVC4 documentation.
 
@@ -71,6 +83,10 @@ CVC3) but does not directly incorporate code from any previous version.
 CVC4 is intended to be an open and extensible SMT engine. It can be used
 as a stand-alone tool or as a library. It has been designed to increase
 the performance and reduce the memory overhead of its predecessors.
+
+This version corresponds to nightly development builds of CVC4.  If you
+want a stable, release version of CVC4, install the "cvc4" packages
+instead of the "cvc4-nightly" packages.
 
 %prep
 %setup -q
