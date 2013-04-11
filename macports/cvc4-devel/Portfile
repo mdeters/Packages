@@ -49,7 +49,7 @@ variant no_static description {Do not build static libraries} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
