@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.1
-revision            2
+revision            4
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -22,6 +22,7 @@ homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/
 checksums           rmd160 0aed7cf9387ea10473960476aecd854a1fc8473c \
                     sha256 e90561f958e82b03160863eb0dd569faa636506f00e9da0f315ab4d13331c4ef
+default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
 depends_build       port:boost \
@@ -45,7 +46,7 @@ variant no_static description {Do not build static libraries} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
