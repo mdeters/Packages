@@ -3,10 +3,10 @@
 #
 Summary: First order formula validity checker (version 4)
 Name: cvc4-nightly
-Version: 2013-04-11
+Version: 2013_04_11
 Release: 1
 License: BSD
-Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-%{version}.tar.gz
+Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-04-11.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
