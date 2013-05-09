@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.2
-revision            0
+revision            1
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -20,8 +20,8 @@ long_description    CVC4 is a tool for determining the satisfiability of a first
 license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/
-checksums           rmd160 0aed7cf9387ea10473960476aecd854a1fc8473c \
-                    sha256 e90561f958e82b03160863eb0dd569faa636506f00e9da0f315ab4d13331c4ef
+checksums           rmd160 d298d9dec7d609e49cae49319e366cb675edb5cd \
+                    sha256 a53f6e931aab24249dd18fc97fcbd61a4dd72a06c859f6826c4c0887192b8545
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
