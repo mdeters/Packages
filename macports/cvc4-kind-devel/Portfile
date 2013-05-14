@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-kind-devel
-version             2013-05-09
+version             2013-05-12
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -24,8 +24,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 fbee17b7b658af2877d5ba2847bc24c36ba763e5 \
-                    sha256 da118502e806ae4458b64125989f0cdf7b92dd3646211014132de697c7954a1e
+checksums           rmd160 c52acde4e6965e8d4707f10ed737446d18601c95 \
+                    sha256 6613245e235a0d0816c5149f04e7406e7f8dbf2de57050e71dee5a2819c7daa5
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
@@ -67,4 +67,4 @@ post-destroot {
 
 livecheck.type          regex
 livecheck.url           ${master_sites}
-livecheck.regex         ${name}-(\[0-9.\]+)\\.tar\\.gz
+livecheck.regex         ${name}-(\[0-9.-\]+)\\.tar\\.gz
