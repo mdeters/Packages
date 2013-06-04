@@ -36,8 +36,7 @@ depends_build       port:boost \
                     bin:awk:gawk
 conflicts           cvc4 \
                     cvc4-devel
-patchfiles          kind.patch \
-                    clang-init-order.patch
+patchfiles          kind.patch
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
