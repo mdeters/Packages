@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2013-05-12
+version             2013-06-01
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -23,8 +23,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 c52acde4e6965e8d4707f10ed737446d18601c95 \
-                    sha256 6613245e235a0d0816c5149f04e7406e7f8dbf2de57050e71dee5a2819c7daa5
+checksums           rmd160 2466dc2545c55931c78a99f1067adecbc56e8e2c \
+                    sha256 67fe1ae34ad3fa6457ca2f583a2b7a0ce15ffc7dffc9dd6b88c643affed4e6ed
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
@@ -35,6 +35,7 @@ depends_build       port:boost \
                     bin:awk:gawk
 conflicts           cvc4 \
                     cvc4-kind-devel
+patchfiles          clang-init-order.patch
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \

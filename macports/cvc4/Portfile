@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.2
-revision            1
+revision            2
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -32,6 +32,7 @@ depends_build       port:boost \
                     bin:awk:gawk
 conflicts           cvc4-devel \
                     cvc4-kind-devel
+patchfiles          clang-init-order.patch
 configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
