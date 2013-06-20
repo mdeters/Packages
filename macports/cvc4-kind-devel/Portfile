@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-kind-devel
-version             2013-06-04
+version             2013-06-20
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -24,8 +24,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 b089ada810448a459071389dd24e74a80728b671 \
-                    sha256 f006c2ad7e42ba8b88cecdf3ba23eafb490e8db9d33143c5430c6b1092d932fe
+checksums           rmd160 924dce2cf9736f677a368afcea2f98f5b828b494 \
+                    sha256 0a26e9eeff72b0d7f7183826d5476e945ff1b9c0578668c565cf1ae09712a07f
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
@@ -48,6 +48,11 @@ test.run            yes
 
 variant no_static description {Do not build static libraries} {
     configure.args-delete --enable-static
+}
+
+variant production description {Build a "production" copy (no assertions)} {
+    configure.args-delete --with-build=default
+    configure.args-append --with-build=production
 }
 
 pre-configure {

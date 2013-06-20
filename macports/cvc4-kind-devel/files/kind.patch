@@ -1,118 +1,116 @@
-diff --git a/contrib/run-script-casc24-fnt b/contrib/run-script-casc24-fnt
-index b10d732..2a10c53 100755
---- a/contrib/run-script-casc24-fnt
-+++ contrib/run-script-casc24-fnt
-@@ -16,18 +16,18 @@ function trywith {
-   (ulimit -t "$limit";$cvc4 -L tptp --szs-compliant --no-checking --no-interactive --dump-models --produce-models "$@" $bench) 2>/dev/null |
-   (read result;
-   case "$result" in
--    sat) echo "% SZS status" "Satisfiable for $filename";
--         echo "% SZS output" "start FiniteModel for $filename";
-+    sat) echo "% SZS Satisfiable for $filename";
-+         echo "% SZS output start FiniteModel for $filename";
-          cat;
--         echo "% SZS output" "end FiniteModel for $filename";
-+         echo "% SZS output end FiniteModel for $filename";
-          exit 0;;
--    unsat) echo "% SZS status" "Unsatisfiable for $filename"; exit 0;;
--    conjecture-sat) echo "% SZS status" "CounterSatisfiable for $filename";
--                    echo "% SZS output" "start FiniteModel for $filename";
-+    unsat) echo "% SZS Unsatisfiable for $filename"; exit 0;;
-+    conjecture-sat) echo "% SZS CounterSatisfiable for $filename";
-+                    echo "% SZS output start FiniteModel for $filename";
-                     cat;
--                    echo "% SZS output" "end FiniteModel for $filename";
-+                    echo "% SZS output end FiniteModel for $filename";
-                     exit 0;;
--    conjecture-unsat) echo "% SZS status" "Theorem for $filename"; exit 0;;
-+    conjecture-unsat) echo "% SZS Theorem for $filename"; exit 0;;
-   esac; exit 1)
-   if [ ${PIPESTATUS[1]} -eq 0 ]; then exit 0; fi
- }
-@@ -35,4 +35,4 @@ function trywith {
- trywith 30 --finite-model-find --uf-ss-totality
- trywith 30 --finite-model-find --decision=justification --fmf-fmc
- trywith $to --finite-model-find --decision=justification
--echo "% SZS status" "GaveUp for $filename"
-+echo "% SZS GaveUp for $filename"
-\ No newline at end of file
-diff --git a/contrib/run-script-casc24-fnt-no-models b/contrib/run-script-casc24-fnt-no-models
-index 3b4d5e3..a189c10 100755
---- a/contrib/run-script-casc24-fnt-no-models
-+++ contrib/run-script-casc24-fnt-no-models
-@@ -14,23 +14,23 @@ filename=${file%.*}
- function trywith {
-   result="$( ulimit -t "$1";shift;$cvc4 -L tptp --szs-compliant --no-checking --no-interactive "$@" $bench)"
-   case "$result" in
--    sat) echo "% SZS status" "Satisfiable for $filename"; exit 0;;
--    unsat) echo "% SZS status" "Unsatisfiable for $filename"; exit 0;;
--    conjecture-sat) echo "% SZS status" "CounterSatisfiable for $filename"; exit 0;;
--    conjecture-unsat) echo "% SZS status" "Theorem for $filename"; exit 0;;
-+    sat) echo "% SZS Satisfiable for $filename"; exit 0;;
-+    unsat) echo "% SZS Unsatisfiable for $filename"; exit 0;;
-+    conjecture-sat) echo "% SZS CounterSatisfiable for $filename"; exit 0;;
-+    conjecture-unsat) echo "% SZS Theorem for $filename"; exit 0;;
-   esac
- }
- function finishwith {
-   result="$( $cvc4 -L tptp --szs-compliant --no-checking --no-interactive "$@" $bench)"
-   case "$result" in
--    sat) echo "% SZS status" "Satisfiable for $filename"; exit 0;;
--    unsat) echo "% SZS status" "Unsatisfiable for $filename"; exit 0;;
--    conjecture-sat) echo "% SZS status" "CounterSatisfiable for $filename"; exit 0;;
--    conjecture-unsat) echo "% SZS status" "Theorem for $filename"; exit 0;;
-+    sat) echo "% SZS Satisfiable for $filename"; exit 0;;
-+    unsat) echo "% SZS Unsatisfiable for $filename"; exit 0;;
-+    conjecture-sat) echo "% SZS CounterSatisfiable for $filename"; exit 0;;
-+    conjecture-unsat) echo "% SZS Theorem for $filename"; exit 0;;
-   esac
- }
+diff --git a/.project b/.project
+index b1fd9f1..2522883 100644
+--- a/.project
++++ .project
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <projectDescription>
+-	<name>cvc4-idl</name>
++	<name>cvc4-bvprop</name>
+ 	<comment></comment>
+ 	<projects>
+ 	</projects>
+diff --git a/contrib/theoryskel/README.WHATS-NEXT b/contrib/theoryskel/README.WHATS-NEXT
+index b25b600..ede8054 100644
+--- a/contrib/theoryskel/README.WHATS-NEXT
++++ contrib/theoryskel/README.WHATS-NEXT
+@@ -3,9 +3,9 @@ Congratulations, you now have a new theory of $dir !
+ Your next steps will likely be:
  
- trywith 30 --finite-model-find --uf-ss-totality
- trywith 30 --finite-model-find --decision=justification --fmf-fmc
- trywith $to --finite-model-find --decision=justification
--echo "% SZS status" "GaveUp for $filename"
-+echo "% SZS GaveUp for $filename"
-\ No newline at end of file
-diff --git a/contrib/run-script-casc24-fof b/contrib/run-script-casc24-fof
-index b3ede0d..940e269 100755
---- a/contrib/run-script-casc24-fof
-+++ contrib/run-script-casc24-fof
-@@ -14,19 +14,19 @@ filename=${file%.*}
- function trywith {
-   result="$( ulimit -t "$1";shift;$cvc4 -L tptp --szs-compliant --no-checking --no-interactive "$@" $bench)"
-   case "$result" in
--    sat) echo "% SZS status" "Satisfiable for $filename"; exit 0;;
--    unsat) echo "% SZS status" "Unsatisfiable for $filename"; exit 0;;
--    conjecture-sat) echo "% SZS status" "CounterSatisfiable for $filename"; exit 0;;
--    conjecture-unsat) echo "% SZS status" "Theorem for $filename"; exit 0;;
-+    sat) echo "% SZS Satisfiable for $filename"; exit 0;;
-+    unsat) echo "% SZS Unsatisfiable for $filename"; exit 0;;
-+    conjecture-sat) echo "% SZS CounterSatisfiable for $filename"; exit 0;;
-+    conjecture-unsat) echo "% SZS Theorem for $filename"; exit 0;;
-   esac
- }
- function finishwith {
-   result="$( $cvc4 -L tptp --szs-compliant --no-checking --no-interactive "$@" $bench)"
-   case "$result" in
--    sat) echo "% SZS status" "Satisfiable for $filename"; exit 0;;
--    unsat) echo "% SZS status" "Unsatisfiable for $filename"; exit 0;;
--    conjecture-sat) echo "% SZS status" "CounterSatisfiable for $filename"; exit 0;;
--    conjecture-unsat) echo "% SZS status" "Theorem for $filename"; exit 0;;
-+    sat) echo "% SZS Satisfiable for $filename"; exit 0;;
-+    unsat) echo "% SZS Unsatisfiable for $filename"; exit 0;;
-+    conjecture-sat) echo "% SZS CounterSatisfiable for $filename"; exit 0;;
-+    conjecture-unsat) echo "% SZS Theorem for $filename"; exit 0;;
-   esac
- }
+ * to specify theory constants, types, and operators in your \`kinds' file
+-* to add typing rules to theory_$dir_type_rules.h for your operators
++* to add typing rules to theory_${dir}_type_rules.h for your operators
+   and constants
+-* to write code in theory_$dir_rewriter.h to implement a normal form
++* to write code in theory_${dir}_rewriter.h to implement a normal form
+   for your theory's terms
+ * to write parser rules in src/parser/cvc/Cvc.g to support the CVC input
+   language, src/parser/smt/Smt.g to support the (deprecated) SMT-LIBv1
+diff --git a/examples/api/java/CVC4Streams.java b/examples/api/java/CVC4Streams.java
+deleted file mode 100644
+index 0b0984b..0000000
+--- a/examples/api/java/CVC4Streams.java
++++ /dev/null
+@@ -1,59 +0,0 @@
+-/*********************                                                        */
+-/*! \file CVC4Streams.java
+- ** \verbatim
+- ** Original author: Morgan Deters
+- ** Major contributors: none
+- ** Minor contributors (to current version): none
+- ** This file is part of the CVC4 project.
+- ** Copyright (c) 2009-2013  New York University and The University of Iowa
+- ** See the file COPYING in the top-level source directory for licensing
+- ** information.\endverbatim
+- **
+- ** \brief Example of driving CVC4 parsing from Java streams
+- **
+- ** This example shows how CVC4 can be driven from Java streams.
+- **/
+-
+-import java.io.*;
+-import edu.nyu.acsys.CVC4.*;
+-
+-public class CVC4Streams {
+-  public static void main(String[] args) throws IOException {
+-    System.loadLibrary("cvc4jni");
+-    ExprManager exprMgr = new ExprManager();
+-    SmtEngine smt = new SmtEngine(exprMgr);
+-    smt.setOption("incremental", new SExpr(true));
+-    smt.setOption("output-language", new SExpr("smt2"));
+-
+-    PipedOutputStream solverPipe = new PipedOutputStream();
+-    PrintWriter toSolver = new PrintWriter(solverPipe);
+-    PipedInputStream stream = new PipedInputStream(solverPipe);
+-
+-    toSolver.println("(set-logic QF_LIA)");
+-    toSolver.println("(declare-fun x () Int)");
+-    toSolver.println("(assert (= x 5))");
+-    toSolver.println("(check-sat)");
+-    toSolver.flush();
+-
+-    ParserBuilder pbuilder =
+-      new ParserBuilder(exprMgr, "<string 1>")
+-      .withInputLanguage(InputLanguage.INPUT_LANG_SMTLIB_V2)
+-      .withLineBufferedStreamInput((java.io.InputStream)stream);
+-    Parser parser = pbuilder.build();
+-
+-    Command cmd;
+-    while((cmd = parser.nextCommand()) != null) {
+-      System.out.println(cmd);
+-      cmd.invoke(smt, System.out);
+-    }
+-
+-    toSolver.println("(assert (= x 10))");
+-    toSolver.println("(check-sat)");
+-    toSolver.flush();
+-
+-    while((cmd = parser.nextCommand()) != null) {
+-      System.out.println(cmd);
+-      cmd.invoke(smt, System.out);
+-    }
+-  }
+-}
+diff --git a/examples/api/java/Makefile.am b/examples/api/java/Makefile.am
+index f4b8f10..84c8187 100644
+--- a/examples/api/java/Makefile.am
++++ examples/api/java/Makefile.am
+@@ -2,7 +2,6 @@ noinst_DATA =
  
-@@ -34,4 +34,4 @@ trywith 30
- trywith 15 --finite-model-find --fmf-inst-engine
- trywith 30 --finite-model-find --decision=justification --fmf-fmc
- trywith $to --decision=justification
--echo "% SZS status" "GaveUp for $filename"
-+echo "% SZS GaveUp for $filename"
-\ No newline at end of file
+ if CVC4_LANGUAGE_BINDING_JAVA
+ noinst_DATA += \
+-	CVC4Streams.class \
+ 	BitVectors.class \
+ 	BitVectorsAndArrays.class \
+ 	Combination.class \
+@@ -15,7 +14,6 @@ endif
+ 	$(AM_V_JAVAC)$(JAVAC) -classpath "@builddir@/../../../src/bindings/CVC4.jar" -d "@builddir@" $<
+ 
+ EXTRA_DIST = \
+-	CVC4Streams.java \
+ 	BitVectors.java \
+ 	BitVectorsAndArrays.java \
+ 	Combination.java \
 diff --git a/src/compat/cvc3_compat.cpp b/src/compat/cvc3_compat.cpp
 index 601c251..0b3b743 100644
 --- a/src/compat/cvc3_compat.cpp
@@ -309,6 +307,26 @@ index 5e4e862..30d1971 100644
  
  /**
   * Class encapsulating an integer subrange type.
+diff --git a/src/expr/type_node.cpp b/src/expr/type_node.cpp
+index 1d4c330..e654b5d 100644
+--- a/src/expr/type_node.cpp
++++ src/expr/type_node.cpp
+@@ -123,15 +123,6 @@ bool TypeNode::isSubtypeOf(TypeNode t) const {
+     }
+     return true;
+   }
+-  if(isFunction()) {
+-    // A function is a subtype of another if the args are the same type, and 
+-    // the return type is a subtype of the other's.  This is enough for now
+-    // (and it's necessary for model generation, since a Real-valued function
+-    // might return a constant Int and thus the model value is typed differently).
+-    return t.isFunction() &&
+-           getArgTypes() == t.getArgTypes() &&
+-           getRangeType().isSubtypeOf(t.getRangeType());
+-  }
+   if(isPredicateSubtype()) {
+     return getSubtypeParentType().isSubtypeOf(t);
+   }
 diff --git a/src/main/command_executor.cpp b/src/main/command_executor.cpp
 index 556e512..fef70fe 100644
 --- a/src/main/command_executor.cpp
@@ -490,6 +508,32 @@ index 14a7a9f..590c472 100644
  expert-option waitToJoin --wait-to-join bool :default true
   wait for other threads to join before quitting
  
+diff --git a/src/options/Makefile.am b/src/options/Makefile.am
+index 670718e..21988df 100644
+--- a/src/options/Makefile.am
++++ src/options/Makefile.am
+@@ -36,9 +36,7 @@ OPTIONS_FILES_SRCS = \
+ 	../main/options.cpp \
+ 	../main/options.h \
+ 	../parser/options.cpp \
+-	../parser/options.h \
+-	../theory/idl/options.cpp \
+-	../theory/idl/options.h
++	../parser/options.h
+ 
+ OPTIONS_FILES = \
+ 	$(patsubst %.cpp,%,$(filter %.cpp,$(OPTIONS_FILES_SRCS)))
+@@ -95,9 +93,7 @@ nodist_liboptions_la_SOURCES = \
+ 	../main/options.cpp \
+ 	../main/options.h \
+ 	../parser/options.cpp \
+-	../parser/options.h \
+-	../theory/idl/options.cpp \
+-	../theory/idl/options.h
++	../parser/options.h
+ 
+ BUILT_SOURCES = \
+ 	exprs-builts \
 diff --git a/src/parser/cvc/Cvc.g b/src/parser/cvc/Cvc.g
 index cf21ca6..3cebf81 100644
 --- a/src/parser/cvc/Cvc.g
@@ -507,6 +551,263 @@ index cf21ca6..3cebf81 100644
      }
  
      /* subrange types */
+diff --git a/src/parser/options b/src/parser/options
+index e16f963..b3e69a9 100644
+--- a/src/parser/options
++++ src/parser/options
+@@ -17,8 +17,4 @@ option semanticChecks /--no-checking bool :default DO_SEMANTIC_CHECKS_BY_DEFAULT
+ option szsCompliant --szs-compliant bool :default false
+  temporary support for szs ontolotogy, print if conjecture is found
+ 
+-# this is just to support security in the online version
+-# (--no-include-file disables filesystem access in TPTP and SMT2 parsers)
+-undocumented-option canIncludeFile /--no-include-file bool :default true
+-
+ endmodule
+diff --git a/src/parser/parser.cpp b/src/parser/parser.cpp
+index fa2a1e7..370bdfc 100644
+--- a/src/parser/parser.cpp
++++ src/parser/parser.cpp
+@@ -47,8 +47,7 @@ Parser::Parser(ExprManager* exprManager, Input* input, bool strictMode, bool par
+   d_done(false),
+   d_checksEnabled(true),
+   d_strictMode(strictMode),
+-  d_parseOnly(parseOnly),
+-  d_canIncludeFile(true) {
++  d_parseOnly(parseOnly) {
+   d_input->setParser(*this);
+ }
+ 
+diff --git a/src/parser/parser.h b/src/parser/parser.h
+index b4e79b4..4f943a0 100644
+--- a/src/parser/parser.h
++++ src/parser/parser.h
+@@ -158,12 +158,6 @@ class CVC4_PUBLIC Parser {
+   /** Are we only parsing? */
+   bool d_parseOnly;
+ 
+-  /**
+-   * Can we include files?  (Set to false for security purposes in
+-   * e.g. the online version.)
+-   */
+-  bool d_canIncludeFile;
+-
+   /** The set of operators available in the current logic. */
+   std::set<Kind> d_logicOperators;
+ 
+@@ -258,10 +252,6 @@ public:
+ 
+   bool strictModeEnabled() { return d_strictMode; }
+ 
+-  bool allowIncludeFile() { d_canIncludeFile = true; }
+-  bool disallowIncludeFile() { d_canIncludeFile = false; }
+-  bool canIncludeFile() const { return d_canIncludeFile; }
+-
+   /**
+    * Returns a variable, given a name.
+    *
+diff --git a/src/parser/parser_builder.cpp b/src/parser/parser_builder.cpp
+index 684a495..e1e4053 100644
+--- a/src/parser/parser_builder.cpp
++++ src/parser/parser_builder.cpp
+@@ -54,7 +54,6 @@ void ParserBuilder::init(ExprManager* exprManager,
+   d_exprManager = exprManager;
+   d_checksEnabled = true;
+   d_strictMode = false;
+-  d_canIncludeFile = true;
+   d_mmap = false;
+   d_parseOnly = false;
+ }
+@@ -107,12 +106,6 @@ Parser* ParserBuilder::build()
+     parser->disableChecks();
+   }
+ 
+-  if( d_canIncludeFile ) {
+-    parser->allowIncludeFile();
+-  } else {
+-    parser->disallowIncludeFile();
+-  }
+-
+   return parser;
+ }
+ 
+@@ -158,8 +151,7 @@ ParserBuilder& ParserBuilder::withOptions(const Options& options) {
+       .withMmap(options[options::memoryMap])
+       .withChecks(options[options::semanticChecks])
+       .withStrictMode(options[options::strictParsing])
+-      .withParseOnly(options[options::parseOnly])
+-      .withIncludeFile(options[options::canIncludeFile]);
++      .withParseOnly(options[options::parseOnly]);
+   }
+ 
+ ParserBuilder& ParserBuilder::withStrictMode(bool flag) {
+@@ -167,11 +159,6 @@ ParserBuilder& ParserBuilder::withStrictMode(bool flag) {
+   return *this;
+ }
+ 
+-ParserBuilder& ParserBuilder::withIncludeFile(bool flag) {
+-  d_canIncludeFile = flag;
+-  return *this;
+-}
+-
+ ParserBuilder& ParserBuilder::withStreamInput(std::istream& input) {
+   d_inputType = STREAM_INPUT;
+   d_streamInput = &input;
+diff --git a/src/parser/parser_builder.h b/src/parser/parser_builder.h
+index 9779bf3..607547b 100644
+--- a/src/parser/parser_builder.h
++++ src/parser/parser_builder.h
+@@ -71,9 +71,6 @@ class CVC4_PUBLIC ParserBuilder {
+   /** Should we parse in strict mode? */
+   bool d_strictMode;
+ 
+-  /** Should we allow include-file commands? */
+-  bool d_canIncludeFile;
+-
+   /** Should we memory-map a file input? */
+   bool d_mmap;
+ 
+@@ -152,13 +149,6 @@ public:
+    */
+   ParserBuilder& withStrictMode(bool flag = true);
+ 
+-  /**
+-   * Should the include-file commands be enabled?
+-   *
+-   * (Default: yes)
+-   */
+-  ParserBuilder& withIncludeFile(bool flag = true);
+-
+   /** Set the parser to use the given stream for its input. */
+   ParserBuilder& withStreamInput(std::istream& input);
+ 
+diff --git a/src/parser/smt2/Smt2.g b/src/parser/smt2/Smt2.g
+index 373f5b3..29bc8d4 100644
+--- a/src/parser/smt2/Smt2.g
++++ src/parser/smt2/Smt2.g
+@@ -197,10 +197,7 @@ parseCommand returns [CVC4::Command* cmd = NULL]
+      * the RPAREN_TOK is properly eaten and we are in a good state to read
+      * the included file's tokens. */
+   | LPAREN_TOK INCLUDE_TOK str[name] RPAREN_TOK
+-    { if(!PARSER_STATE->canIncludeFile()) {
+-        PARSER_STATE->parseError("include-file feature was disabled for this run.");
+-      }
+-      if(PARSER_STATE->strictModeEnabled()) {
++    { if(PARSER_STATE->strictModeEnabled()) {
+         PARSER_STATE->parseError("Extended commands are not permitted while operating in strict compliance mode.");
+       }
+       PARSER_STATE->includeFile(name);
+@@ -801,7 +798,7 @@ term[CVC4::Expr& expr, CVC4::Expr& expr2]
+         v.push_back(MK_EXPR( CVC4::kind::APPLY_TYPE_ASCRIPTION,
+                              MK_CONST(AscriptionType(dtc.getSpecializedConstructorType(type))), f.getOperator() ));
+         v.insert(v.end(), f.begin(), f.end());
+-        expr = MK_EXPR(CVC4::kind::APPLY_CONSTRUCTOR, v);
++        f = MK_EXPR(CVC4::kind::APPLY_CONSTRUCTOR, v);
+       } else {
+         if(f.getType() != type) {
+           PARSER_STATE->parseError("Type ascription not satisfied.");
+diff --git a/src/parser/smt2/smt2.cpp b/src/parser/smt2/smt2.cpp
+index 42324fe..be4907e 100644
+--- a/src/parser/smt2/smt2.cpp
++++ src/parser/smt2/smt2.cpp
+@@ -242,11 +242,6 @@ static bool newInputStream(const std::string& filename, pANTLR3_LEXER lexer) {
+ }
+ 
+ void Smt2::includeFile(const std::string& filename) {
+-  // security for online version
+-  if(!canIncludeFile()) {
+-    parseError("include-file feature was disabled for this run.");
+-  }
+-
+   // Get the lexer
+   AntlrInput* ai = static_cast<AntlrInput*>(getInput());
+   pANTLR3_LEXER lexer = ai->getAntlr3Lexer();
+diff --git a/src/parser/tptp/tptp.cpp b/src/parser/tptp/tptp.cpp
+index 93c2168..ab4ea14 100644
+--- a/src/parser/tptp/tptp.cpp
++++ src/parser/tptp/tptp.cpp
+@@ -128,11 +128,6 @@ bool newInputStream(std::string fileName, pANTLR3_LEXER lexer){
+ 
+ 
+ void Tptp::includeFile(std::string fileName){
+-  // security for online version
+-  if(!canIncludeFile()) {
+-    parseError("include-file feature was disabled for this run.");
+-  }
+-
+   // Get the lexer
+   AntlrInput * ai = static_cast<AntlrInput *>(getInput());
+   pANTLR3_LEXER lexer = ai->getAntlr3Lexer();
+diff --git a/src/printer/smt2/smt2_printer.cpp b/src/printer/smt2/smt2_printer.cpp
+index f4abee2..fc25740 100644
+--- a/src/printer/smt2/smt2_printer.cpp
++++ src/printer/smt2/smt2_printer.cpp
+@@ -172,12 +172,6 @@ void Smt2Printer::toStream(std::ostream& out, TNode n,
+       break;
+     }
+ 
+-    case kind::STORE_ALL: {
+-      ArrayStoreAll asa = n.getConst<ArrayStoreAll>();
+-      out << "(__array_store_all__ " << asa.getType() << " " << asa.getExpr() << ")";
+-      break;
+-    }
+-
+     case kind::SUBRANGE_TYPE: {
+       const SubrangeBounds& bounds = n.getConst<SubrangeBounds>();
+       // No way to represent subranges in SMT-LIBv2; this is inspired
+@@ -446,7 +440,6 @@ static string smtKindString(Kind k) throw() {
+     // arrays theory
+   case kind::SELECT: return "select";
+   case kind::STORE: return "store";
+-  case kind::STORE_ALL: return "__array_store_all__";
+   case kind::ARRAY_TYPE: return "Array";
+ 
+     // bv theory
+diff --git a/src/smt/boolean_terms.cpp b/src/smt/boolean_terms.cpp
+index b3e6961..166a695 100644
+--- a/src/smt/boolean_terms.cpp
++++ src/smt/boolean_terms.cpp
+@@ -487,39 +487,7 @@ Node BooleanTermConverter::rewriteBooleanTermsRec(TNode top, theory::TheoryId pa
+         } else if(t.isArray()) {
+           TypeNode indexType = convertType(t.getArrayIndexType(), false);
+           TypeNode constituentType = convertType(t.getArrayConstituentType(), false);
+-          if(indexType != t.getArrayIndexType() && constituentType == t.getArrayConstituentType()) {
+-            TypeNode newType = nm->mkArrayType(indexType, constituentType);
+-            Node n = nm->mkSkolem(top.getAttribute(expr::VarNameAttr()) + "'",
+-                                  newType, "an array variable introduced by Boolean-term conversion",
+-                                  NodeManager::SKOLEM_EXACT_NAME);
+-            top.setAttribute(BooleanTermAttr(), n);
+-            Debug("boolean-terms") << "constructed: " << n << " of type " << newType << endl;
+-            Node n_ff = nm->mkNode(kind::SELECT, n, d_ff);
+-            Node n_tt = nm->mkNode(kind::SELECT, n, d_tt);
+-            Node base = nm->mkConst(ArrayStoreAll(ArrayType(top.getType().toType()), (*TypeEnumerator(n_ff.getType())).toExpr()));
+-            Node repl = nm->mkNode(kind::STORE,
+-                                   nm->mkNode(kind::STORE, base, nm->mkConst(true),
+-                                              n_tt),
+-                                   nm->mkConst(false), n_ff);
+-            Debug("boolean-terms") << "array replacement: " << top << " => " << repl << endl;
+-            d_smt.d_theoryEngine->getModel()->addSubstitution(top, repl);
+-            d_termCache[make_pair(top, parentTheory)] = n;
+-            result.top() << n;
+-            worklist.pop();
+-            goto next_worklist;
+-          } else if(indexType == t.getArrayIndexType() && constituentType != t.getArrayConstituentType()) {
+-            TypeNode newType = nm->mkArrayType(indexType, constituentType);
+-            Node n = nm->mkSkolem(top.getAttribute(expr::VarNameAttr()) + "'",
+-                                  newType, "an array variable introduced by Boolean-term conversion",
+-                                  NodeManager::SKOLEM_EXACT_NAME);
+-            top.setAttribute(BooleanTermAttr(), n);
+-            Debug("boolean-terms") << "constructed: " << n << " of type " << newType << endl;
+-            d_smt.d_theoryEngine->getModel()->addSubstitution(top, n);
+-            d_termCache[make_pair(top, parentTheory)] = n;
+-            result.top() << n;
+-            worklist.pop();
+-            goto next_worklist;
+-          } else if(indexType != t.getArrayIndexType() && constituentType != t.getArrayConstituentType()) {
++          if(indexType != t.getArrayIndexType() || constituentType != t.getArrayConstituentType()) {
+             TypeNode newType = nm->mkArrayType(indexType, constituentType);
+             Node n = nm->mkSkolem(top.getAttribute(expr::VarNameAttr()) + "'",
+                                   newType, "an array variable introduced by Boolean-term conversion",
 diff --git a/src/smt/options b/src/smt/options
 index e5f9c2e..1da9563 100644
 --- a/src/smt/options
@@ -604,6 +905,29 @@ index ca89ce3..e830f39 100644
  
    // ensure it's a constant
    Assert(resultNode.getKind() == kind::LAMBDA || resultNode.isConst());
+diff --git a/src/theory/Makefile.am b/src/theory/Makefile.am
+index 2df698d..70962e6 100644
+--- a/src/theory/Makefile.am
++++ src/theory/Makefile.am
+@@ -3,7 +3,7 @@ AM_CPPFLAGS = \
+ 	-I@builddir@/.. -I@srcdir@/../include -I@srcdir@/..
+ AM_CXXFLAGS = -Wall -Wno-unknown-pragmas $(FLAG_VISIBILITY_HIDDEN)
+ 
+-SUBDIRS = builtin booleans uf arith bv arrays datatypes quantifiers rewriterules idl
++SUBDIRS = builtin booleans uf arith bv arrays datatypes quantifiers rewriterules
+ DIST_SUBDIRS = $(SUBDIRS) example
+ 
+ noinst_LTLIBRARIES = libtheory.la
+@@ -60,8 +60,7 @@ libtheory_la_LIBADD = \
+ 	@builddir@/bv/libbv.la \
+ 	@builddir@/datatypes/libdatatypes.la \
+ 	@builddir@/quantifiers/libquantifiers.la \
+-	@builddir@/rewriterules/librewriterules.la \
+-	@builddir@/idl/libidl.la
++	@builddir@/rewriterules/librewriterules.la
+ 
+ EXTRA_DIST = \
+ 	logic_info.i \
 diff --git a/src/theory/arith/theory_arith_type_rules.h b/src/theory/arith/theory_arith_type_rules.h
 index cc8451f..9c59b0f 100644
 --- a/src/theory/arith/theory_arith_type_rules.h
@@ -618,6 +942,1416 @@ index cc8451f..9c59b0f 100644
      }else{
        return nodeManager->realType();
      }
+diff --git a/src/theory/arrays/theory_arrays_rewriter.h b/src/theory/arrays/theory_arrays_rewriter.h
+index 5df06bd..18bbef8 100644
+--- a/src/theory/arrays/theory_arrays_rewriter.h
++++ src/theory/arrays/theory_arrays_rewriter.h
+@@ -36,10 +36,6 @@ namespace attr {
+ typedef expr::Attribute<attr::ArrayConstantMostFrequentValueCountTag, uint64_t> ArrayConstantMostFrequentValueCountAttr;
+ typedef expr::Attribute<attr::ArrayConstantMostFrequentValueTag, Node> ArrayConstantMostFrequentValueAttr;
+ 
+-static inline Node mkEqNode(Node a, Node b) {
+-  return a.getType().isBoolean() ? a.iffNode(b) : a.eqNode(b);
+-}
+-
+ class TheoryArraysRewriter {
+   static Node normalizeConstant(TNode node) {
+     return normalizeConstant(node, node[1].getType().getCardinality());
+@@ -248,7 +244,7 @@ public:
+             val = false;
+           }
+           else {
+-            n = Rewriter::rewrite(mkEqNode(store[1], index));
++            n = Rewriter::rewrite(store[1].eqNode(index));
+             if (n.getKind() != kind::CONST_BOOLEAN) {
+               break;
+             }
+@@ -305,7 +301,7 @@ public:
+             val = false;
+           }
+           else {
+-            Node eqRewritten = Rewriter::rewrite(mkEqNode(store[1], index));
++            Node eqRewritten = Rewriter::rewrite(store[1].eqNode(index));
+             if (eqRewritten.getKind() != kind::CONST_BOOLEAN) {
+               Trace("arrays-postrewrite") << "Arrays::postRewrite returning " << node << std::endl;
+               return RewriteResponse(REWRITE_DONE, node);
+@@ -344,7 +340,7 @@ public:
+                 val = false;
+               }
+               else {
+-                n = Rewriter::rewrite(mkEqNode(store[1], index));
++                n = Rewriter::rewrite(store[1].eqNode(index));
+                 if (n.getKind() != kind::CONST_BOOLEAN) {
+                   break;
+                 }
+@@ -420,7 +416,7 @@ public:
+             val = false;
+           }
+           else {
+-            n = Rewriter::rewrite(mkEqNode(store[1], index));
++            n = Rewriter::rewrite(store[1].eqNode(index));
+             if (n.getKind() != kind::CONST_BOOLEAN) {
+               break;
+             }
+@@ -470,7 +466,7 @@ public:
+             val = false;
+           }
+           else {
+-            Node eqRewritten = Rewriter::rewrite(mkEqNode(store[1], index));
++            Node eqRewritten = Rewriter::rewrite(store[1].eqNode(index));
+             if (eqRewritten.getKind() != kind::CONST_BOOLEAN) {
+               break;
+             }
+diff --git a/src/theory/idl/Makefile b/src/theory/idl/Makefile
+deleted file mode 100644
+index 75ae33c..0000000
+--- a/src/theory/idl/Makefile
++++ /dev/null
+@@ -1,4 +0,0 @@
+-topdir = ../../..
+-srcdir = src/theory/idl
+-
+-include $(topdir)/Makefile.subdir
+diff --git a/src/theory/idl/Makefile.am b/src/theory/idl/Makefile.am
+deleted file mode 100644
+index 4297e3b..0000000
+--- a/src/theory/idl/Makefile.am
++++ /dev/null
+@@ -1,19 +0,0 @@
+-AM_CPPFLAGS = \
+-	-D__BUILDING_CVC4LIB \
+-	-I@builddir@/../.. -I@srcdir@/../../include -I@srcdir@/../..
+-AM_CXXFLAGS = -Wall -Wno-unknown-pragmas $(FLAG_VISIBILITY_HIDDEN)
+-
+-noinst_LTLIBRARIES = libidl.la
+-
+-libidl_la_SOURCES = \
+-	idl_model.h \
+-	idl_model.cpp \
+-	idl_assertion.h \
+-	idl_assertion.cpp \
+-	idl_assertion_db.h \
+-	idl_assertion_db.cpp \
+-	theory_idl.h \
+-	theory_idl.cpp
+-
+-EXTRA_DIST = \
+-	kinds 
+diff --git a/src/theory/idl/idl_assertion.cpp b/src/theory/idl/idl_assertion.cpp
+deleted file mode 100644
+index 861dd0a..0000000
+--- a/src/theory/idl/idl_assertion.cpp
++++ /dev/null
+@@ -1,196 +0,0 @@
+-#include "theory/idl/idl_assertion.h"
+-
+-using namespace CVC4;
+-using namespace theory;
+-using namespace idl;
+-
+-IDLAssertion::IDLAssertion()
+-: d_op(kind::LAST_KIND)
+-{}
+-
+-IDLAssertion::IDLAssertion(TNode node) {
+-  bool ok = parse(node, 1, false);
+-  if (!ok) {
+-    d_x = d_y = TNode::null();
+-  } else {
+-    if (d_op == kind::GT) {
+-      // Turn GT into LT x - y > c is the same as y - x < -c
+-      std::swap(d_x, d_y);
+-      d_c = -d_c;
+-      d_op = kind::LT;
+-    }
+-    if (d_op == kind::GEQ) {
+-      // Turn GT into LT x - y >= c is the same as y - x <= -c
+-      std::swap(d_x, d_y);
+-      d_c = -d_c;
+-      d_op = kind::LEQ;
+-    }
+-    if (d_op == kind::LT) {
+-      // Turn strict into non-strict x - y < c is the same as x - y <= c-1
+-      d_c = d_c - 1;
+-      d_op = kind::LEQ;
+-    }
+-  }
+-  d_original = node;
+-}
+-
+-IDLAssertion::IDLAssertion(const IDLAssertion& other)
+-: d_x(other.d_x)
+-, d_y(other.d_y)
+-, d_op(other.d_op)
+-, d_c(other.d_c)
+-, d_original(other.d_original)
+-{}
+-
+-bool IDLAssertion::propagate(IDLModel& model) const {
+-  Debug("theory::idl::model") << model << std::endl;
+-  Assert(ok());
+-  // Should be d_x - d_y <= d_c, or d_x - d_c <= d_y
+-  Integer x_value = model.getValue(d_x);
+-  Integer y_value = model.getValue(d_y);
+-  if (x_value - y_value > d_c) {
+-    model.setValue(d_y, x_value - d_c, IDLReason(d_x, d_original));
+-    Debug("theory::idl::model") << model << std::endl;
+-    return true;
+-  } else {
+-    return false;
+-  }
+-}
+-
+-void IDLAssertion::toStream(std::ostream& out) const {
+-  out << "IDL[" << d_x << " - " << d_y << " " << d_op << " " << d_c << "]";
+-}
+-
+-/** Negates the given arithmetic kind */
+-static Kind negateOp(Kind op) {
+-  switch (op) {
+-  case kind::LT:
+-    // not (a < b) = (a >= b)
+-    return kind::GEQ;
+-  case kind::LEQ:
+-    // not (a <= b) = (a > b)
+-    return kind::GT;
+-  case kind::GT:
+-    // not (a > b) = (a <= b)
+-    return kind::LEQ;
+-  case kind::GEQ:
+-    // not (a >= b) = (a < b)
+-    return kind::LT;
+-  case kind::EQUAL:
+-    // not (a = b) = (a != b)
+-    return kind::DISTINCT;
+-  case kind::DISTINCT:
+-    // not (a != b) = (a = b)
+-    return kind::EQUAL;
+-  default:
+-    Unreachable();
+-    break;
+-  }
+-  return kind::LAST_KIND;
+-}
+-
+-bool IDLAssertion::parse(TNode node, int c, bool negated) {
+-
+-  // Only unit coefficients allowed
+-  if (c != 1 && c != -1) {
+-    return false;
+-  }
+-
+-  // Assume we're ok
+-  bool ok = true;
+-
+-  // The kind of the node
+-  switch(node.getKind()) {
+-
+-  case kind::NOT:
+-    // We parse the negation
+-    ok = parse(node[0], c, true);
+-    // Setup the kind
+-    if (ok) {
+-      d_op = negateOp(d_op);
+-    }
+-    break;
+-
+-  case kind::EQUAL:
+-  case kind::LT:
+-  case kind::LEQ:
+-  case kind::GT:
+-  case kind::GEQ: {
+-    // All relation operators are parsed on both sides
+-    d_op = node.getKind();
+-    ok = parse(node[0], c, negated);
+-    if (ok) {
+-      ok = parse(node[1],-c, negated);
+-    }
+-    break;
+-  }
+-
+-  case kind::CONST_RATIONAL: {
+-    // Constants
+-    Rational m = node.getConst<Rational>();
+-    if (m.isIntegral()) {
+-      d_c +=  m.getNumerator() * (-c);
+-    } else {
+-      ok = false;
+-    }
+-    break;
+-  }
+-  case kind::MULT: {
+-    // Only unit multiplication of variables
+-    if (node.getNumChildren() == 2 && node[0].isConst()) {
+-      Rational a = node[0].getConst<Rational>();
+-      if (a == 1 || a == -1) {
+-        ok = parse(node[1], c * a.sgn(), negated);
+-      } else {
+-        ok = false;
+-      }
+-    } else {
+-      ok = false;
+-    }
+-    break;
+-  }
+-
+-  case kind::PLUS: {
+-    for(unsigned i = 0; i < node.getNumChildren(); ++i) {
+-      ok = parse(node[i], c, negated);
+-      if(!ok) {
+-        break;
+-      }
+-    }
+-    break;
+-  }
+-
+-  case kind::MINUS: {
+-    ok = parse(node[0], c, negated);
+-    if (ok) {
+-      ok = parse(node[1], -c, negated);
+-    }
+-    break;
+-  }
+-
+-  case kind::UMINUS: {
+-    ok = parse(node[0], -c, negated);
+-    break;
+-  }
+-
+-  default: {
+-    if (c > 0) {
+-      if (d_x.isNull()) {
+-        d_x = node;
+-      } else {
+-        ok = false;
+-      }
+-    } else {
+-      if (d_y.isNull()) {
+-        d_y = node;
+-      } else {
+-        ok = false;
+-      }
+-    }
+-    break;
+-  }
+-  } // End case
+-
+-  // Difference logic OK
+-  return ok;
+-}
+diff --git a/src/theory/idl/idl_assertion.h b/src/theory/idl/idl_assertion.h
+deleted file mode 100644
+index 2ed5a6b..0000000
+--- a/src/theory/idl/idl_assertion.h
++++ /dev/null
+@@ -1,74 +0,0 @@
+-#pragma once
+-
+-#include "theory/idl/idl_model.h"
+-
+-namespace CVC4 {
+-namespace theory {
+-namespace idl {
+-
+-/**
+- * An internal representation of the IDL assertions. Each IDL assertions is
+- * of the form (x - y op c) where op is one of (<=, =, !=). IDL assertion
+- * can be constructed from an expression.
+- */
+-class IDLAssertion {
+-
+-  /** The positive variable */
+-  TNode d_x;
+-  /** The negative variable */
+-  TNode d_y;
+-  /** The relation */
+-  Kind d_op;
+-  /** The RHS constant */
+-  Integer d_c;
+-
+-  /** Original assertion we got this one from */
+-  TNode d_original;
+-
+-  /** Parses the given node into an assertion, and return true if OK. */
+-  bool parse(TNode node, int c = 1, bool negated = false);
+-
+-public:
+-
+-  /** Null assertion */
+-  IDLAssertion();
+-  /** Create the assertion from given node */
+-  IDLAssertion(TNode node);
+-  /** Copy constructor */
+-  IDLAssertion(const IDLAssertion& other);
+-
+-  TNode getX() const { return d_x; }
+-  TNode getY() const { return d_y; }
+-  Kind getOp() const { return d_op;}
+-  Integer getC() const { return d_c; }
+-
+-  /**
+-   * Propagate the constraint using the model. For example, if the constraint
+-   * is of the form x - y <= -1, and the value of x in the model is 0, then
+-   *
+-   *   (x - y <= -1) and (x = 0) implies y >= x + 1 = 1
+-   *
+-   * If the value of y is less then 1, is is set to 1 and true is returned. If
+-   * the value of y is 1 or more, than false is return.
+-   *
+-   * @return true if value of y was updated
+-   */
+-  bool propagate(IDLModel& model) const;
+-
+-  /** Is this constraint proper */
+-  bool ok() const {
+-    return !d_x.isNull() || !d_y.isNull();
+-  }
+-
+-  /** Output to the stream */
+-  void toStream(std::ostream& out) const;
+-};
+-
+-inline std::ostream& operator << (std::ostream& out, const IDLAssertion& assertion) {
+-  assertion.toStream(out);
+-  return out;
+-}
+-
+-}
+-}
+-}
+diff --git a/src/theory/idl/idl_assertion_db.cpp b/src/theory/idl/idl_assertion_db.cpp
+deleted file mode 100644
+index 7c27e9d..0000000
+--- a/src/theory/idl/idl_assertion_db.cpp
++++ /dev/null
+@@ -1,42 +0,0 @@
+-#include "theory/idl/idl_assertion_db.h"
+-
+-using namespace CVC4;
+-using namespace theory;
+-using namespace idl;
+-
+-IDLAssertionDB::IDLAssertionDB(context::Context* c)
+-: d_assertions(c)
+-, d_variableLists(c)
+-{}
+-
+-void IDLAssertionDB::add(const IDLAssertion& assertion, TNode var) {
+-  // Is there a list for the variable already?
+-  unsigned previous = -1;
+-  var_to_unsigned_map::iterator find = d_variableLists.find(var);
+-  if (find != d_variableLists.end()) {
+-    previous = (*find).second;
+-  }
+-  // Add to the DB
+-  d_variableLists[var] = d_assertions.size();
+-  d_assertions.push_back(IDLAssertionListElement(assertion, previous));
+-}
+-
+-IDLAssertionDB::iterator::iterator(IDLAssertionDB& db, TNode var)
+-: d_db(db)
+-, d_current(-1)
+-{
+-  var_to_unsigned_map::const_iterator find = d_db.d_variableLists.find(var);
+-  if (find != d_db.d_variableLists.end()) {
+-    d_current = (*find).second;
+-  }
+-}
+-
+-void IDLAssertionDB::iterator::next() {
+-  if (d_current != (unsigned)(-1)) {
+-    d_current = d_db.d_assertions[d_current].d_previous;
+-  }
+-}
+-
+-IDLAssertion IDLAssertionDB::iterator::get() const {
+-  return d_db.d_assertions[d_current].d_assertion;
+-}
+diff --git a/src/theory/idl/idl_assertion_db.h b/src/theory/idl/idl_assertion_db.h
+deleted file mode 100644
+index 3972819..0000000
+--- a/src/theory/idl/idl_assertion_db.h
++++ /dev/null
+@@ -1,69 +0,0 @@
+-#pragma once
+-
+-#include "theory/idl/idl_assertion.h"
+-#include "context/cdlist.h"
+-
+-namespace CVC4 {
+-namespace theory {
+-namespace idl {
+-
+-/**
+- * Context-dependent database assertions, organized by variable. Each variable
+- * can be associated a list of IDL assertions. The list of assertions can
+- * be iterated over using the provided iterator class.
+- */
+-class IDLAssertionDB {
+-
+-  /** Elements of the assertion lists */
+-  struct IDLAssertionListElement {
+-    /** The assertion itself */
+-    IDLAssertion d_assertion;
+-    /** The inndex of the previous element (-1 for null) */
+-    unsigned d_previous;
+-
+-    IDLAssertionListElement(const IDLAssertion& assertion, unsigned previous)
+-    : d_assertion(assertion), d_previous(previous)
+-    {}
+-  };
+-
+-  /** All assertions in a context dependent stack */
+-  context::CDList<IDLAssertionListElement> d_assertions;
+-
+-  typedef context::CDHashMap<TNode, unsigned, TNodeHashFunction> var_to_unsigned_map;
+-
+-  /** Map from variables to the first element of their list */
+-  var_to_unsigned_map d_variableLists;
+-
+-public:
+-
+-  /** Create a new assertion database */
+-  IDLAssertionDB(context::Context* c);
+-
+-  /** Add a new assertion, attach to the list of the given variable */
+-  void add(const IDLAssertion& assertion, TNode var);
+-
+-  /** Iteration over the constraints of a variable */
+-  class iterator {
+-    /** The database */
+-    const IDLAssertionDB& d_db;
+-    /** Index of the current constraint */
+-    unsigned d_current;
+-  public:
+-    /** Construct the iterator for the variable */
+-    iterator(IDLAssertionDB& db, TNode var);
+-    /** Is this iterator done */
+-    bool done() const { return d_current == (unsigned)(-1); }
+-    /** Next element */
+-    void next();
+-    /** Get the assertion */
+-    IDLAssertion get() const;
+-  };
+-};
+-
+-}
+-}
+-}
+-
+-
+-
+-
+diff --git a/src/theory/idl/idl_model.cpp b/src/theory/idl/idl_model.cpp
+deleted file mode 100644
+index 2feabd7..0000000
+--- a/src/theory/idl/idl_model.cpp
++++ /dev/null
+@@ -1,47 +0,0 @@
+-#include "theory/idl/idl_model.h"
+-
+-using namespace CVC4;
+-using namespace theory;
+-using namespace idl;
+-
+-IDLModel::IDLModel(context::Context* context)
+-: d_model(context)
+-, d_reason(context)
+-{}
+-
+-Integer IDLModel::getValue(TNode var) const {
+-  model_value_map::const_iterator find = d_model.find(var);
+-  if (find != d_model.end()) {
+-    return (*find).second;
+-  } else {
+-    return 0;
+-  }
+-}
+-
+-void IDLModel::setValue(TNode var, Integer value, IDLReason reason) {
+-  Assert(!reason.constraint.isNull());
+-  d_model[var] = value;
+-  d_reason[var] = reason;
+-}
+-
+-void IDLModel::getReasonCycle(TNode var, std::vector<TNode>& reasons) {
+-  TNode current = var;
+-  do {
+-    Debug("theory::idl::model") << "processing: " << var << std::endl;
+-    Assert(d_reason.find(current) != d_reason.end());
+-    IDLReason reason = d_reason[current];
+-    Debug("theory::idl::model") << "adding reason: " << reason.constraint << std::endl;
+-    reasons.push_back(reason.constraint);
+-    current = reason.x;
+-  } while (current != var);
+-}
+-
+-void IDLModel::toStream(std::ostream& out) const {
+-  model_value_map::const_iterator it = d_model.begin();
+-  model_value_map::const_iterator it_end = d_model.end();
+-  out << "Model[" << std::endl;
+-  for (; it != it_end; ++ it) {
+-    out << (*it).first << " -> " << (*it).second << std::endl;
+-  }
+-  out << "]";
+-}
+diff --git a/src/theory/idl/idl_model.h b/src/theory/idl/idl_model.h
+deleted file mode 100644
+index a1840a3..0000000
+--- a/src/theory/idl/idl_model.h
++++ /dev/null
+@@ -1,67 +0,0 @@
+-#pragma once
+-
+-#include "expr/node.h"
+-#include "context/cdhashmap.h"
+-
+-namespace CVC4 {
+-namespace theory {
+-namespace idl {
+-
+-/**
+- * A reason for a value of a variable in the model is a constraint that implies
+- * this value by means of the value of another variable. For example, if the
+- * value of x is 0, then the variable x and the constraint (y > 0) are a reason
+- * for the y taking the value 1.
+- */
+-struct IDLReason {
+-  /** The variable of the reason */
+-  TNode x;
+-  /** The constraint of the reaason */
+-  TNode constraint;
+-
+-  IDLReason(TNode x, TNode constraint)
+-  : x(x), constraint(constraint) {}
+-  IDLReason() {}
+-};
+-
+-/**
+- * A model maps variables to integer values and backs them up with reasons.
+- * Default values (if not set with setValue) for all variables are 0.
+- */
+-class IDLModel {
+-
+-  typedef context::CDHashMap<TNode, Integer, TNodeHashFunction> model_value_map;
+-  typedef context::CDHashMap<TNode, IDLReason, TNodeHashFunction> model_reason_map;
+-
+-  /** Values assigned to individual variables */
+-  model_value_map d_model;
+-
+-  /** Reasons constraining the individual variables */
+-  model_reason_map d_reason;
+-
+-public:
+-
+-  IDLModel(context::Context* context);
+-
+-  /** Get the model value of the variable */
+-  Integer getValue(TNode var) const;
+-
+-  /** Set the value of the variable */
+-  void setValue(TNode var, Integer value, IDLReason reason);
+-
+-  /** Get the cycle of reasons behind the variable var */
+-  void getReasonCycle(TNode var, std::vector<TNode>& reasons);
+-
+-  /** Output to the given stream */
+-  void toStream(std::ostream& out) const;
+-
+-};
+-
+-inline std::ostream& operator << (std::ostream& out, const IDLModel& model) {
+-  model.toStream(out);
+-  return out;
+-}
+-
+-}
+-}
+-}
+diff --git a/src/theory/idl/kinds b/src/theory/idl/kinds
+deleted file mode 100644
+index 6bf0218..0000000
+--- a/src/theory/idl/kinds
++++ /dev/null
+@@ -1,8 +0,0 @@
+-# kinds                                                               -*- sh -*-
+-#
+-# For documentation on this file format, please refer to
+-# src/theory/builtin/kinds.
+-#
+-
+-alternate THEORY_ARITH "idl" ::CVC4::theory::idl::TheoryIdl "theory/idl/theory_idl.h"
+-
+diff --git a/src/theory/idl/options b/src/theory/idl/options
+deleted file mode 100644
+index 0048353..0000000
+--- a/src/theory/idl/options
++++ /dev/null
+@@ -1,10 +0,0 @@
+-#
+-# Option specification file for CVC4
+-# See src/options/base_options for a description of this file format
+-#
+-
+-module IDL "theory/idl/options.h" Idl
+-
+-option idlRewriteEq --enable-idl-rewrite-equalities/--disable-idl-rewrite-equalities bool :default false :read-write
+-
+-endmodule
+diff --git a/src/theory/idl/theory_idl.cpp b/src/theory/idl/theory_idl.cpp
+deleted file mode 100644
+index bf2297d..0000000
+--- a/src/theory/idl/theory_idl.cpp
++++ /dev/null
+@@ -1,126 +0,0 @@
+-#include "theory/idl/theory_idl.h"
+-#include "theory/idl/options.h"
+-#include "theory/rewriter.h"
+-
+-#include <set>
+-#include <queue>
+-
+-using namespace std;
+-
+-using namespace CVC4;
+-using namespace theory;
+-using namespace idl;
+-
+-TheoryIdl::TheoryIdl(context::Context* c, context::UserContext* u, OutputChannel& out,
+-                     Valuation valuation, const LogicInfo& logicInfo, QuantifiersEngine* qe)
+-: Theory(THEORY_ARITH, c, u, out, valuation, logicInfo, qe)
+-, d_model(c)
+-, d_assertionsDB(c)
+-{}
+-
+-Node TheoryIdl::ppRewrite(TNode atom) {
+-  if (atom.getKind() == kind::EQUAL  && options::idlRewriteEq()) {
+-    // If the option is turned on, each equality into two inequalities. This in
+-    // effect removes equalities, and theorefore dis-equalities too.
+-    Node leq = NodeBuilder<2>(kind::LEQ) << atom[0] << atom[1];
+-    Node geq = NodeBuilder<2>(kind::GEQ) << atom[0] << atom[1];
+-    Node rewritten = Rewriter::rewrite(leq.andNode(geq));
+-    return rewritten;
+-  } else {
+-    return atom;
+-  }
+-}
+-
+-void TheoryIdl::check(Effort level) {
+-
+-  while(!done()) {
+-
+-    // Get the next assertion
+-    Assertion assertion = get();
+-    Debug("theory::idl") << "TheoryIdl::check(): processing " << assertion.assertion << std::endl;
+-
+-    // Convert the assertion into the internal representation
+-    IDLAssertion idlAssertion(assertion.assertion);
+-    Debug("theory::idl") << "TheoryIdl::check(): got " << idlAssertion << std::endl;
+-
+-    if (idlAssertion.ok()) {
+-      if (idlAssertion.getOp() == kind::DISTINCT) {
+-        // We don't handle dis-equalities
+-        d_out->setIncomplete();
+-      } else {
+-        // Process the convex assertions immediately
+-        bool ok = processAssertion(idlAssertion);
+-        if (!ok) {
+-          // In conflict, we're done
+-          return;
+-        }
+-      }
+-    } else {
+-      // Not an IDL assertion, set incomplete
+-      d_out->setIncomplete();
+-    }
+-  }
+-
+-}
+-
+-bool TheoryIdl::processAssertion(const IDLAssertion& assertion) {
+-
+-  Debug("theory::idl") << "TheoryIdl::processAssertion(" << assertion << ")" << std::endl;
+-
+-  // Add the constraint (x - y op c) to the list assertions of x
+-  d_assertionsDB.add(assertion, assertion.getX());
+-
+-  // Update the model, if forced by the assertion
+-  bool y_updated = assertion.propagate(d_model);
+-
+-  // If the value of y was updated, we might need to update further
+-  if (y_updated) {
+-
+-    std::queue<TNode> queue; // Queue of variables to consider
+-    std::set<TNode> inQueue; // Current elements of the queue
+-
+-    // Add the first updated variable to the queue
+-    queue.push(assertion.getY());
+-    inQueue.insert(assertion.getY());
+-
+-    while (!queue.empty()) {
+-      // Pop a new variable x off the queue
+-      TNode x = queue.front();
+-      queue.pop();
+-      inQueue.erase(x);
+-
+-      // Go through the constraint (x - y op c), and update values of y
+-      IDLAssertionDB::iterator it(d_assertionsDB, x);
+-      while (!it.done()) {
+-        // Get the assertion and update y
+-        IDLAssertion x_y_assertion = it.get();
+-        y_updated = x_y_assertion.propagate(d_model);
+-        // If updated add to the queue
+-        if (y_updated) {
+-          // If the variable that we updated is the same as the first
+-          // variable that we updated, it's a cycle of updates => conflict
+-          if (x_y_assertion.getY() == assertion.getX()) {
+-            std::vector<TNode> reasons;
+-            d_model.getReasonCycle(x_y_assertion.getY(), reasons);
+-            // Construct the reason of the conflict
+-            Node conflict = NodeManager::currentNM()->mkNode(kind::AND, reasons);
+-            d_out->conflict(conflict);
+-            return false;
+-          } else {
+-            // No cycle, just a model update, so we add to the queue
+-            TNode y = x_y_assertion.getY();
+-            if (inQueue.count(y) == 0) {
+-              queue.push(y);
+-              inQueue.insert(x_y_assertion.getY());
+-            }
+-          }
+-        }
+-        // Go to the next constraint
+-        it.next();
+-      }
+-    }
+-  }
+-
+-  // Everything fine, no conflict
+-  return true;
+-}
+diff --git a/src/theory/idl/theory_idl.h b/src/theory/idl/theory_idl.h
+deleted file mode 100644
+index 25b9929..0000000
+--- a/src/theory/idl/theory_idl.h
++++ /dev/null
+@@ -1,46 +0,0 @@
+-#pragma once
+-
+-#include "cvc4_private.h"
+-
+-#include "theory/theory.h"
+-#include "theory/idl/idl_model.h"
+-#include "theory/idl/idl_assertion_db.h"
+-
+-namespace CVC4 {
+-namespace theory {
+-namespace idl {
+-
+-/**
+- * Handles integer difference logic (IDL) constraints.
+- */
+-class TheoryIdl : public Theory {
+-
+-  /** The current model */
+-  IDLModel d_model;
+-
+-  /** The asserted constraints, organized by variable */
+-  IDLAssertionDB d_assertionsDB;
+-
+-  /** Process a new assertion, returns false if in conflict */
+-  bool processAssertion(const IDLAssertion& assertion);
+-
+-public:
+-
+-  /** Theory constructor. */
+-  TheoryIdl(context::Context* c, context::UserContext* u, OutputChannel& out,
+-            Valuation valuation, const LogicInfo& logicInfo, QuantifiersEngine* qe);
+-
+-  /** Pre-processing of input atoms */
+-  Node ppRewrite(TNode atom);
+-
+-  /** Check the assertions for satisfiability */
+-  void check(Effort effort);
+-
+-  /** Identity string */
+-  std::string identify() const { return "THEORY_IDL"; }
+-
+-};/* class TheoryIdl */
+-
+-}/* CVC4::theory::idl namespace */
+-}/* CVC4::theory namespace */
+-}/* CVC4 namespace */
+diff --git a/src/theory/quantifiers/Makefile.am b/src/theory/quantifiers/Makefile.am
+index 0339fbc..60f2ee7 100644
+--- a/src/theory/quantifiers/Makefile.am
++++ src/theory/quantifiers/Makefile.am
+@@ -48,9 +48,7 @@ libquantifiers_la_SOURCES = \
+ 	bounded_integers.h \
+ 	bounded_integers.cpp \
+ 	first_order_reasoning.h \
+-	first_order_reasoning.cpp \
+-	rewrite_engine.h \
+-	rewrite_engine.cpp
++	first_order_reasoning.cpp
+ 
+ EXTRA_DIST = \
+ 	kinds \
+diff --git a/src/theory/quantifiers/inst_match_generator.cpp b/src/theory/quantifiers/inst_match_generator.cpp
+index 5036234..87c39f0 100644
+--- a/src/theory/quantifiers/inst_match_generator.cpp
++++ src/theory/quantifiers/inst_match_generator.cpp
+@@ -38,10 +38,10 @@ InstMatchGenerator::InstMatchGenerator( Node pat, int matchPolicy ) : d_matchPol
+   d_next = NULL;
+ }
+ 
+-void InstMatchGenerator::setActiveAdd(bool val){
+-  d_active_add = val;
++void InstMatchGenerator::setActiveAdd(){
++  d_active_add = true;
+   if( d_next!=NULL ){
+-    d_next->setActiveAdd(val);
++    d_next->setActiveAdd();
+   }
+ }
+ 
+@@ -310,20 +310,18 @@ bool InstMatchGenerator::getMatchArithmetic( Node t, InstMatch& m, QuantifiersEn
+ 
+ /** reset instantiation round */
+ void InstMatchGenerator::resetInstantiationRound( QuantifiersEngine* qe ){
+-  if( !d_match_pattern.isNull() ){
+-    Debug("matching-debug2") << this << " reset instantiation round." << std::endl;
+-    d_needsReset = true;
++  if( d_match_pattern.isNull() ){
++    for( int i=0; i<(int)d_children.size(); i++ ){
++      d_children[i]->resetInstantiationRound( qe );
++    }
++  }else{
+     if( d_cg ){
+       d_cg->resetInstantiationRound();
+     }
+   }
+-  if( d_next ){
+-    d_next->resetInstantiationRound( qe );
+-  }
+ }
+ 
+ void InstMatchGenerator::reset( Node eqc, QuantifiersEngine* qe ){
+-  Debug("matching-debug2") << this << " reset " << eqc << "." << std::endl;
+   if( !eqc.isNull() ){
+     d_eq_class = eqc;
+   }
+@@ -331,22 +329,16 @@ void InstMatchGenerator::reset( Node eqc, QuantifiersEngine* qe ){
+   //we are producing matches for f(E) ~ t, where E is a non-ground vector of terms, and t is a ground term
+   //just look in equivalence class of the RHS
+   d_cg->reset( d_eq_class.getKind()==INST_CONSTANT ? Node::null() : d_eq_class );
+-  d_needsReset = false;
+ }
+ 
+ bool InstMatchGenerator::getNextMatch( Node f, InstMatch& m, QuantifiersEngine* qe ){
+-  if( d_needsReset ){
+-    Debug("matching") << "Reset not done yet, must do the reset..." << std::endl;
+-    reset( d_eq_class.getKind()==INST_CONSTANT ? Node::null() : d_eq_class, qe );
+-  }
+   m.d_matched = Node::null();
+-  Debug("matching") << this << " " << d_match_pattern << " get next match " << m << " in eq class " << d_eq_class << std::endl;
++  //Debug("matching") << this << " " << d_pattern << " get next match 2 " << m << " in eq class " << d_eq_class << std::endl;
+   bool success = false;
+   Node t;
+   do{
+     //get the next candidate term t
+     t = d_cg->getNextCandidate();
+-    Debug("matching-debug2") << "Matching candidate : " << t << std::endl;
+     //if t not null, try to fit it into match m
+     if( !t.isNull() && t.getType()==d_match_pattern.getType() ){
+       success = getMatch( f, t, m, qe );
+@@ -354,7 +346,7 @@ bool InstMatchGenerator::getNextMatch( Node f, InstMatch& m, QuantifiersEngine*
+   }while( !success && !t.isNull() );
+   m.d_matched = t;
+   if( !success ){
+-    Debug("matching") << this << " failed, reset " << d_eq_class << std::endl;
++    //Debug("matching") << this << " failed, reset " << d_eq_class << std::endl;
+     //we failed, must reset
+     reset( d_eq_class.getKind()==INST_CONSTANT ? Node::null() : d_eq_class, qe );
+   }
+diff --git a/src/theory/quantifiers/inst_match_generator.h b/src/theory/quantifiers/inst_match_generator.h
+index 9f856a5..4c954fa 100644
+--- a/src/theory/quantifiers/inst_match_generator.h
++++ src/theory/quantifiers/inst_match_generator.h
+@@ -44,14 +44,13 @@ public:
+   /** add ground term t, called when t is added to term db */
+   virtual int addTerm( Node f, Node t, QuantifiersEngine* qe ) = 0;
+   /** set active add */
+-  virtual void setActiveAdd( bool val ) {}
++  virtual void setActiveAdd() {}
+ };/* class IMGenerator */
+ 
+ class CandidateGenerator;
+ 
+ class InstMatchGenerator : public IMGenerator {
+ private:
+-  bool d_needsReset;
+   /** candidate generator */
+   CandidateGenerator* d_cg;
+   /** policy to use for matching */
+@@ -109,7 +108,7 @@ public:
+   int addTerm( Node f, Node t, QuantifiersEngine* qe );
+ 
+   bool d_active_add;
+-  void setActiveAdd( bool val );
++  void setActiveAdd();
+ 
+   static InstMatchGenerator* mkInstMatchGenerator( Node pat, QuantifiersEngine* qe );
+   static InstMatchGenerator* mkInstMatchGenerator( std::vector< Node >& pats, QuantifiersEngine* qe );
+diff --git a/src/theory/quantifiers/instantiation_engine.cpp b/src/theory/quantifiers/instantiation_engine.cpp
+index 38ee4a5..77df694 100644
+--- a/src/theory/quantifiers/instantiation_engine.cpp
++++ src/theory/quantifiers/instantiation_engine.cpp
+@@ -197,7 +197,6 @@ void InstantiationEngine::check( Theory::Effort e ){
+                          << d_quantEngine->getModel()->getNumAssertedQuantifiers() << std::endl;
+     for( int i=0; i<(int)d_quantEngine->getModel()->getNumAssertedQuantifiers(); i++ ){
+       Node n = d_quantEngine->getModel()->getAssertedQuantifier( i );
+-      //it is not active if we have found the skolemized negation is unsat
+       if( options::cbqi() && hasAddedCbqiLemma( n ) ){
+         Node cel = d_quantEngine->getTermDatabase()->getCounterexampleLiteral( n );
+         bool active, value;
+@@ -227,9 +226,6 @@ void InstantiationEngine::check( Theory::Effort e ){
+           Debug("quantifiers") << ", ce is asserted";
+         }
+         Debug("quantifiers") << std::endl;
+-      //it is not active if it corresponds to a rewrite rule: we will process in rewrite engine
+-      }else if( n.hasAttribute(QRewriteRuleAttribute()) ){
+-        d_quant_active[n] = false;
+       }else{
+         d_quant_active[n] = true;
+         quantActive = true;
+diff --git a/src/theory/quantifiers/model_builder.cpp b/src/theory/quantifiers/model_builder.cpp
+index fbf3ce5..88fb7cd 100644
+--- a/src/theory/quantifiers/model_builder.cpp
++++ src/theory/quantifiers/model_builder.cpp
+@@ -39,10 +39,6 @@ TheoryEngineModelBuilder( qe->getTheoryEngine() ), d_curr_model( c, NULL ), d_qe
+   d_addedLemmas = 0;
+ }
+ 
+-bool QModelBuilder::isQuantifierActive( Node f ) {
+-  return !f.hasAttribute(QRewriteRuleAttribute());
+-}
+-
+ 
+ bool QModelBuilder::optUseModel() {
+   return options::fmfModelBasedInst();
+@@ -359,8 +355,7 @@ QModelBuilderIG::Statistics::~Statistics(){
+ }
+ 
+ bool QModelBuilderIG::isQuantifierActive( Node f ){
+-  return !f.hasAttribute(QRewriteRuleAttribute()) &&
+-         ( d_considerAxioms || !f.getAttribute(AxiomAttribute()) ) && d_quant_sat.find( f )==d_quant_sat.end();
++  return ( d_considerAxioms || !f.getAttribute(AxiomAttribute()) ) && d_quant_sat.find( f )==d_quant_sat.end();
+ }
+ 
+ bool QModelBuilderIG::isTermActive( Node n ){
+diff --git a/src/theory/quantifiers/model_builder.h b/src/theory/quantifiers/model_builder.h
+index 708688c..7156129 100644
+--- a/src/theory/quantifiers/model_builder.h
++++ src/theory/quantifiers/model_builder.h
+@@ -37,7 +37,7 @@ public:
+   QModelBuilder( context::Context* c, QuantifiersEngine* qe );
+   virtual ~QModelBuilder(){}
+   // is quantifier active?
+-  virtual bool isQuantifierActive( Node f );
++  virtual bool isQuantifierActive( Node f ) { return true; }
+   //do exhaustive instantiation
+   virtual bool doExhaustiveInstantiation( FirstOrderModel * fm, Node f, int effort, int & lemmas ) { return false; }
+   //whether to construct model
+diff --git a/src/theory/quantifiers/model_engine.cpp b/src/theory/quantifiers/model_engine.cpp
+index 0f756dc..32deb9e 100644
+--- a/src/theory/quantifiers/model_engine.cpp
++++ src/theory/quantifiers/model_engine.cpp
+@@ -168,6 +168,14 @@ int ModelEngine::checkModel(){
+       }
+     }
+   }
++  //full model checking: construct models for all functions
++  /*
++  if( d_fmc.isActive() ){
++    for (std::map< Node, uf::UfModelTreeGenerator >::iterator it = fm->d_uf_model_gen.begin(); it != fm->d_uf_model_gen.end(); ++it) {
++      d_fmc.getModel(fm, it->first);
++    }
++  }
++  */
+   //compute the relevant domain if necessary
+   //if( optUseRelevantDomain() ){
+   //}
+@@ -219,7 +227,6 @@ int ModelEngine::checkModel(){
+ 
+ int ModelEngine::exhaustiveInstantiate( Node f, int effort ){
+   int addedLemmas = 0;
+-  //first check if the builder can do the exhaustive instantiation
+   if( !d_builder->doExhaustiveInstantiation( d_quantEngine->getModel(), f, effort, addedLemmas ) ){
+     Trace("inst-fmf-ei") << "Exhaustive instantiate " << f << ", effort = " << effort << "..." << std::endl;
+     Debug("inst-fmf-ei") << "   Instantiation Constants: ";
+diff --git a/src/theory/quantifiers/options b/src/theory/quantifiers/options
+index a0e42c4..e830147 100644
+--- a/src/theory/quantifiers/options
++++ src/theory/quantifiers/options
+@@ -24,8 +24,8 @@ option prenexQuant /--disable-prenex-quant bool :default true
+ # Whether to variable-eliminate quantifiers.
+ # For example, forall x y. ( P( x, y ) V x != c ) will be rewritten to
+ #   forall y. P( c, y )
+-option varElimQuant /--disable-var-elim-quant bool :default true
+- disable simple variable elimination for quantified formulas
++option varElimQuant --var-elim-quant bool :default false
++ enable variable elimination of quantified formulas
+ 
+ # Whether to CNF quantifier bodies
+ option cnfQuant --cnf-quant bool :default false
+diff --git a/src/theory/quantifiers/quantifiers_rewriter.cpp b/src/theory/quantifiers/quantifiers_rewriter.cpp
+index b087521..9f156b6 100644
+--- a/src/theory/quantifiers/quantifiers_rewriter.cpp
++++ src/theory/quantifiers/quantifiers_rewriter.cpp
+@@ -307,7 +307,7 @@ Node QuantifiersRewriter::computeSimpleIteLift( Node body ) {
+ }
+ 
+ Node QuantifiersRewriter::computeVarElimination( Node body, std::vector< Node >& args, Node& ipl ){
+-  Trace("var-elim-quant-debug") << "Compute var elimination for " << body << std::endl;
++  Trace("var-elim-quant") << "Compute var elimination for " << body << std::endl;
+   QuantPhaseReq qpr( body );
+   std::vector< Node > vars;
+   std::vector< Node > subs;
+diff --git a/src/theory/quantifiers/rewrite_engine.cpp b/src/theory/quantifiers/rewrite_engine.cpp
+deleted file mode 100755
+index 5a35e38..0000000
+--- a/src/theory/quantifiers/rewrite_engine.cpp
++++ /dev/null
+@@ -1,115 +0,0 @@
+-/*********************                                                        */
+-/*! \file bounded_integers.cpp
+- ** \verbatim
+- ** Original author: Andrew Reynolds
+- ** This file is part of the CVC4 project.
+- ** Copyright (c) 2009-2013  New York University and The University of Iowa
+- ** See the file COPYING in the top-level source directory for licensing
+- ** information.\endverbatim
+- **
+- ** \brief Rewrite engine module
+- **
+- ** This class manages rewrite rules for quantifiers
+- **/
+-
+-#include "theory/quantifiers/rewrite_engine.h"
+-#include "theory/quantifiers/quant_util.h"
+-#include "theory/quantifiers/first_order_model.h"
+-#include "theory/quantifiers/model_engine.h"
+-#include "theory/quantifiers/options.h"
+-#include "theory/quantifiers/inst_match_generator.h"
+-
+-using namespace CVC4;
+-using namespace std;
+-using namespace CVC4::theory;
+-using namespace CVC4::theory::quantifiers;
+-using namespace CVC4::kind;
+-
+-RewriteEngine::RewriteEngine( context::Context* c, QuantifiersEngine* qe ) : QuantifiersModule(qe) {
+-
+-}
+-
+-void RewriteEngine::check( Theory::Effort e ) {
+-  if( e==Theory::EFFORT_FULL ){
+-    //apply rewrite rules
+-    int addedLemmas = 0;
+-    for( unsigned i=0; i<d_rr_quant.size(); i++ ) {
+-      addedLemmas += checkRewriteRule( d_rr_quant[i] );
+-    }
+-    Trace("rewrite-engine") << "Rewrite engine generated " << addedLemmas << " lemmas." << std::endl;
+-    if (addedLemmas==0) {
+-    }else{
+-      //otherwise, the search will continue
+-      d_quantEngine->flushLemmas( &d_quantEngine->getOutputChannel() );
+-    }
+-  }
+-}
+-
+-int RewriteEngine::checkRewriteRule( Node f ) {
+-  Trace("rewrite-engine-inst") << "Check " << f << "..." << std::endl;
+-  int addedLemmas = 0;
+-  //reset triggers
+-  Node rr = f.getAttribute(QRewriteRuleAttribute());
+-  if( d_rr_triggers.find(f)==d_rr_triggers.end() ){
+-    std::vector< inst::Trigger * > triggers;
+-    if( f.getNumChildren()==3 ){
+-      for(unsigned i=0; i<f[2].getNumChildren(); i++ ){
+-        Node pat = f[2][i];
+-        std::vector< Node > nodes;
+-        Trace("rewrite-engine-trigger") << "Trigger is : ";
+-        for( int j=0; j<(int)pat.getNumChildren(); j++ ){
+-          Node p = d_quantEngine->getTermDatabase()->getInstConstantNode( pat[j], f );
+-          nodes.push_back( p );
+-          Trace("rewrite-engine-trigger") << p << " " << p.getKind() << " ";
+-        }
+-        Trace("rewrite-engine-trigger") << std::endl;
+-        Assert( inst::Trigger::isUsableTrigger( nodes, f ) );
+-        inst::Trigger * tr = inst::Trigger::mkTrigger( d_quantEngine, f, nodes, 0, true, inst::Trigger::TR_MAKE_NEW, false );
+-        tr->getGenerator()->setActiveAdd(false);
+-        triggers.push_back( tr );
+-      }
+-    }
+-    d_rr_triggers[f].insert( d_rr_triggers[f].end(), triggers.begin(), triggers.end() );
+-  }
+-  for( unsigned i=0; i<d_rr_triggers[f].size(); i++ ){
+-    Trace("rewrite-engine-inst") << "Try trigger " << *d_rr_triggers[f][i] << std::endl;
+-    d_rr_triggers[f][i]->resetInstantiationRound();
+-    d_rr_triggers[f][i]->reset( Node::null() );
+-    bool success;
+-    do
+-    {
+-      InstMatch m;
+-      success = d_rr_triggers[f][i]->getNextMatch( f, m );
+-      if( success ){
+-        //see if instantiation is true in the model
+-        bool trueInModel = false;
+-
+-        if( !trueInModel ){
+-          Trace("rewrite-engine-inst") << "Add instantiation : " << m << std::endl;
+-          if( d_quantEngine->addInstantiation( f, m ) ){
+-            addedLemmas++;
+-            Trace("rewrite-engine-inst-debug") << "success" << std::endl;
+-          }else{
+-            Trace("rewrite-engine-inst-debug") << "failure." << std::endl;
+-          }
+-        }
+-      }
+-    }while(success);
+-  }
+-  Trace("rewrite-engine-inst") << "Rule " << f << " generated " << addedLemmas << " lemmas." << std::endl;
+-  return addedLemmas;
+-}
+-
+-void RewriteEngine::registerQuantifier( Node f ) {
+-  if( f.hasAttribute(QRewriteRuleAttribute()) ){
+-    Trace("rewrite-engine") << "Register quantifier " << f << std::endl;
+-    Node rr = f.getAttribute(QRewriteRuleAttribute());
+-    Trace("rewrite-engine") << "  rewrite rule is : " << rr << std::endl;
+-    d_rr_quant.push_back( f );
+-  }
+-}
+-
+-void RewriteEngine::assertNode( Node n ) {
+-
+-}
+-
+diff --git a/src/theory/quantifiers/rewrite_engine.h b/src/theory/quantifiers/rewrite_engine.h
+deleted file mode 100755
+index 5160af6..0000000
+--- a/src/theory/quantifiers/rewrite_engine.h
++++ /dev/null
+@@ -1,51 +0,0 @@
+-/*********************                                                        */
+-/*! \file bounded_integers.h
+-** \verbatim
+-** Original author: Andrew Reynolds
+-** This file is part of the CVC4 project.
+-** Copyright (c) 2009-2013  New York University and The University of Iowa
+-** See the file COPYING in the top-level source directory for licensing
+-** information.\endverbatim
+-**
+-** \brief This class manages integer bounds for quantifiers
+-**/
+-
+-#include "cvc4_private.h"
+-
+-#ifndef __CVC4__REWRITE_ENGINE_H
+-#define __CVC4__REWRITE_ENGINE_H
+-
+-#include "theory/quantifiers_engine.h"
+-#include "theory/quantifiers/trigger.h"
+-
+-#include "context/context.h"
+-#include "context/context_mm.h"
+-#include "context/cdchunk_list.h"
+-
+-namespace CVC4 {
+-namespace theory {
+-namespace quantifiers {
+-
+-class RewriteEngine : public QuantifiersModule
+-{
+-  typedef context::CDHashMap<Node, bool, NodeHashFunction> NodeBoolMap;
+-  typedef context::CDHashMap<Node, int, NodeHashFunction> NodeIntMap;
+-  typedef context::CDHashMap<Node, Node, NodeHashFunction> NodeNodeMap;
+-  std::vector< Node > d_rr_quant;
+-  /** explicitly provided patterns */
+-  std::map< Node, std::vector< inst::Trigger* > > d_rr_triggers;
+-private:
+-  int checkRewriteRule( Node f );
+-public:
+-  RewriteEngine( context::Context* c, QuantifiersEngine* qe );
+-
+-  void check( Theory::Effort e );
+-  void registerQuantifier( Node f );
+-  void assertNode( Node n );
+-};
+-
+-}
+-}
+-}
+-
+-#endif
+\ No newline at end of file
+diff --git a/src/theory/quantifiers/term_database.h b/src/theory/quantifiers/term_database.h
+index fb59645..7b5df2a 100644
+--- a/src/theory/quantifiers/term_database.h
++++ src/theory/quantifiers/term_database.h
+@@ -64,11 +64,6 @@ typedef expr::Attribute<HasBoundVarAttributeId, bool> HasBoundVarAttribute;
+ struct HasBoundVarComputedAttributeId {};
+ typedef expr::Attribute<HasBoundVarComputedAttributeId, bool> HasBoundVarComputedAttribute;
+ 
+-//for rewrite rules
+-struct QRewriteRuleAttributeId {};
+-typedef expr::Attribute<QRewriteRuleAttributeId, Node> QRewriteRuleAttribute;
+-
+-
+ class QuantifiersEngine;
+ 
+ namespace inst{
+diff --git a/src/theory/quantifiers/trigger.cpp b/src/theory/quantifiers/trigger.cpp
+index b71a148..fea8ab6 100644
+--- a/src/theory/quantifiers/trigger.cpp
++++ src/theory/quantifiers/trigger.cpp
+@@ -44,7 +44,7 @@ d_quantEngine( qe ), d_f( f ){
+         d_mg = new InstMatchGeneratorSimple( f, d_nodes[0] );
+       }else{
+         d_mg = InstMatchGenerator::mkInstMatchGenerator( d_nodes[0], qe );
+-        d_mg->setActiveAdd(true);
++        d_mg->setActiveAdd();
+       }
+     }else{
+       d_mg = new InstMatchGeneratorMulti( f, d_nodes, qe, matchOption );
+@@ -53,7 +53,7 @@ d_quantEngine( qe ), d_f( f ){
+     }
+   }else{
+     d_mg = InstMatchGenerator::mkInstMatchGenerator( d_nodes, qe );
+-    d_mg->setActiveAdd(true);
++    d_mg->setActiveAdd();
+   }
+   if( d_nodes.size()==1 ){
+     if( isSimpleTrigger( d_nodes[0] ) ){
+@@ -301,7 +301,7 @@ Node Trigger::getIsUsableTrigger( Node n, Node f, bool pol, bool hasPol ) {
+     }
+   }
+   bool usable = quantifiers::TermDb::getInstConstAttr(n)==f && isAtomicTrigger( n ) && isUsable( n, f );
+-  Trace("usable") << n << " usable : " << (quantifiers::TermDb::getInstConstAttr(n)==f) << " " << isAtomicTrigger( n ) << " " << isUsable( n, f ) << std::endl;
++  Trace("usable") << n << " usable : " << usable << std::endl;
+   if( usable ){
+     return n;
+   }else{
+diff --git a/src/theory/quantifiers_engine.cpp b/src/theory/quantifiers_engine.cpp
+index 94bc475..c663e1a 100644
+--- a/src/theory/quantifiers_engine.cpp
++++ src/theory/quantifiers_engine.cpp
+@@ -28,7 +28,6 @@
+ #include "theory/rewriterules/efficient_e_matching.h"
+ #include "theory/rewriterules/rr_trigger.h"
+ #include "theory/quantifiers/bounded_integers.h"
+-#include "theory/quantifiers/rewrite_engine.h"
+ 
+ using namespace std;
+ using namespace CVC4;
+@@ -63,15 +62,9 @@ d_lemmas_produced_c(u){
+   }else{
+     d_inst_engine = NULL;
+   }
+-  bool reqModel = options::finiteModelFind() || options::rewriteRulesAsAxioms();
+-  if( reqModel ){
++  if( options::finiteModelFind() ){
+     d_model_engine = new quantifiers::ModelEngine( c, this );
+     d_modules.push_back( d_model_engine );
+-  }else{
+-    d_model_engine = NULL;
+-  }
+-
+-  if( options::finiteModelFind() ){
+     if( options::fmfBoundInt() ){
+       d_bint = new quantifiers::BoundedIntegers( c, this );
+       d_modules.push_back( d_bint );
+@@ -79,14 +72,9 @@ d_lemmas_produced_c(u){
+       d_bint = NULL;
+     }
+   }else{
++    d_model_engine = NULL;
+     d_bint = NULL;
+   }
+-  if( options::rewriteRulesAsAxioms() ){
+-    d_rr_engine = new quantifiers::RewriteEngine( c, this );
+-    d_modules.push_back(d_rr_engine);
+-  }else{
+-    d_rr_engine = NULL;
+-  }
+ 
+   //options
+   d_optInstCheckDuplicate = true;
+diff --git a/src/theory/quantifiers_engine.h b/src/theory/quantifiers_engine.h
+index 40b0437..2ff2100 100644
+--- a/src/theory/quantifiers_engine.h
++++ src/theory/quantifiers_engine.h
+@@ -60,13 +60,11 @@ public:
+ };/* class QuantifiersModule */
+ 
+ namespace quantifiers {
+-  class TermDb;
+-  class FirstOrderModel;
+-  //modules
+   class InstantiationEngine;
+   class ModelEngine;
++  class TermDb;
++  class FirstOrderModel;
+   class BoundedIntegers;
+-  class RewriteEngine;
+ }/* CVC4::theory::quantifiers */
+ 
+ namespace inst {
+@@ -90,6 +88,10 @@ private:
+   TheoryEngine* d_te;
+   /** vector of modules for quantifiers */
+   std::vector< QuantifiersModule* > d_modules;
++  /** instantiation engine */
++  quantifiers::InstantiationEngine* d_inst_engine;
++  /** model engine */
++  quantifiers::ModelEngine* d_model_engine;
+   /** equality query class */
+   EqualityQueryQuantifiersEngine* d_eq_query;
+   /** for computing relevance of quantifiers */
+@@ -98,14 +100,8 @@ private:
+   std::map< Node, QuantPhaseReq* > d_phase_reqs;
+   /** efficient e-matcher */
+   EfficientEMatcher* d_eem;
+-  /** instantiation engine */
+-  quantifiers::InstantiationEngine* d_inst_engine;
+-  /** model engine */
+-  quantifiers::ModelEngine* d_model_engine;
+   /** bounded integers utility */
+   quantifiers::BoundedIntegers * d_bint;
+-  /** rewrite rules utility */
+-  quantifiers::RewriteEngine * d_rr_engine;
+ private:
+   /** list of all quantifiers seen */
+   std::vector< Node > d_quants;
+diff --git a/src/theory/rewriterules/theory_rewriterules_rules.cpp b/src/theory/rewriterules/theory_rewriterules_rules.cpp
+index 7e1d42b..446d30d 100644
+--- a/src/theory/rewriterules/theory_rewriterules_rules.cpp
++++ src/theory/rewriterules/theory_rewriterules_rules.cpp
+@@ -232,11 +232,7 @@ void TheoryRewriteRules::addRewriteRule(const Node r)
+     NodeBuilder<> patternListB(kind::INST_PATTERN_LIST);
+     patternListB << static_cast<Node>(patternB);
+     forallB << static_cast<Node>(patternListB);
+-    Node lem = (Node) forallB;
+-    lem = Rewriter::rewrite(lem);
+-    QRewriteRuleAttribute qra;
+-    lem.setAttribute(qra,r);
+-    getOutputChannel().lemma(lem);
++    getOutputChannel().lemma((Node) forallB);
+     return;
+   }
+ 
 diff --git a/src/theory/term_registration_visitor.cpp b/src/theory/term_registration_visitor.cpp
 index 558975a..d454bc3 100644
 --- a/src/theory/term_registration_visitor.cpp

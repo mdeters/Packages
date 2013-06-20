@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.2
-revision            2
+revision            3
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -44,6 +44,11 @@ test.run            yes
 
 variant no_static description {Do not build static libraries} {
     configure.args-delete --enable-static
+}
+
+variant production description {Build a "production" copy (no assertions)} {
+    configure.args-delete --with-build=default
+    configure.args-append --with-build=production
 }
 
 pre-configure {
