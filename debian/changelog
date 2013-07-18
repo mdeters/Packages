@@ -1,3 +1,9 @@
+cvc4 (1.2-2) stable; urgency=low
+
+  * Rebuilding to get package dependences right.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Thu, 18 Jul 2013 09:51:15 -0400
+
 cvc4 (1.2-1) stable; urgency=low
 
   * CVC4 public release 1.2
