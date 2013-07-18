@@ -1,3 +1,9 @@
+cvc4 (1.2-3) stable; urgency=low
+
+  * Rebuilding for Quantal, fixing Java dependence.
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Thu, 18 Jul 2013 12:38:55 -0400
+
 cvc4 (1.2-2) stable; urgency=low
 
   * Rebuilding to get package dependences right.
