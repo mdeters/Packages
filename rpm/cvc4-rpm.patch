@@ -24,9 +24,24 @@ Forwarded: <no|not-needed|url proving that it has been forwarded>
 Reviewed-By: <name and email of someone who approved the patch>
 Last-Update: <YYYY-MM-DD>
 
---- cvc4-0.1~20121107.orig/Makefile.in
-+++ cvc4-0.1~20121107/Makefile.in
-@@ -1082,7 +1082,7 @@ info: info-recursive
+diff -Nurp cvc4-1.3-prerelease/Makefile.am cvc4-1.3-prerelease.patched/Makefile.am
+--- cvc4-1.3-prerelease/Makefile.am	2013-05-07 20:24:33.935184257 +0000
++++ cvc4-1.3-prerelease.patched/Makefile.am	2013-07-31 23:05:35.424453562 +0000
+@@ -98,6 +98,10 @@ lcov lcov-all lcov18:
+ 
+ endif
+ 
++install-data-local: doxygen-doc
++	$(mkinstalldirs) "$(DESTDIR)$(docdir)/doxygen"
++	cp -r $(top_srcdir)/doc/doxygen/html "$(DESTDIR)$(docdir)/doxygen"
++
+ # abs_srcdir is required here to get this Makefile instead of the
+ # Makefile in the builddir (since $(srcdir) is stripped off of
+ # EXTRA_DIST files)
+diff -Nurp cvc4-1.3-prerelease/Makefile.in cvc4-1.3-prerelease.patched/Makefile.in
+--- cvc4-1.3-prerelease/Makefile.in	2013-07-30 19:27:10.032549680 +0000
++++ cvc4-1.3-prerelease.patched/Makefile.in	2013-07-31 23:05:35.424453562 +0000
+@@ -1113,7 +1113,7 @@ info: info-recursive
  
  info-am:
  
@@ -35,8 +50,8 @@ Last-Update: <YYYY-MM-DD>
  
  install-dvi: install-dvi-recursive
  
-@@ -1143,12 +1143,12 @@ uninstall-man: uninstall-man1 uninstall-
- 	distclean-libtool distclean-local distclean-tags \
+@@ -1174,12 +1174,12 @@ uninstall-man: uninstall-man1 uninstall-
+ 	distclean-hdr distclean-libtool distclean-local distclean-tags \
  	distcleancheck distdir distuninstallcheck dvi dvi-am html \
  	html-am info info-am install install-am install-data \
 -	install-data-am install-dvi install-dvi-am install-exec \
@@ -54,7 +69,7 @@ Last-Update: <YYYY-MM-DD>
  	maintainer-clean-generic mostlyclean mostlyclean-generic \
  	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
  	uninstall uninstall-am uninstall-man uninstall-man1 \
-@@ -1282,6 +1282,10 @@ doc/pcvc4.1: doc/cvc4.1
+@@ -1313,6 +1313,10 @@ doc/pcvc4.1: doc/cvc4.1
  	rm -f doc/pcvc4.1
  	cp -p "$<" "$@"
  
@@ -65,21 +80,9 @@ Last-Update: <YYYY-MM-DD>
  # Can't put the first several in EXTRA_DIST because those are processed
  # *before* recursive "make dist", and these files are generated in a
  # subdirectory invocation of "make dist".
---- cvc4-0.1~20121107.orig/Makefile.am
-+++ cvc4-0.1~20121107/Makefile.am
-@@ -98,6 +98,10 @@ lcov lcov-all lcov18:
- 
- endif
- 
-+install-data-local: doxygen-doc
-+	$(mkinstalldirs) "$(DESTDIR)$(docdir)/doxygen"
-+	cp -r $(top_srcdir)/doc/doxygen/html "$(DESTDIR)$(docdir)/doxygen"
-+
- # abs_srcdir is required here to get this Makefile instead of the
- # Makefile in the builddir (since $(srcdir) is stripped off of
- # EXTRA_DIST files)
---- cvc4-0.1~20121107.orig/config/doxygen.cfg
-+++ cvc4-0.1~20121107/config/doxygen.cfg
+diff -Nurp cvc4-1.3-prerelease/config/doxygen.cfg cvc4-1.3-prerelease.patched/config/doxygen.cfg
+--- cvc4-1.3-prerelease/config/doxygen.cfg	2013-07-29 20:10:18.768245307 +0000
++++ cvc4-1.3-prerelease.patched/config/doxygen.cfg	2013-07-31 23:05:35.428453672 +0000
 @@ -1362,7 +1362,7 @@ HIDE_UNDOC_RELATIONS   = YES
  # toolkit from AT&T and Lucent Bell Labs. The other options in this section
  # have no effect if this option is set to NO (the default)
