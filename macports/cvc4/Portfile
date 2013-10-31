@@ -37,7 +37,8 @@ configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
-                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3"
+                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \
+                    CPPFLAGS=-stdlib=libstdc++
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
@@ -52,7 +53,7 @@ variant production description {Build a "production" copy (no assertions)} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` CPPFLAGS=-stdlib=libstdc++ ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {

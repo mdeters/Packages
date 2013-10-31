@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-kind-devel
-version             2013-07-31
+version             2013-10-29
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -24,8 +24,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 de14426f57e74324eed3876abcd0f8c25cd7db97 \
-                    sha256 d53ff7b46f563f9699c402e79e0d7ac95b2c4b0a9ee3439ace2b3cdf74930f54
+checksums           rmd160 185c9ad63a70a3905313f6cb544fdeb2bb980bb7 \
+                    sha256 75f03601440f51235a8f802caa6089ab00438debeb8e665a30128a41ea2c482b
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
@@ -41,7 +41,8 @@ configure.args      --enable-static --enable-shared --with-build=default \
                     --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
-                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3"
+                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \
+                    CPPFLAGS=-stdlib=libstdc++
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
@@ -56,7 +57,7 @@ variant production description {Build a "production" copy (no assertions)} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` CPPFLAGS=-stdlib=libstdc++ ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
