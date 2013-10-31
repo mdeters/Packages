@@ -40,6 +40,7 @@ configure.args      --enable-static --enable-shared --with-build=default \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
                     ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \
+                    CXXFLAGS=-stdlib=libstdc++ \
                     CPPFLAGS=-stdlib=libstdc++
 # --enable-language-bindings=c,java
 # --with-portfolio
