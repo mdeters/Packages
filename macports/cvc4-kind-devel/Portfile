@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-kind-devel
-version             2013-10-29
+version             2013-11-02
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -24,8 +24,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 185c9ad63a70a3905313f6cb544fdeb2bb980bb7 \
-                    sha256 75f03601440f51235a8f802caa6089ab00438debeb8e665a30128a41ea2c482b
+checksums           rmd160 912687d8bee85d87082f0ff3304b2f14fd3b28be \
+                    sha256 3058ddd5556a81f2b776eb9513c48d274b68db54b340b604dcf990c10d00a89b
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
@@ -58,7 +58,8 @@ variant production description {Build a "production" copy (no assertions)} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` CPPFLAGS=-stdlib=libstdc++ ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
+    # Mavericks requires -stdlib=libstdc++ here
+    system "if test ${os.major} -ge 13; then export CPPFLAGS=\"\$CPPFLAGS -stdlib=libstdc++\"; fi; MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {

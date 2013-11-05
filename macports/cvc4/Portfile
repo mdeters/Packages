@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.2
-revision            3
+revision            4
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -54,7 +54,8 @@ variant production description {Build a "production" copy (no assertions)} {
 }
 
 pre-configure {
-    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` CPPFLAGS=-stdlib=libstdc++ ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
+    # Mavericks requires -stdlib=libstdc++ here
+    system "if test ${os.major} -ge 13; then export CPPFLAGS=\"\$CPPFLAGS -stdlib=libstdc++\"; fi; MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
