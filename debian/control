@@ -9,7 +9,7 @@ Homepage: http://www.cs.nyu.edu/acsys/cvc4/
 
 Package: cvc4
 Architecture: any
-Depends: libcvc4-1 (= ${binary:Version}), libcvc4parser1 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: libcvc4-2 (= ${binary:Version}), libcvc4parser2 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: cvc4-doc
 Description: First order formula validity checker (version 4)
  This package contains the CVC4 binaries.
@@ -43,7 +43,7 @@ Description: CVC4 command-line, language, and API documentation
 Package: libcvc4-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4-1 (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4-2 (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 headers and static libraries
  This is the CVC4 development package, containing headers and static
  libraries for CVC4.  Install this package only if you need to build
@@ -58,7 +58,7 @@ Description: CVC4 headers and static libraries
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
  
-Package: libcvc4-1
+Package: libcvc4-2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -78,7 +78,7 @@ Description: CVC4 dynamic libraries
 Package: libcvc4parser-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4parser1 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4parser2 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 parser headers and static libraries
  This is the CVC4 parser development package, containing headers and static
  libraries for the CVC4 parser.  Install this package only if you need to
@@ -93,7 +93,7 @@ Description: CVC4 parser headers and static libraries
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
  
-Package: libcvc4parser1
+Package: libcvc4parser2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -114,7 +114,7 @@ Description: CVC4 parser dynamic libraries
 Package: libcvc4compat-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4compat1 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), libcvc4parser-dev (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4compat2 (= ${binary:Version}), libcvc4-dev (= ${binary:Version}), libcvc4parser-dev (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 headers and static libraries, compatibility with CVC3 C++ API
  This is the CVC4 compatibility development package, containing headers and
  static libraries for the CVC4 compatibility layer.  Install this package only
@@ -130,7 +130,7 @@ Description: CVC4 headers and static libraries, compatibility with CVC3 C++ API
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
  
-Package: libcvc4compat1
+Package: libcvc4compat2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -148,7 +148,7 @@ Description: CVC4 dynamic libraries, compatibility with CVC3 C++ API
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
 
-Package: libcvc4bindings-java1
+Package: libcvc4bindings-java2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -165,7 +165,7 @@ Description: CVC4 Java bindings
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
 
-#Package: libcvc4bindings-perl1
+#Package: libcvc4bindings-perl2
 #Section: libs
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -182,7 +182,7 @@ Description: CVC4 Java bindings
 # as a stand-alone tool or as a library. It has been designed to increase
 # the performance and reduce the memory overhead of its predecessors.
 #
-#Package: libcvc4bindings-php1
+#Package: libcvc4bindings-php2
 #Section: libs
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -199,7 +199,7 @@ Description: CVC4 Java bindings
 # as a stand-alone tool or as a library. It has been designed to increase
 # the performance and reduce the memory overhead of its predecessors.
 #
-#Package: libcvc4bindings-tcl1
+#Package: libcvc4bindings-tcl2
 #Section: libs
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -216,7 +216,7 @@ Description: CVC4 Java bindings
 # as a stand-alone tool or as a library. It has been designed to increase
 # the performance and reduce the memory overhead of its predecessors.
 #
-#Package: libcvc4bindings-ruby1
+#Package: libcvc4bindings-ruby2
 #Section: libs
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -233,7 +233,7 @@ Description: CVC4 Java bindings
 # as a stand-alone tool or as a library. It has been designed to increase
 # the performance and reduce the memory overhead of its predecessors.
 #
-#Package: libcvc4bindings-python1
+#Package: libcvc4bindings-python2
 #Section: libs
 #Architecture: any
 #Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
@@ -253,7 +253,7 @@ Description: CVC4 Java bindings
 Package: libcvc4bindings-c-compat-dev
 Section: libdevel
 Architecture: any
-Depends: libcvc4bindings-c-compat1 (= ${binary:Version}), libcvc4compat-dev (= ${binary:Version}), ${misc:Depends}
+Depends: libcvc4bindings-c-compat2 (= ${binary:Version}), libcvc4compat-dev (= ${binary:Version}), ${misc:Depends}
 Description: CVC4 headers and static libraries, compatibility with CVC3 C API
  This is the CVC4 compatibility development package, containing headers and
  static libraries for the CVC4 compatibility layer.  Install this package only
@@ -269,7 +269,7 @@ Description: CVC4 headers and static libraries, compatibility with CVC3 C API
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
  
-Package: libcvc4bindings-c-compat1
+Package: libcvc4bindings-c-compat2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -287,7 +287,7 @@ Description: CVC4 dynamic libraries, compatibility with CVC3 C API
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
 
-Package: libcvc4bindings-java-compat1
+Package: libcvc4bindings-java-compat2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
