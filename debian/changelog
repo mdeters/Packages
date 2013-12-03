@@ -1,3 +1,10 @@
+cvc4 (1.2.1~20131203) unstable; urgency=low
+
+  * Updates for library versioning
+  * Remove upstream ChangeLog
+
+ -- Morgan Deters <mdeters@cs.nyu.edu>  Tue, 03 Dec 2013 15:14:28 -0500
+
 cvc4 (1.2-3) stable; urgency=low
 
   * Rebuilding for Quantal, fixing Java dependence.

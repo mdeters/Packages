@@ -25,6 +25,3 @@ override_dh_install:
 	dh_install
 	rm debian/cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
 	ln -s /usr/share/javascript/jquery/jquery.js debian/cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
-
-override_dh_installchangelogs:
-	dh_installchangelogs ChangeLog

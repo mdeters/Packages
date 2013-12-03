@@ -3,10 +3,10 @@
 #
 Summary: First order formula validity checker (version 4)
 Name: cvc4-nightly
-Version: 2013_04_11
+Version: 2013_12_03
 Release: 1
 License: BSD
-Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-04-11.tar.gz
+Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-12-03.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
@@ -89,7 +89,7 @@ want a stable, release version of CVC4, install the "cvc4" packages
 instead of the "cvc4-nightly" packages.
 
 %prep
-%setup -q -n cvc4-2013-04-11
+%setup -q -n cvc4-2013-12-03
 %patch0 -p1
 
 %build
@@ -194,6 +194,8 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Dec 03 2013 Morgan Deters <mdeters@cs.nyu.edu> 2013-12-03-1
+- Remove upstream ChangeLog
 * Thu May 09 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.2-1
 * Wed Apr 03 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.1-1
 * Wed Feb 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.0-1

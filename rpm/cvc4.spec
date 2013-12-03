@@ -104,7 +104,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-%doc COPYING RELEASE-NOTES NEWS README AUTHORS THANKS ChangeLog
+%doc COPYING RELEASE-NOTES NEWS README AUTHORS THANKS
 %{_bindir}/cvc4
 %{_bindir}/pcvc4
 %{_libdir}/libcvc4.so.*
