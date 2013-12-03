@@ -3,7 +3,8 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2013-11-02
+version             2013-12-06
+revision            0
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -23,8 +24,8 @@ license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 912687d8bee85d87082f0ff3304b2f14fd3b28be \
-                    sha256 3058ddd5556a81f2b776eb9513c48d274b68db54b340b604dcf990c10d00a89b
+checksums           rmd160 dccfacf488b339871f8f73f10d4c9208ea6bb8cf \
+                    sha256 de2761ee0648ba6ca7106ce2b90dfd29c84201e98cab92ff577f49221e87bfe7
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline

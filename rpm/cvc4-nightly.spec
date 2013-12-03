@@ -194,8 +194,7 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
-* Tue Dec 03 2013 Morgan Deters <mdeters@cs.nyu.edu> 2013-12-03-1
-- Remove upstream ChangeLog
+* Fri Dec 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-1
 * Thu May 09 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.2-1
 * Wed Apr 03 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.1-1
 * Wed Feb 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.0-1
