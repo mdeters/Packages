@@ -20,8 +20,8 @@ long_description    CVC4 is a tool for determining the satisfiability of a first
 license             BSD-ish
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/
-checksums           rmd160 d298d9dec7d609e49cae49319e366cb675edb5cd \
-                    sha256 a53f6e931aab24249dd18fc97fcbd61a4dd72a06c859f6826c4c0887192b8545
+checksums           rmd160 af388e76e7cde290f64f00710b388c431cfd1fe2 \
+                    sha256 8013300450130d10e51c8167fcd52eb253404e49524931506e51e1d503d6e3f9
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
