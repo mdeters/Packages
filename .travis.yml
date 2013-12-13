@@ -1,0 +1,44 @@
+language: cpp
+compiler: gcc
+env:
+ - TRAVIS_CVC4_PACKAGE=rpm
+ - TRAVIS_CVC4_PACKAGE=debian
+before_install:
+# dhart/ppa is for cxxtest package, which doesn't appear officially until quantal
+ - travis_retry sudo apt-add-repository -y ppa:dhart/ppa
+ - travis_retry sudo apt-get update -qq
+ - travis_retry sudo apt-get install -qq libgmp-dev antlr3 libantlr3c-dev libboost-dev libboost-thread-dev swig2.0 libcln-dev cxxtest openjdk-7-jdk rpm devscripts
+before_script:
+ - export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+ - export PATH=$PATH:$JAVA_HOME/bin
+ - export JAVA_CPPFLAGS=-I$JAVA_HOME/include
+script:
+ - case "$TRAVIS_CVC4_PACKAGE" in
+   rpm)
+     mkdir rpmbuild
+     cd rpmbuild
+     echo "%_topdir `pwd`" > "$HOME/.rpmmacros"
+     echo "%_smt_mflags -j2" >> "$HOME/.rpmmacros"
+     mkdir -p SPECS SOURCES
+     cp ../rpm/cvc4-nightly.spec SPECS
+     cp ../rpm/cvc4-rpm.patch SOURCES
+     rpmbuild -ba SPECS/cvc4-nightly.spec
+     ;;
+   debian)
+     echo "NOT SUPPORTING DEB BUILD YET"
+     exit 1
+     ;;
+   *)
+     echo "ERROR-- unknown package to build \"$TRAVIS_CVC4_PACKAGE\""
+     exit 1
+     ;;
+   esac
+matrix:
+  fast_finish: true
+  allow_failures:
+    - env: TRAVIS_CVC4_PACKAGE=debian
+notifications:
+  email:
+    recipients: mdeters@cs.nyu.edu
+    on_success: change
+    on_failure: always
