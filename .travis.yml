@@ -16,7 +16,7 @@ before_script:
 script: |
    normal="$(echo -e '\033[0m')" red="$normal$(echo -e '\033[01;31m')" green="$normal$(echo -e '\033[01;32m')"
    DATE=`date +"%Y-%m-%d"`;
-   cd cvc4 && ./autogen.sh && ./configure && make dist &&
+   (cd cvc4 && ./autogen.sh && ./configure && make dist) &&
    case "$TRAVIS_CVC4_PACKAGE" in
    rpm)
      mkdir rpmbuild &&
@@ -36,7 +36,7 @@ script: |
      exit 1
      ;;
    *)
-     echo && echo "${red}ERROR -- unknown package to build \"$TRAVIS_CVC4_PACKAGE\"${normal}" && echo;
+     echo && echo "${red}ERROR: unknown package to build: \"$TRAVIS_CVC4_PACKAGE\"${normal}" && echo;
      exit 1
      ;;
    esac
