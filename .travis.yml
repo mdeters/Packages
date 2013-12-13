@@ -15,21 +15,21 @@ before_script:
 script:
  - case "$TRAVIS_CVC4_PACKAGE" in
    rpm)
-     mkdir rpmbuild
-     cd rpmbuild
-     echo "%_topdir `pwd`" > "$HOME/.rpmmacros"
-     echo "%_smt_mflags -j2" >> "$HOME/.rpmmacros"
-     mkdir -p SPECS SOURCES
-     cp ../rpm/cvc4-nightly.spec SPECS
-     cp ../rpm/cvc4-rpm.patch SOURCES
+     mkdir rpmbuild &&
+     cd rpmbuild &&
+     echo "%_topdir `pwd`" > "$HOME/.rpmmacros" &&
+     echo "%_smt_mflags -j2" >> "$HOME/.rpmmacros" &&
+     mkdir -p SPECS SOURCES &&
+     cp ../rpm/cvc4-nightly.spec SPECS &&
+     cp ../rpm/cvc4-rpm.patch SOURCES &&
      rpmbuild -ba SPECS/cvc4-nightly.spec
      ;;
    debian)
-     echo "NOT SUPPORTING DEB BUILD YET"
+     echo "NOT SUPPORTING DEB BUILD YET";
      exit 1
      ;;
    *)
-     echo "ERROR-- unknown package to build \"$TRAVIS_CVC4_PACKAGE\""
+     echo "ERROR-- unknown package to build \"$TRAVIS_CVC4_PACKAGE\"";
      exit 1
      ;;
    esac
