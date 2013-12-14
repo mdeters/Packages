@@ -34,7 +34,24 @@ script: |
      echo && echo "${green}RPM BUILD PASSED${normal}" && echo
      ;;
    debian)
-     echo && echo "${red}NOT SUPPORTING DEB BUILD YET${normal}" && echo;
+     mkdir debwork &&
+     cd debwork &&
+     cp ../cvc4/builds/cvc4*tar.gz cvc4_$DEBVERSION.orig.tar.gz &&
+     tar xfz cvc4_$DEBVERSION.orig.tar.gz &&
+     mv cvc4-* cvc4-$DEBVERSION &&
+     cd cvc4-$DEBVERSION &&
+     cp -a ../../debian debian &&
+     cat > changelog.tmp <<EOF &&
+   cvc4 ($DEBVERSION-1) unstable; urgency=low
+   
+     * Automated Travis-CI build of Debian package from master sources.
+   
+    -- Morgan Deters <mdeters@cs.nyu.edu>  `date -R`
+   EOF
+     cat debian/changelog >> changelog.tmp &&
+     mv -v changelog.tmp debian/changelog &&
+     debuild -j2 -us -uc &&
+     echo && echo "${green}DEBIAN BUILD PASSED${normal}" && echo
      exit 1
      ;;
    *)
