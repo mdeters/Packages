@@ -29,7 +29,7 @@ script: |
      cp ../rpm/cvc4-nightly.spec SPECS &&
      cp ../rpm/cvc4-rpm.patch SOURCES &&
      cp ../cvc4/builds/cvc4*tar.gz SOURCES/cvc4-$DATE.tar.gz &&
-     perl -pi -e 's,^(Version: *).*,${1}'$rpmvers',;s,^(Source:.*/cvc4-)[0-9-]*(\.tar\.gz)$,${1}'$DATE'$2,;s,^(%setup -q -n cvc4-)[0-9-]*$,${1}'$DATE',;s,^%changelog$,%changelog\\n* '$rpmdate' Morgan Deters <mdeters\@cs.nyu.edu> '$DATE'-1\\n- Automated Travis-CI build of CVC4.,' SPECS/cvc4-nightly.spec &&
+     perl -pi -e 's,^(Version: *).*,${1}'$rpmvers',;s,^(Source:.*/cvc4-)[0-9-]*(\.tar\.gz)$,${1}'$DATE'$2,;s,^(%setup -q -n cvc4-)[0-9-]*$,${1}'$DATE',;s,^%changelog$,%changelog\\n* '"$rpmdate"' Morgan Deters <mdeters\@cs.nyu.edu> '$DATE'-1\\n- Automated Travis-CI build of CVC4.,' SPECS/cvc4-nightly.spec &&
      rpmbuild -ba SPECS/cvc4-nightly.spec &&
      echo && echo "${green}RPM BUILD PASSED${normal}" && echo
      ;;
