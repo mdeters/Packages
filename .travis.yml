@@ -62,8 +62,6 @@ script: |
    esac
 matrix:
   fast_finish: true
-  allow_failures:
-    - env: TRAVIS_CVC4_PACKAGE=debian
 notifications:
   email:
     recipients: mdeters@cs.nyu.edu
