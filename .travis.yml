@@ -1,7 +1,7 @@
 language: cpp
 compiler: gcc
 env:
- - TRAVIS_CVC4_PACKAGE=rpm
+# - TRAVIS_CVC4_PACKAGE=rpm
  - TRAVIS_CVC4_PACKAGE=debian
 before_install:
 # dhart/ppa is for cxxtest package, which doesn't appear officially until quantal
