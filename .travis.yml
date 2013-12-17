@@ -53,7 +53,6 @@ script: |
      mv -v changelog.tmp debian/changelog &&
      debuild -j2 -us -uc &&
      echo && echo "${green}DEBIAN BUILD PASSED${normal}" && echo
-     exit 1
      ;;
    *)
      echo && echo "${red}ERROR: unknown package to build: \"$TRAVIS_CVC4_PACKAGE\"${normal}" && echo;
