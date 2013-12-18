@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2013-12-14
+version             2013-12-18
 revision            0
 categories          math devel
 platforms           darwin
@@ -20,14 +20,15 @@ long_description    CVC4 is a tool for determining the satisfiability of a first
                     \
                     This version is a developmental snapshot release.  For a stable version, \
                     please use the "cvc4" package instead.
-license             BSD-ish
+license             GPL
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 5cc2ad1167663229f0392a574d0c9257c0c6605f \
-                    sha256 92d6532c05c395f0f2d66f3de545a78773752b5907d827921d021513af74a24f
+checksums           rmd160 1085f3bca069a5c4d6ca41f365c352d6cb95fe0c \
+                    sha256 dbf06998f7447e071303d82325dc7c3c4294071b3b38599159a168c45c2c266d
 default_variants    +no_static
 depends_lib         port:gmp \
+                    port:cln \
                     port:readline
 depends_build       port:boost \
                     port:doxygen \
@@ -36,8 +37,8 @@ depends_build       port:boost \
                     bin:awk:gawk
 conflicts           cvc4 \
                     cvc4-kind-devel
-configure.args      --enable-static --enable-shared --with-build=default \
-                    --with-gmp --with-compat --with-readline \
+configure.args      --enable-static --enable-shared --with-build=production \
+                    --with-cln --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
                     ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \
@@ -51,9 +52,9 @@ variant no_static description {Do not build static libraries} {
     configure.args-delete --enable-static
 }
 
-variant production description {Build a "production" copy (no assertions)} {
-    configure.args-delete --with-build=default
-    configure.args-append --with-build=production
+variant debug description {Build a "debug" copy} {
+    configure.args-delete --with-build=production
+    configure.args-append --with-build=debug
 }
 
 pre-configure {

@@ -4,12 +4,12 @@
 Summary: First order formula validity checker (version 4)
 Name: cvc4
 Version: 1.3
-Release: 1
-License: BSD
+Release: 2
+License: GPL
 Source: http://cvc4.cs.nyu.edu/builds/src/cvc4-1.3.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
-BuildRequires: gmp-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
+BuildRequires: gmp-devel, cln-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
 # for other language bindings: python-devel, perl-devel, ruby-devel, tcl-devel, php-devel
 Conflicts: cvc4-nightly
 Packager: Morgan Deters <mdeters@cs.nyu.edu>
@@ -77,7 +77,7 @@ the performance and reduce the memory overhead of its predecessors.
 %patch0 -p1
 
 %build
-%configure --enable-static --enable-shared --with-build=default --enable-language-bindings=c,java --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
+%configure --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --with-cln --with-compat --with-readline --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
 # configure --enable-static --enable-shared --with-build=default --with-portfolio --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot
 # PERL_CPPFLAGS=-I/usr/lib/perl/5.12/CORE/ PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.5
 make %{?_smp_mflags}
@@ -106,13 +106,11 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc COPYING RELEASE-NOTES NEWS README AUTHORS THANKS
 %{_bindir}/cvc4
-%{_bindir}/pcvc4
 %{_libdir}/libcvc4.so.*
 %{_libdir}/libcvc4parser.so.*
 %{_libdir}/libcvc4compat.so.*
 %{_libdir}/libcvc4bindings_c_compat.so.*
 %doc %{_mandir}/man1/cvc4.1.gz
-%doc %{_mandir}/man1/pcvc4.1.gz
 %doc %{_mandir}/man5/cvc4.5.gz
 
 %files devel
@@ -178,6 +176,8 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Dec 18 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-2
+- build is now production-cln, no portfolio
 * Fri Dec 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-1
 * Thu May 09 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.2-1
 * Wed Apr 03 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.1-1

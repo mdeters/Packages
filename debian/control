@@ -1,11 +1,11 @@
 Source: cvc4
 Priority: extra
 Maintainer: Morgan Deters <mdeters@cs.nyu.edu>
-Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libz-dev, awk, bash, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, libreadline-dev, swig2.0, openjdk-6-jdk
+Build-Depends: debhelper (>= 7.0.50~), autotools-dev, libgmp3-dev, libcln-dev, libz-dev, awk, bash, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, libreadline-dev, swig2.0, openjdk-6-jdk
 # Currently not building other bindings: python-dev, perl, ruby-dev, tcl-dev, php5-dev
 Standards-Version: 3.9.2
 Section: math
-Homepage: http://www.cs.nyu.edu/acsys/cvc4/
+Homepage: http://cvc4.cs.nyu.edu/
 
 Package: cvc4
 Architecture: any
