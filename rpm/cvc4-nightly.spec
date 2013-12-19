@@ -3,10 +3,10 @@
 #
 Summary: First order formula validity checker (version 4)
 Name: cvc4-nightly
-Version: 2013_12_18
+Version: 2013_12_19
 Release: 1
 License: GPL
-Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-12-18.tar.gz
+Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-12-19.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, cln-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
@@ -89,7 +89,7 @@ want a stable, release version of CVC4, install the "cvc4" packages
 instead of the "cvc4-nightly" packages.
 
 %prep
-%setup -q -n cvc4-2013-12-18
+%setup -q -n cvc4-2013-12-19
 %patch0 -p1
 
 %build
@@ -127,6 +127,7 @@ rm -rf %{buildroot}
 %{_libdir}/libcvc4compat.so.*
 %{_libdir}/libcvc4bindings_c_compat.so.*
 %doc %{_mandir}/man1/cvc4.1.gz
+%doc %{_mandir}/man1/pcvc4.1.gz
 %doc %{_mandir}/man5/cvc4.5.gz
 
 %files devel
@@ -192,6 +193,8 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Dec 19 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-3
+- fix to documentation packaging
 * Wed Dec 18 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-2
 - build is now production-cln, no portfolio
 * Fri Dec 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-1

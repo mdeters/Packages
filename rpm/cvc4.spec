@@ -4,7 +4,7 @@
 Summary: First order formula validity checker (version 4)
 Name: cvc4
 Version: 1.3
-Release: 2
+Release: 3
 License: GPL
 Source: http://cvc4.cs.nyu.edu/builds/src/cvc4-1.3.tar.gz
 Patch0: cvc4-rpm.patch
@@ -111,6 +111,7 @@ rm -rf %{buildroot}
 %{_libdir}/libcvc4compat.so.*
 %{_libdir}/libcvc4bindings_c_compat.so.*
 %doc %{_mandir}/man1/cvc4.1.gz
+%doc %{_mandir}/man1/pcvc4.1.gz
 %doc %{_mandir}/man5/cvc4.5.gz
 
 %files devel
@@ -176,6 +177,8 @@ rm -rf %{buildroot}
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Dec 19 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-3
+- fix to documentation packaging
 * Wed Dec 18 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-2
 - build is now production-cln, no portfolio
 * Fri Dec 06 2013 Morgan Deters <mdeters@cs.nyu.edu> 1.3-1
