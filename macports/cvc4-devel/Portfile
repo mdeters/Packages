@@ -3,7 +3,7 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2013-12-19
+version             2014-01-10
 revision            0
 categories          math devel
 platforms           darwin
@@ -24,8 +24,8 @@ license             GPL
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 e1fd4c468525035fb4b504014a7f03e2d9eba48b \
-                    sha256 e2124d6e9c3e11f1b13317b4da482f9dabd3c46bae646aaacb5341ca362c4649
+checksums           rmd160 c0613dea3df57f790288615f5dd472ee44e38f5b \
+                    sha256 d1eaa3fcc128968056ed0fd25d8e0d17bdf53b8d7af9b14596e47316663fb0de
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:cln \
@@ -38,7 +38,7 @@ depends_build       port:boost \
 conflicts           cvc4 \
                     cvc4-kind-devel
 configure.args      --enable-static --enable-shared --with-build=production \
-                    --with-cln --with-compat --with-readline \
+                    --enable-gpl --with-cln --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
                     ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \

@@ -3,10 +3,10 @@
 #
 Summary: First order formula validity checker (version 4)
 Name: cvc4-nightly
-Version: 2013_12_19
+Version: 2014_01_10
 Release: 1
 License: GPL
-Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2013-12-19.tar.gz
+Source: http://cvc4.cs.nyu.edu/builds/src/unstable/cvc4-2014-01-10.tar.gz
 Patch0: cvc4-rpm.patch
 URL: http://cvc4.cs.nyu.edu/
 BuildRequires: gmp-devel, cln-devel, zlib-devel, doxygen, graphviz, antlr3-C-devel >= 3.2, boost-devel, readline-devel, swig >= 2.0, java-sdk
@@ -89,11 +89,11 @@ want a stable, release version of CVC4, install the "cvc4" packages
 instead of the "cvc4-nightly" packages.
 
 %prep
-%setup -q -n cvc4-2013-12-19
+%setup -q -n cvc4-2014-01-10
 %patch0 -p1
 
 %build
-%configure --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --with-cln --with-compat --with-readline --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
+%configure --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --enable-gpl --with-cln --with-compat --with-readline --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java/include -I/usr/lib/jvm/java/include/linux'
 # configure --enable-static --enable-shared --with-build=default --with-portfolio --enable-language-bindings=c,java,tcl,ruby,php,perl,python --with-gmp --with-compat --with-readline --with-portfolio --disable-doxygen-pdf --enable-doxygen-dot
 # PERL_CPPFLAGS=-I/usr/lib/perl/5.12/CORE/ PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.5
 make %{?_smp_mflags}
