@@ -122,6 +122,7 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc COPYING RELEASE-NOTES NEWS README AUTHORS THANKS
 %{_bindir}/cvc4
+%{_bindir}/cvc4-translator
 %{_libdir}/libcvc4.so.*
 %{_libdir}/libcvc4parser.so.*
 %{_libdir}/libcvc4compat.so.*
