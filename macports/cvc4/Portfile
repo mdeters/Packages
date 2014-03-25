@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4
 version             1.3
-revision            2
+revision            3
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -45,7 +45,8 @@ configure.args      --enable-static --enable-shared --with-build=production \
 # --with-portfolio
 test.run            yes
 patch.pre_args      -p1
-patchfiles          patch-url-update.diff
+patchfiles          patch-url-update.diff \
+                    patch-xcode51.diff
 
 variant no_static description {Do not build static libraries} {
     configure.args-delete --enable-static
