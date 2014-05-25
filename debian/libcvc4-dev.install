@@ -14,7 +14,6 @@ usr/include/cvc4/util
 usr/include/cvc4/options
 usr/lib/libcvc4.a
 usr/lib/libcvc4.so
-usr/lib/libcvc4.la
 usr/share/man/man3/libcvc4.3
 usr/share/man/man3/SmtEngine.3cvc
 usr/share/man/man3/options.3cvc
