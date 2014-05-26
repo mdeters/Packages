@@ -14,7 +14,7 @@ CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
 LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 %:
-	dh --parallel $@
+	dh $@ --parallel
 
 override_dh_auto_configure:
 	dh_auto_configure -- --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --bsd --with-gmp --with-compat --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java-6-openjdk-i386/include -I/usr/lib/jvm/java-6-openjdk-amd64/include'
