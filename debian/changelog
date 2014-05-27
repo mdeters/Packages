@@ -1,6 +1,6 @@
-cvc4 (1.3.1~20140526) unstable; urgency=low
+cvc4 (1.3.1~20140526-1) unstable; urgency=low
 
-  * Updates to packaging (compat level, lintian warnings.
+  * Updates to packaging (compat level, lintian warnings).
 
  -- Morgan Deters <mdeters@cs.nyu.edu>  Mon, 26 May 2014 14:18:20 -0400
 
