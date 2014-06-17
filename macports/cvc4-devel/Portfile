@@ -40,9 +40,7 @@ configure.args      --enable-static --enable-shared --with-build=production \
                     --enable-gpl --with-gmp --with-compat --with-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
-                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3" \
-                    CXXFLAGS=-stdlib=libstdc++ \
-                    CPPFLAGS=-stdlib=libstdc++
+                    ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3"
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
@@ -57,8 +55,7 @@ variant debug description {Build a "debug" copy} {
 }
 
 pre-configure {
-    # Mavericks requires -stdlib=libstdc++ here
-    system "if test ${os.major} -ge 13; then export CPPFLAGS=\"\$CPPFLAGS -stdlib=libstdc++\"; fi; MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
+    system "MACHINE_TYPE=`${worksrcpath}/config/config.guess | cut -f1 -d-` ANTLR_CONFIGURE_ARGS=--disable-abiflags ${worksrcpath}/contrib/get-antlr-3.4"
 }
 
 post-build {
