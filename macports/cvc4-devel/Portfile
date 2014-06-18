@@ -4,7 +4,7 @@ PortSystem          1.0
 
 name                cvc4-devel
 version             2014-06-18
-revision            0
+revision            1
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
@@ -37,7 +37,7 @@ depends_build       port:boost \
 conflicts           cvc4 \
                     cvc4-kind-devel
 configure.args      --enable-static --enable-shared --with-build=production \
-                    --enable-gpl --with-gmp --with-compat --with-readline \
+                    --enable-gpl --with-gmp --with-compat --without-readline \
                     --disable-doxygen-pdf --enable-doxygen-dot \
                     --with-antlr-dir="${worksrcpath}/antlr-3.4" \
                     ANTLR="${worksrcpath}/antlr-3.4/bin/antlr3"
