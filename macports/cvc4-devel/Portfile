@@ -3,8 +3,8 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2014-06-18
-revision            2
+version             2014-06-19
+revision            0
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
