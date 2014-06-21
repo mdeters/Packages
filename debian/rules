@@ -8,16 +8,16 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
-CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
-CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
-LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
+export CPPFLAGS:=$(shell dpkg-buildflags --get CPPFLAGS)
+export CFLAGS:=$(shell dpkg-buildflags --get CFLAGS)
+export CXXFLAGS:=$(shell dpkg-buildflags --get CXXFLAGS)
+export LDFLAGS:=$(shell dpkg-buildflags --get LDFLAGS)
 
 %:
 	dh $@ --parallel
 
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --bsd --with-gmp --with-compat --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java-6-openjdk-i386/include -I/usr/lib/jvm/java-6-openjdk-amd64/include'
+	dh_auto_configure -- --enable-static --enable-shared --with-build=production --enable-language-bindings=c,java --bsd --with-gmp --with-compat --disable-doxygen-pdf --enable-doxygen-dot JAVA_CPPFLAGS='-I/usr/lib/jvm/java-7-openjdk-i386/include -I/usr/lib/jvm/java-7-openjdk-amd64/include -I/usr/lib/jvm/java-6-openjdk-i386/include -I/usr/lib/jvm/java-6-openjdk-amd64/include'
 # PERL_CPPFLAGS=-I/usr/lib/perl/5.12/CORE/ PHP_CPPFLAGS='-I/usr/include/php5/Zend -I/usr/include/php5/TSRM -I/usr/include/php5/main -I/usr/include/php5' PYTHON_CPPFLAGS=-I/usr/include/python2.7 RUBY_CPPFLAGS=-I/usr/lib/ruby/1.8/x86_64-linux TCL_CPPFLAGS=-I/usr/include/tcl8.5
 
 # Skip unit tests (by doing a "make regress" instead of "make check") to avoid a
@@ -29,3 +29,7 @@ override_dh_install:
 	dh_install
 	rm debian/cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
 	ln -s /usr/share/javascript/jquery/jquery.js debian/cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
+
+# verbose shlibs warnings
+override_dh_shlibdeps:
+	dh_shlibdeps -- -v
