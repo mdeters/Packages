@@ -31,5 +31,7 @@ override_dh_install:
 	ln -s /usr/share/javascript/jquery/jquery.js debian/cvc4-doc/usr/share/doc/cvc4/doxygen/html/jquery.js
 
 # verbose shlibs warnings
+override_dh_makeshlibs:
+	dh_makeshlibs -- -V
 override_dh_shlibdeps:
 	dh_shlibdeps -- -v
