@@ -21,8 +21,8 @@ license             GPL
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/
 distname            cvc4-${version}
-checksums           rmd160 af388e76e7cde290f64f00710b388c431cfd1fe2 \
-                    sha256 8013300450130d10e51c8167fcd52eb253404e49524931506e51e1d503d6e3f9
+checksums           rmd160 726f673afe0417bccdde9a2f038da5f642958d15 \
+                    sha256 76fe4ff9eb9ad7d65589efb47d41aae95f3191bd0d0c3940698a7cb2df3f7024
 default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
