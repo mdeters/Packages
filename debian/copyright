@@ -28,12 +28,12 @@ Upstream Authors:
 
 Copyright:
 
-    CVC4 is copyright (C) 2009, 2010, 2011, 2012, 2013 New York University
+    CVC4 is copyright (C) 2009, 2010, 2011, 2012, 2013, 2014 New York University
     and The University of Iowa.  All rights reserved.
 
 License:
 
-    CVC4 is copyright (C) 2009, 2010, 2011, 2012, 2013 New York University
+    CVC4 is copyright (C) 2009, 2010, 2011, 2012, 2013, 2014 New York University
     and The University of Iowa.  All rights reserved.
 
     CVC4 is open-source; distribution is under the terms of the modified BSD
@@ -59,6 +59,6 @@ License:
 
 The Debian packaging is:
 
-    Copyright (c) 2010, 2011, 2012, 2013 Morgan Deters <mdeters@cs.nyu.edu>
+    Copyright (c) 2010, 2011, 2012, 2013, 2014 Morgan Deters <mdeters@cs.nyu.edu>
 
     Released under the same license as above.
