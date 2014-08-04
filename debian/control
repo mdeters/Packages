@@ -11,7 +11,7 @@ Package: cvc4
 Architecture: any
 Depends: libcvc4-2 (= ${binary:Version}), libcvc4parser2 (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: cvc4-doc
-Description: First order formula validity checker (version 4)
+Description: An automated theorem prover for SMT problems
  This package contains the CVC4 binaries.
  .
  CVC4 is a tool for determining the satisfiability of a first order formula
