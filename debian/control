@@ -2,7 +2,6 @@ Source: cvc4
 Priority: extra
 Maintainer: Morgan Deters <mdeters@cs.nyu.edu>
 Build-Depends: debhelper (>= 8), autotools-dev, libgmp3-dev, libz-dev, gawk | awk, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, swig2.0, openjdk-7-jdk | openjdk-6-jdk
-# Currently not building other bindings: python-dev, perl, ruby-dev, tcl-dev, php5-dev
 Standards-Version: 3.9.5
 Section: math
 Homepage: http://cvc4.cs.nyu.edu/
@@ -164,91 +163,6 @@ Description: CVC4 Java bindings
  CVC4 is intended to be an open and extensible SMT engine. It can be used
  as a stand-alone tool or as a library. It has been designed to increase
  the performance and reduce the memory overhead of its predecessors.
-
-#Package: libcvc4bindings-perl3
-#Section: libs
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends}
-#Description: CVC4 Perl bindings
-# This package contains the CVC4 Perl bindings.  "CVC4.so" and "CVC4.pm"
-# contain the Perl API that allows CVC4 to support Perl programs.
-# .
-# CVC4 is a tool for determining the satisfiability of a first order formula
-# modulo a first order theory (or a combination of such theories). It is the
-# fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
-# CVC3) but does not directly incorporate code from any previous version.
-# .
-# CVC4 is intended to be an open and extensible SMT engine. It can be used
-# as a stand-alone tool or as a library. It has been designed to increase
-# the performance and reduce the memory overhead of its predecessors.
-#
-#Package: libcvc4bindings-php3
-#Section: libs
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends}
-#Description: CVC4 PHP bindings
-# This package contains the CVC4 PHP bindings.  "CVC4.so" and "CVC4.php"
-# contain the PHP API that allows CVC4 to support PHP programs.
-# .
-# CVC4 is a tool for determining the satisfiability of a first order formula
-# modulo a first order theory (or a combination of such theories). It is the
-# fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
-# CVC3) but does not directly incorporate code from any previous version.
-# .
-# CVC4 is intended to be an open and extensible SMT engine. It can be used
-# as a stand-alone tool or as a library. It has been designed to increase
-# the performance and reduce the memory overhead of its predecessors.
-#
-#Package: libcvc4bindings-tcl3
-#Section: libs
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends}
-#Description: CVC4 Tcl bindings
-# This package contains the CVC4 Tcl bindings.  "CVC4.so" contains the Tcl
-# API that allows CVC4 to support Tcl programs.
-# .
-# CVC4 is a tool for determining the satisfiability of a first order formula
-# modulo a first order theory (or a combination of such theories). It is the
-# fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
-# CVC3) but does not directly incorporate code from any previous version.
-# .
-# CVC4 is intended to be an open and extensible SMT engine. It can be used
-# as a stand-alone tool or as a library. It has been designed to increase
-# the performance and reduce the memory overhead of its predecessors.
-#
-#Package: libcvc4bindings-ruby3
-#Section: libs
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends}
-#Description: CVC4 Ruby bindings
-# This package contains the CVC4 Ruby bindings.  "CVC4.so" contains the Ruby
-# API that allows CVC4 to support Ruby programs.
-# .
-# CVC4 is a tool for determining the satisfiability of a first order formula
-# modulo a first order theory (or a combination of such theories). It is the
-# fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
-# CVC3) but does not directly incorporate code from any previous version.
-# .
-# CVC4 is intended to be an open and extensible SMT engine. It can be used
-# as a stand-alone tool or as a library. It has been designed to increase
-# the performance and reduce the memory overhead of its predecessors.
-#
-#Package: libcvc4bindings-python3
-#Section: libs
-#Architecture: any
-#Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
-#Description: CVC4 Python bindings
-# This package contains the CVC4 Python bindings.  "CVC4.so" and "CVC4.py"
-# contain the Python API that allows CVC4 to support Python programs.
-# .
-# CVC4 is a tool for determining the satisfiability of a first order formula
-# modulo a first order theory (or a combination of such theories). It is the
-# fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite,
-# CVC3) but does not directly incorporate code from any previous version.
-# .
-# CVC4 is intended to be an open and extensible SMT engine. It can be used
-# as a stand-alone tool or as a library. It has been designed to increase
-# the performance and reduce the memory overhead of its predecessors.
 
 Package: libcvc4bindings-c-compat-dev
 Section: libdevel
