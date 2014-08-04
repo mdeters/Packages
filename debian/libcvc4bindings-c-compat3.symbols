@@ -1,4 +1,4 @@
-libcvc4bindings_c_compat.so.3 libcvc4bindings-c-compat2 #MINVER#
+libcvc4bindings_c_compat.so.3 libcvc4bindings-c-compat3 #MINVER#
  _Z12signal_errorPKciN4CVC49ExceptionE@Base 1.4
  _ZN10CInterface10deleteExprEPv@Base 1.4
  _ZN10CInterface10deleteTypeEPv@Base 1.4

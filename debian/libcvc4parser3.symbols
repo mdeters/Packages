@@ -1,4 +1,4 @@
-libcvc4parser.so.3 libcvc4parser2 #MINVER#
+libcvc4parser.so.3 libcvc4parser3 #MINVER#
  _ZN4CVC410RecordTypeD0Ev@Base 1.4
  _ZN4CVC410RecordTypeD1Ev@Base 1.4
  _ZN4CVC410RecordTypeD2Ev@Base 1.4

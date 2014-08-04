@@ -1,4 +1,4 @@
-libcvc4.so.3 libcvc4-2 #MINVER#
+libcvc4.so.3 libcvc4-3 #MINVER#
  _ZN4CVC410PopCommand6invokeEPNS_9SmtEngineE@Base 1.4
  _ZN4CVC410PopCommand8exportToEPNS_11ExprManagerERNS_24ExprManagerMapCollectionE@Base 1.4
  _ZN4CVC410PopCommandD0Ev@Base 1.4

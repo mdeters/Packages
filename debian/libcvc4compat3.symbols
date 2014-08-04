@@ -1,4 +1,4 @@
-libcvc4compat.so.3 libcvc4compat2 #MINVER#
+libcvc4compat.so.3 libcvc4compat3 #MINVER#
  _ZN19__gmp_alloc_cstringD1Ev@Base 1.4
  _ZN19__gmp_alloc_cstringD2Ev@Base 1.4
  _ZN4CVC310int2stringEi@Base 1.4

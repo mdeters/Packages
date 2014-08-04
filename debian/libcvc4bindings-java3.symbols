@@ -1,4 +1,4 @@
-libcvc4jni.so.3 libcvc4bindings-java2 #MINVER#
+libcvc4jni.so.3 libcvc4bindings-java3 #MINVER#
  Java_edu_nyu_acsys_CVC4_CVC4JNI_ArrayStoreAllHashFunction_1apply@Base 1.4
  Java_edu_nyu_acsys_CVC4_CVC4JNI_ArrayStoreAll_1equals@Base 1.4
  Java_edu_nyu_acsys_CVC4_CVC4JNI_ArrayStoreAll_1getExpr@Base 1.4
