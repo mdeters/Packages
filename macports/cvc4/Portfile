@@ -29,8 +29,7 @@ depends_build       port:boost \
                     bin:curl:curl \
                     bin:bash:bash \
                     bin:awk:gawk
-conflicts           cvc4-devel \
-                    cvc4-kind-devel
+conflicts           cvc4-devel
 configure.args      --enable-static --enable-shared --with-build=production \
                     --bsd --with-gmp --with-compat \
                     --disable-doxygen-pdf --enable-doxygen-dot \
