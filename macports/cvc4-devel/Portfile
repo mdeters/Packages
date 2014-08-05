@@ -4,12 +4,12 @@
 PortSystem          1.0
 
 name                cvc4-devel
-version             2014-08-02
+version             2014-08-05
 revision            0
 categories          math devel
 platforms           darwin
 maintainers         cs.nyu.edu:mdeters
-description         First order formula validity checker (version 4)
+description         An automated theorem prover for SMT problems
 long_description    CVC4 is a tool for determining the satisfiability of a first order formula \
                     modulo a first order theory (or a combination of such theories). It is the \
                     fourth in the Cooperating Validity Checker family of tools (CVC, CVC Lite, \
@@ -25,9 +25,8 @@ license             BSD
 homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
-checksums           rmd160 aa276b117e5c8e9041a2b2441307986bd6ecc574 \
-                    sha256 0592b4288e73e5379a2c33ee2d8939e28699cbb950e66fdc262a1e2cb84f736f
-default_variants    +no_static
+checksums           rmd160 118f04177b078281a8efd3b03434b68c969423f1 \
+                    sha256 21712ab7faf30fa0c11b6b8ab4a683b73e05196437cf8d62d46ce3275c1857f8
 depends_lib         port:gmp \
                     port:readline
 depends_build       port:boost \
@@ -45,10 +44,6 @@ configure.args      --enable-static --enable-shared --with-build=production \
 # --with-portfolio
 test.run            yes
 
-variant no_static description {Do not build static libraries} {
-    configure.args-delete --enable-static
-}
-
 variant debug description {Build a "debug" copy} {
     configure.args-replace --with-build=production --with-build=debug
 }
@@ -59,6 +54,11 @@ pre-configure {
 
 post-build {
     system "make -C \"${worksrcpath}\" doc"
+}
+
+destroot {
+    # strip binaries and libraries
+    system "make -C \"${worksrcpath}\" install-strip DESTDIR=\"${destroot}\""
 }
 
 post-destroot {

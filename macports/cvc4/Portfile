@@ -23,7 +23,6 @@ homepage            http://cvc4.cs.nyu.edu/
 master_sites        http://cvc4.cs.nyu.edu/builds/src/
 checksums           rmd160 726f673afe0417bccdde9a2f038da5f642958d15 \
                     sha256 76fe4ff9eb9ad7d65589efb47d41aae95f3191bd0d0c3940698a7cb2df3f7024
-default_variants    +no_static
 depends_lib         port:gmp
 depends_build       port:boost \
                     port:doxygen \
@@ -40,10 +39,6 @@ configure.args      --enable-static --enable-shared --with-build=production \
 # --with-portfolio
 test.run            yes
 
-variant no_static description {Do not build static libraries} {
-    configure.args-delete --enable-static
-}
-
 variant debug description {Build a "debug" copy} {
     configure.args-replace --with-build=production --with-build=debug
 }
@@ -54,6 +49,11 @@ pre-configure {
 
 post-build {
     system "make -C \"${worksrcpath}\" doc"
+}
+
+destroot {
+    # strip binaries and libraries
+    system "make -C \"${worksrcpath}\" install-strip DESTDIR=\"${destroot}\""
 }
 
 post-destroot {
