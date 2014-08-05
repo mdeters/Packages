@@ -1,6 +1,8 @@
 Description: Fix man page warnings
  This is a commit pulled from CVC4's GitHub repo that fixes
- some man page warnings.
+ some man page warnings, combined with the corresponding change
+ to the distributed non-template files that aren't in the
+ repository.
 .
  This can be removed once there's a new upstream release.
 Author: Morgan Deters <mdeters@morgandeters.com>
@@ -48,6 +50,46 @@ index a0d6c16..f92faf4 100644
  .TP 10
  .I "COMMON OPTIONS"
 @@ -16,6 +18,8 @@ ${remaining_manpage_internals_documentation}
+ .PD
+ .RE
+ 
++.ad b
++
+ .SH VERSION
+ This manual page refers to
+ .B CVC4
+--- cvc4-1.4.orig/doc/options.3cvc
++++ cvc4-1.4/doc/options.3cvc
+@@ -7,6 +7,8 @@ options \- the options infrastructure
+ 
+ .SH AVAILABLE INTERNAL OPTIONS
+ 
++.ad l
++
+ .RS
+ .TP 10
+ .I "COMMON OPTIONS"
+@@ -1264,6 +1266,8 @@ add lemmas even at regular effort
+ .PD
+ .RE
+ 
++.ad b
++
+ .SH VERSION
+ This manual page refers to
+ .B CVC4
+--- cvc4-1.4.orig/doc/SmtEngine.3cvc
++++ cvc4-1.4/doc/SmtEngine.3cvc
+@@ -19,6 +19,8 @@ and
+ .I SmtEngine::getOption()
+ use the following option keys.
+ 
++.ad l
++
+ .RS
+ .TP 10
+ .I "COMMON OPTIONS"
+@@ -712,6 +714,8 @@ use the following option keys.
  .PD
  .RE
  
