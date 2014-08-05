@@ -1,0 +1,6 @@
+# there is no upstream changelog
+cvc4-doc: no-upstream-changelog
+cvc4-doc: duplicate-files usr/share/doc/cvc4/doxygen/html/ftv2blank.png usr/share/doc/cvc4/doxygen/html/ftv2lastnode.png usr/share/doc/cvc4/doxygen/html/ftv2node.png usr/share/doc/cvc4/doxygen/html/ftv2vertline.png
+cvc4-doc: duplicate-files usr/share/doc/cvc4/doxygen/html/ftv2doc.png usr/share/doc/cvc4/doxygen/html/ftv2link.png
+cvc4-doc: duplicate-files usr/share/doc/cvc4/doxygen/html/ftv2mlastnode.png usr/share/doc/cvc4/doxygen/html/ftv2mnode.png
+cvc4-doc: duplicate-files usr/share/doc/cvc4/doxygen/html/ftv2plastnode.png usr/share/doc/cvc4/doxygen/html/ftv2pnode.png
