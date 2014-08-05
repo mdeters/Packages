@@ -27,6 +27,7 @@ master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
 checksums           rmd160 aa276b117e5c8e9041a2b2441307986bd6ecc574 \
                     sha256 0592b4288e73e5379a2c33ee2d8939e28699cbb950e66fdc262a1e2cb84f736f
+default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
 depends_build       port:boost \
@@ -43,6 +44,10 @@ configure.args      --enable-static --enable-shared --with-build=production \
 # --enable-language-bindings=c,java
 # --with-portfolio
 test.run            yes
+
+variant no_static description {Do not build static libraries} {
+    configure.args-delete --enable-static
+}
 
 variant debug description {Build a "debug" copy} {
     configure.args-replace --with-build=production --with-build=debug
