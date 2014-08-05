@@ -1,5 +1,5 @@
 cvc4 (1.4-1) stable; urgency=low
 
-  * Initial packaging for Debian.
+  * Initial packaging for Debian.  Closes: #757048.
 
  -- Morgan Deters <mdeters@morgandeters.com>  Tue, 05 Aug 2014 00:00:12 -0400
