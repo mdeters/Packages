@@ -1,6 +1,6 @@
 Source: cvc4
 Priority: extra
-Maintainer: Morgan Deters <mdeters@cs.nyu.edu>
+Maintainer: Morgan Deters <mdeters@morgandeters.com>
 Build-Depends: debhelper (>= 8), autotools-dev, libgmp3-dev, libz-dev, gawk | awk, doxygen, graphviz, libantlr3c-dev (>= 3.2), libboost-thread-dev, swig2.0, openjdk-7-jdk | openjdk-6-jdk
 Standards-Version: 3.9.5
 Section: math
