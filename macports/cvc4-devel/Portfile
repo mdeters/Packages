@@ -1,3 +1,4 @@
+# -*- coding: utf-8; mode: tcl; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- vim:fenc=utf-8:ft=tcl:et:sw=4:ts=4:sts=4
 # $Id$
 
 PortSystem          1.0
@@ -26,7 +27,6 @@ master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
 checksums           rmd160 aa276b117e5c8e9041a2b2441307986bd6ecc574 \
                     sha256 0592b4288e73e5379a2c33ee2d8939e28699cbb950e66fdc262a1e2cb84f736f
-default_variants    +no_static
 depends_lib         port:gmp \
                     port:readline
 depends_build       port:boost \
@@ -45,13 +45,8 @@ configure.args      --enable-static --enable-shared --with-build=production \
 # --with-portfolio
 test.run            yes
 
-variant no_static description {Do not build static libraries} {
-    configure.args-delete --enable-static
-}
-
 variant debug description {Build a "debug" copy} {
-    configure.args-delete --with-build=production
-    configure.args-append --with-build=debug
+    configure.args-replace --with-build=production --with-build=debug
 }
 
 pre-configure {
