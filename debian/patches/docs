@@ -1,33 +1,12 @@
-Description: Upstream changes introduced in version 0.1~20121107-1
- This patch has been created by dpkg-source during the package build.
- Here's the last changelog entry, hopefully it gives details on why
- those changes were made:
- .
- cvc4 (0.1~20121107-1) unstable; urgency=low
- .
-   * Rebuild patches against new sources
-   * Remove references to CVC4 being a "research prototype"
- .
- The person named in the Author field signed this changelog entry.
-Author: Morgan Deters <mdeters@cs.nyu.edu>
+Description: Fix documentation build for Debian
+ Fixes installation of documentation, removes dependence
+ on graphviz.
+Author: Morgan Deters <mdeters@morgandeters.com>
+Last-Update: 2014-08-05
 
----
-The information above should follow the Patch Tagging Guidelines, please
-checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
-are templates for supplementary fields that you might want to add:
-
-Origin: <vendor|upstream|other>, <url of original patch>
-Bug: <url in upstream bugtracker>
-Bug-Debian: http://bugs.debian.org/<bugnumber>
-Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
-Forwarded: <no|not-needed|url proving that it has been forwarded>
-Reviewed-By: <name and email of someone who approved the patch>
-Last-Update: <YYYY-MM-DD>
-
-diff -Nurp cvc4-1.3-prerelease/Makefile.am cvc4-1.3-prerelease.patched/Makefile.am
---- cvc4-1.3-prerelease/Makefile.am	2013-05-07 20:24:33.935184257 +0000
-+++ cvc4-1.3-prerelease.patched/Makefile.am	2013-07-31 23:11:33.154212569 +0000
-@@ -98,6 +98,10 @@ lcov lcov-all lcov18:
+--- cvc4-1.4.orig/Makefile.am
++++ cvc4-1.4/Makefile.am
+@@ -112,6 +112,10 @@ lcov lcov-all lcov18:
  
  endif
  
@@ -38,10 +17,9 @@ diff -Nurp cvc4-1.3-prerelease/Makefile.am cvc4-1.3-prerelease.patched/Makefile.
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of
  # EXTRA_DIST files)
-diff -Nurp cvc4-1.3-prerelease/Makefile.in cvc4-1.3-prerelease.patched/Makefile.in
---- cvc4-1.3-prerelease/Makefile.in	2013-07-30 19:27:10.032549680 +0000
-+++ cvc4-1.3-prerelease.patched/Makefile.in	2013-07-31 23:11:33.154212569 +0000
-@@ -1113,7 +1113,7 @@ info: info-recursive
+--- cvc4-1.4.orig/Makefile.in
++++ cvc4-1.4/Makefile.in
+@@ -1125,7 +1125,7 @@ info: info-recursive
  
  info-am:
  
@@ -50,7 +28,7 @@ diff -Nurp cvc4-1.3-prerelease/Makefile.in cvc4-1.3-prerelease.patched/Makefile.
  
  install-dvi: install-dvi-recursive
  
-@@ -1174,12 +1174,12 @@ uninstall-man: uninstall-man1 uninstall-
+@@ -1186,12 +1186,12 @@ uninstall-man: uninstall-man1 uninstall-
  	distclean-hdr distclean-libtool distclean-local distclean-tags \
  	distcleancheck distdir distuninstallcheck dvi dvi-am html \
  	html-am info info-am install install-am install-data \
@@ -69,7 +47,7 @@ diff -Nurp cvc4-1.3-prerelease/Makefile.in cvc4-1.3-prerelease.patched/Makefile.
  	maintainer-clean-generic mostlyclean mostlyclean-generic \
  	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
  	uninstall uninstall-am uninstall-man uninstall-man1 \
-@@ -1313,6 +1313,10 @@ doc/pcvc4.1: doc/cvc4.1
+@@ -1334,6 +1334,10 @@ doc/pcvc4.1: doc/cvc4.1
  	rm -f doc/pcvc4.1
  	cp -p "$<" "$@"
  
@@ -80,10 +58,9 @@ diff -Nurp cvc4-1.3-prerelease/Makefile.in cvc4-1.3-prerelease.patched/Makefile.
  # Can't put the first several in EXTRA_DIST because those are processed
  # *before* recursive "make dist", and these files are generated in a
  # subdirectory invocation of "make dist".
-diff -Nurp cvc4-1.3-prerelease/config/doxygen.cfg cvc4-1.3-prerelease.patched/config/doxygen.cfg
---- cvc4-1.3-prerelease/config/doxygen.cfg	2013-07-29 20:10:18.768245307 +0000
-+++ cvc4-1.3-prerelease.patched/config/doxygen.cfg	2013-07-31 23:11:33.154212569 +0000
-@@ -1362,7 +1362,7 @@ HIDE_UNDOC_RELATIONS   = YES
+--- cvc4-1.4.orig/config/doxygen.cfg
++++ cvc4-1.4/config/doxygen.cfg
+@@ -1361,7 +1361,7 @@ HIDE_UNDOC_RELATIONS   = YES
  # toolkit from AT&T and Lucent Bell Labs. The other options in this section
  # have no effect if this option is set to NO (the default)
  
