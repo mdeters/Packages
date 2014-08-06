@@ -27,8 +27,7 @@ master_sites        http://cvc4.cs.nyu.edu/builds/src/unstable/
 distname            cvc4-${version}
 checksums           rmd160 118f04177b078281a8efd3b03434b68c969423f1 \
                     sha256 21712ab7faf30fa0c11b6b8ab4a683b73e05196437cf8d62d46ce3275c1857f8
-depends_lib         port:gmp \
-                    port:readline
+depends_lib         port:gmp
 depends_build       port:boost \
                     port:doxygen \
                     bin:curl:curl \
