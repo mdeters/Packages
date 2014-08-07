@@ -4,9 +4,9 @@ Description: Fix documentation build for Debian
 Author: Morgan Deters <mdeters@morgandeters.com>
 Last-Update: 2014-08-05
 
---- cvc4-1.4.orig/Makefile.am
-+++ cvc4-1.4/Makefile.am
-@@ -112,6 +112,10 @@ lcov lcov-all lcov18:
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -112,6 +112,10 @@
  
  endif
  
@@ -17,9 +17,9 @@ Last-Update: 2014-08-05
  # abs_srcdir is required here to get this Makefile instead of the
  # Makefile in the builddir (since $(srcdir) is stripped off of
  # EXTRA_DIST files)
---- cvc4-1.4.orig/Makefile.in
-+++ cvc4-1.4/Makefile.in
-@@ -1125,7 +1125,7 @@ info: info-recursive
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -1125,7 +1125,7 @@
  
  info-am:
  
@@ -28,7 +28,7 @@ Last-Update: 2014-08-05
  
  install-dvi: install-dvi-recursive
  
-@@ -1186,12 +1186,12 @@ uninstall-man: uninstall-man1 uninstall-
+@@ -1186,12 +1186,12 @@
  	distclean-hdr distclean-libtool distclean-local distclean-tags \
  	distcleancheck distdir distuninstallcheck dvi dvi-am html \
  	html-am info info-am install install-am install-data \
@@ -47,7 +47,7 @@ Last-Update: 2014-08-05
  	maintainer-clean-generic mostlyclean mostlyclean-generic \
  	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
  	uninstall uninstall-am uninstall-man uninstall-man1 \
-@@ -1334,6 +1334,10 @@ doc/pcvc4.1: doc/cvc4.1
+@@ -1334,6 +1334,10 @@
  	rm -f doc/pcvc4.1
  	cp -p "$<" "$@"
  
@@ -58,9 +58,9 @@ Last-Update: 2014-08-05
  # Can't put the first several in EXTRA_DIST because those are processed
  # *before* recursive "make dist", and these files are generated in a
  # subdirectory invocation of "make dist".
---- cvc4-1.4.orig/config/doxygen.cfg
-+++ cvc4-1.4/config/doxygen.cfg
-@@ -1361,7 +1361,7 @@ HIDE_UNDOC_RELATIONS   = YES
+--- a/config/doxygen.cfg
++++ b/config/doxygen.cfg
+@@ -1361,7 +1361,7 @@
  # toolkit from AT&T and Lucent Bell Labs. The other options in this section
  # have no effect if this option is set to NO (the default)
  

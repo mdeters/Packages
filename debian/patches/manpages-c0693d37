@@ -14,11 +14,9 @@ Date:   Tue Aug 5 15:59:51 2014 -0400
 
     Fix for manpages.
 
-diff --git a/doc/SmtEngine.3cvc_template.in b/doc/SmtEngine.3cvc_template.in
-index 3a876fe..d741fd3 100644
 --- a/doc/SmtEngine.3cvc_template.in
 +++ b/doc/SmtEngine.3cvc_template.in
-@@ -19,6 +19,8 @@ and
+@@ -19,6 +19,8 @@
  .I SmtEngine::getOption()
  use the following option keys.
  
@@ -27,7 +25,7 @@ index 3a876fe..d741fd3 100644
  .RS
  .TP 10
  .I "COMMON OPTIONS"
-@@ -28,6 +30,8 @@ ${remaining_manpage_smt_documentation}
+@@ -28,6 +30,8 @@
  .PD
  .RE
  
@@ -36,11 +34,9 @@ index 3a876fe..d741fd3 100644
  .SH VERSION
  This manual page refers to
  .B CVC4
-diff --git a/doc/options.3cvc_template.in b/doc/options.3cvc_template.in
-index a0d6c16..f92faf4 100644
 --- a/doc/options.3cvc_template.in
 +++ b/doc/options.3cvc_template.in
-@@ -7,6 +7,8 @@ options \- the options infrastructure
+@@ -7,6 +7,8 @@
  
  .SH AVAILABLE INTERNAL OPTIONS
  
@@ -49,7 +45,7 @@ index a0d6c16..f92faf4 100644
  .RS
  .TP 10
  .I "COMMON OPTIONS"
-@@ -16,6 +18,8 @@ ${remaining_manpage_internals_documentation}
+@@ -16,6 +18,8 @@
  .PD
  .RE
  
@@ -58,9 +54,9 @@ index a0d6c16..f92faf4 100644
  .SH VERSION
  This manual page refers to
  .B CVC4
---- cvc4-1.4.orig/doc/options.3cvc
-+++ cvc4-1.4/doc/options.3cvc
-@@ -7,6 +7,8 @@ options \- the options infrastructure
+--- a/doc/options.3cvc
++++ b/doc/options.3cvc
+@@ -7,6 +7,8 @@
  
  .SH AVAILABLE INTERNAL OPTIONS
  
@@ -69,7 +65,7 @@ index a0d6c16..f92faf4 100644
  .RS
  .TP 10
  .I "COMMON OPTIONS"
-@@ -1264,6 +1266,8 @@ add lemmas even at regular effort
+@@ -1264,6 +1266,8 @@
  .PD
  .RE
  
@@ -78,9 +74,9 @@ index a0d6c16..f92faf4 100644
  .SH VERSION
  This manual page refers to
  .B CVC4
---- cvc4-1.4.orig/doc/SmtEngine.3cvc
-+++ cvc4-1.4/doc/SmtEngine.3cvc
-@@ -19,6 +19,8 @@ and
+--- a/doc/SmtEngine.3cvc
++++ b/doc/SmtEngine.3cvc
+@@ -19,6 +19,8 @@
  .I SmtEngine::getOption()
  use the following option keys.
  
@@ -89,7 +85,7 @@ index a0d6c16..f92faf4 100644
  .RS
  .TP 10
  .I "COMMON OPTIONS"
-@@ -712,6 +714,8 @@ use the following option keys.
+@@ -712,6 +714,8 @@
  .PD
  .RE
  
