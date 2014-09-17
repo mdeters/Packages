@@ -1,4 +1,4 @@
-cvc4 (1.4-1) stable; urgency=low
+cvc4 (1.4-1) unstable; urgency=low
 
   * Initial packaging for Debian.  Closes: #757048.
 
