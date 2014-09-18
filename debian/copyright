@@ -101,10 +101,10 @@ License: GPL-2+ with special exception
 
 Files: config/ax_tls.m4
 Copyright: 2008, Alan Woodland <ajw05@aber.ac.uk>
-           2010, Diego Elio Pettenò <flameeyes@gmail.com>
+           2010, Diego Elio Petteno` <flameeyes@gmail.com>
 License: GPL-3+ with special exception
  Copyright (c) 2008 Alan Woodland <ajw05@aber.ac.uk>
- Copyright (c) 2010 Diego Elio Pettenò <flameeyes@gmail.com>
+ Copyright (c) 2010 Diego Elio Petteno` <flameeyes@gmail.com>
 .
  This program is free software: you can redistribute it and/or modify it
  under the terms of the GNU General Public License as published by the
