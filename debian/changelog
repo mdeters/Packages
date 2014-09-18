@@ -1,3 +1,9 @@
+cvc4 (1.4-2) unstable; urgency=low
+
+  * Machine-readable debian/copyright.
+
+ -- Morgan Deters <mdeters@morgandeters.com>  Thu, 18 Sep 2014 09:07:27 -0400
+
 cvc4 (1.4-1) unstable; urgency=low
 
   * Initial packaging for Debian.  Closes: #757048.
